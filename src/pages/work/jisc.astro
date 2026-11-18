@@ -60,6 +60,7 @@ const chapters = [
     label: "Under the hood",
     children: [
       { id: "elasticsearch", label: "Retiring Elasticsearch" },
+      { id: "ta-lookup", label: "The agreements lookup" },
       { id: "stewards", label: "The steward loop" },
       { id: "fargate", label: "Fargate and previews" },
     ],
@@ -123,6 +124,16 @@ const chapters = [
       <p>Open Policy Finder used to copy its records from PostgreSQL into Elasticsearch every day for fuzzy matching and ranking. Keeping the two in step was fiddly: the agreements data alone was keyed by date, year, name and ID.</p>
       <p>Elasticsearch wasn't meaningfully faster for this workload, and as I put it at the time, we didn't have a write problem. PostgreSQL met the product's real scale, so the search moved into it, with a simple cache in front for repeated queries, and the sync went away.</p>
       <p>The search still has to cope with imperfect queries and useful filters. It just does it in the database that already holds the truth.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="ta-lookup" title="The agreements lookup" level={3}>
+    <div class="story-prose">
+      <p>A UK researcher's question is short: my institution, this journal, is it covered? The <a href="https://openpolicyfinder.jisc.ac.uk/ta-lookup">transitional agreement lookup</a> answers it in two picks, and remembers your institution for next time.</p>
+      <p>The hard part is how people type. Institutions and publishers go by acronyms and old names, so the search expands them first: "UCL" finds University College London, "RSC" finds the Royal Society of Chemistry. Matching then happens in PostgreSQL with trigram similarity on normalised names, so a half-typed or misspelt name still lands.</p>
+      <p>The split between front end and back end is deliberate. Next.js renders the page and the agreement result on the server, so the answer arrives as HTML. In the browser, typing is debounced and each new keystroke cancels the request before it, so a slow early response can never overwrite a newer one.</p>
+      <p>Suggestions update optimistically from what's already loaded while the fresh answer is fetched. Responses are cached by normalised query, because agreement data changes on a monthly import, not by the minute, and the cache clears when a new import lands.</p>
+      <p>The notes on the page carry the rules people trip over: agreements apply only to the corresponding author, and merged institutions may follow separate agreements until they renew.</p>
     </div>
   </StoryChapter>
 

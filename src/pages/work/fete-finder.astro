@@ -41,6 +41,7 @@ const chapters = [
     id: "under-the-hood",
     label: "Under the hood",
     children: [
+      { id: "agents", label: "Agents that find the events" },
       { id: "flyers", label: "Flyers into listings" },
       { id: "stable-links", label: "Links that survive edits" },
       { id: "offline-properly", label: "Offline, properly" },
@@ -105,12 +106,22 @@ const chapters = [
     </div>
   </StoryChapter>
 
+  <StoryChapter id="agents" title="Agents that find the events" level={3}>
+    <div class="story-prose">
+      <p>Before the flyer tool, listings were typed in by hand. Mel on the team collected screenshots all day and bulk-uploaded them in the evening. Last year that took around 30 to 40 hours of human work, which is my estimate from that process, not a timed figure.</p>
+      <p>So I built a small team of agents to do the collecting. They watched ticketing sources like Resident Advisor and Fatsoma, which were easy, and organisers' social posts, which weren't: direct collection got blocked, so we used accounts and page-monitoring services instead.</p>
+      <p>For a possible event, an agent read the profile, the post and the replies, ran OCR on the flyer, and had Gemini map it into the listing schema. Names and descriptions stayed free text; price, age range and indoor or outdoor were constrained fields. Every field carried a confidence score.</p>
+      <p>Anything doubtful went to a person: a missing date, a possible duplicate, a location Google's API couldn't place. Resolved venues were cached, so the same bar was never paid for twice.</p>
+      <p>Over the two weeks before the 2026 festival the agents suggested about 87 of the 159 listings. All of them were used, about 20 needed a correction, mostly a clearer location, and none were rejected. I checked those figures afterwards. The agents ran in an earlier version of the codebase; the flyer tool below is what stayed.</p>
+      <p>The rule never changed: agents collect and draft, people publish.</p>
+    </div>
+  </StoryChapter>
+
   <StoryChapter id="flyers" title="Flyers into listings" level={3}>
     <div class="story-prose">
       <p>Organisers announce events with flyers and screenshots, not tidy data. An admin can drop in up to six images of one event and Gemini drafts the listing from them.</p>
       <p>Every field comes back with its value, the evidence it read, a confidence score and up to three alternatives. The prompt treats text inside an image as evidence, never as instructions, which matters when anyone can design a flyer.</p>
       <p>The draft opens in a review screen with that evidence beside each field. A person edits it and accepts it. Until then the row is marked as a draft, and drafts are filtered out of everything public.</p>
-      <p>Before the flyer tool I also used agents that read event and ticketing pages and drafted listing suggestions, under the same rule: a person checked every one before it was published.</p>
       <p>One honest gap: nothing yet checks whether those confidence scores are calibrated. That's the next measurement I'd add.</p>
     </div>
   </StoryChapter>
