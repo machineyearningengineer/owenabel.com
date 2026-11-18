@@ -11,7 +11,7 @@ interface Props {
 }
 
 const {
-  title = "Owen Abel Amenze - Senior Software Engineer",
+  title = "Owen Abel Amenze - Engineer, London",
   description = "Owen Abel Amenze is a senior software engineer in London. Explore work in event platforms, search, publishing, and reliable software.",
   noindex = false,
 } = Astro.props;
@@ -35,7 +35,7 @@ const ogImagePath = caseStudySlug ? `/og/${caseStudySlug}.png` : "/og.png";
 const ogImage = new URL(ogImagePath, Astro.site ?? Astro.url).href;
 const ogImageAlt = caseStudySlug
   ? `${pageName} case study by Owen Abel Amenze`
-  : "Owen Abel Amenze, Senior Software Engineer in London";
+  : "Owen Abel Amenze, engineer in London";
 
 const structuredDataGraph: Record<string, unknown>[] = [
   {
@@ -175,6 +175,20 @@ const structuredData = {
           document.addEventListener("astro:after-swap", applyTheme);
         }
       })();
+      // Homepage intro: first visit, or a week since it last played. Decided
+      // before first paint so the page never flashes underneath it.
+      (() => {
+        try {
+          if (location.pathname !== "/") return;
+          if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+          const last = Number(localStorage.getItem("owenabel-intro-at") || 0);
+          if (Date.now() - last > 7 * 24 * 60 * 60 * 1000) {
+            document.documentElement.dataset.intro = "play";
+          }
+        } catch {
+          // No storage, no intro.
+        }
+      })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
@@ -210,7 +224,7 @@ const structuredData = {
           aria-current={pathname === "/" ? "page" : undefined}
         >
           <strong>Owen Abel Amenze</strong>
-          <span>Senior Software Engineer / London</span>
+          <span>Engineer / London</span>
         </a>
         <nav class="nav" aria-label="Primary navigation">
           {

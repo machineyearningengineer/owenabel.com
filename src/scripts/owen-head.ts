@@ -1,18 +1,38 @@
 /**
- * Owen's head looks toward the cursor. The sprite is one row of 9 frames:
- * [looking at you, then 8 directions clockwise from straight up].
- * With no cursor (or a still one) it glances around on its own; a tap spins it.
+ * Owen's head looks toward the cursor. The sprite is one row of 14 frames
+ * (assets/owen-head):
+ *   0 looking at you, 1–8 directions clockwise from straight up,
+ *   9 wince, 10 teary, 11 annoyed, 12 sigh, 13 shocked.
+ * With no cursor (or a still one) it glances around on its own.
+ * Clicks escalate within a few seconds: wince, then teary, then annoyed with
+ * a cartoon vein, then a sigh, and back to normal. Playing the voice line
+ * (any [data-play]) gets a shocked double-take.
  */
 const DIRECTIONS = 8;
+const WINCE = 9;
+const TEARY = 10;
+const ANNOYED = 11;
+const SIGH = 12;
+const SHOCKED = 13;
 const NEAR = 48;
 const IDLE_AFTER = 2800;
+const WINCE_MS = 420;
+const TEARY_MS = 1100;
+const TEARY_AFTER_CLICKS = 3;
+const ANNOY_AFTER_CLICKS = 5;
+const CLICK_WINDOW_MS = 4000;
+const ANNOYED_MS = 1800;
+const SIGH_MS = 1000;
+const SHOCKED_MS = 1100;
 
 export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   let frame = 0;
   let lastMove = 0;
   let idleTimer = 0;
-  let spinning = false;
+  let moodTimer = 0;
+  let busy = false;
+  let clicks: number[] = [];
 
   const show = (next: number) => {
     if (next === frame) return;
@@ -32,10 +52,10 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
   // Glance in a random direction now and then, coming back to face the reader.
   const idle = () => {
     window.clearTimeout(idleTimer);
-    if (reducedMotion.matches || spinning) return;
+    if (reducedMotion.matches) return;
     idleTimer = window.setTimeout(
       () => {
-        if (performance.now() - lastMove > IDLE_AFTER) {
+        if (!busy && performance.now() - lastMove > IDLE_AFTER) {
           show(frame === 0 ? 1 + Math.floor(Math.random() * DIRECTIONS) : 0);
         }
         idle();
@@ -44,33 +64,62 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
     );
   };
 
-  const spin = () => {
-    if (spinning || reducedMotion.matches) return;
-    spinning = true;
-    let step = 0;
-    const turn = window.setInterval(() => {
-      show(1 + ((2 + step) % DIRECTIONS));
-      step += 1;
-      if (step > DIRECTIONS) {
-        window.clearInterval(turn);
-        spinning = false;
-        show(0);
-        idle();
-      }
-    }, 70);
+  const settle = () => {
+    busy = false;
+    delete head.dataset.mood;
+    show(0);
+  };
+
+  const feel = (mood: string, next: number, ms: number, then: () => void) => {
+    window.clearTimeout(moodTimer);
+    busy = true;
+    head.dataset.mood = mood;
+    show(next);
+    moodTimer = window.setTimeout(then, ms);
+  };
+
+  // Hold the anger, sigh it out, then relax.
+  const coolDown = () => feel("sigh", SIGH, SIGH_MS, settle);
+
+  const poke = () => {
+    const mood = head.dataset.mood;
+    if (mood === "annoyed" || mood === "sigh") return;
+    const now = performance.now();
+    clicks = [...clicks.filter((at) => now - at < CLICK_WINDOW_MS), now];
+    if (clicks.length >= ANNOY_AFTER_CLICKS) {
+      clicks = [];
+      feel("annoyed", ANNOYED, ANNOYED_MS, coolDown);
+    } else if (clicks.length >= TEARY_AFTER_CLICKS) {
+      feel("teary", TEARY, TEARY_MS, settle);
+    } else {
+      feel("wince", WINCE, WINCE_MS, settle);
+    }
   };
 
   document.addEventListener(
     "pointermove",
     (event) => {
-      if (event.pointerType !== "mouse" || spinning || reducedMotion.matches) return;
+      if (event.pointerType !== "mouse" || busy || reducedMotion.matches) return;
       lastMove = performance.now();
       lookAt(event.clientX, event.clientY);
     },
     { passive: true, signal },
   );
-  head.addEventListener("click", spin, { signal });
-  signal.addEventListener("abort", () => window.clearTimeout(idleTimer));
+  head.addEventListener("click", poke, { signal });
+  document.addEventListener(
+    "click",
+    (event) => {
+      const mood = head.dataset.mood;
+      const played = event.target instanceof Element && event.target.closest("[data-play]");
+      if (played && mood !== "annoyed" && mood !== "sigh")
+        feel("shocked", SHOCKED, SHOCKED_MS, settle);
+    },
+    { signal },
+  );
+  signal.addEventListener("abort", () => {
+    window.clearTimeout(idleTimer);
+    window.clearTimeout(moodTimer);
+  });
 
   // Show the head once the sheet has decoded, so it never appears half-loaded.
   const sheet = new Image();

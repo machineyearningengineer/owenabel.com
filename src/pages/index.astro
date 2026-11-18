@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Cite from "../components/Cite.astro";
 import KoiPond from "../components/KoiPond.astro";
+import HeadIntro from "../components/HeadIntro.astro";
 import { getFeaturedWork } from "../data/work";
 
 const featuredWork = getFeaturedWork();
@@ -13,6 +14,13 @@ const builtLabel = new Intl.DateTimeFormat("en-GB", {
   year: "numeric",
   timeZone: "Europe/London",
 }).format(built);
+// "GMT" in winter, "BST" in summer (browsers disagree on the short name).
+const londonZone =
+  new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", timeZoneName: "longOffset" })
+    .format(built)
+    .includes("+01")
+    ? "BST"
+    : "GMT";
 const londonTime = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   minute: "2-digit",
@@ -21,10 +29,11 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 ---
 
 <BaseLayout>
+  <HeadIntro />
   <section class="hero koi-surface" aria-labelledby="intro-title">
     <KoiPond />
     <h1 id="intro-title" class="visually-hidden">
-      Owen Abel Amenze, senior software engineer in London
+      Owen Abel Amenze, engineer in London
     </h1>
     <div class="hero-grid">
       <table class="ledger">
@@ -101,8 +110,8 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
           <dd>INDEX-ABEL</dd>
           <dt>Updated:</dt>
           <dd><time datetime={built.toISOString()}>{builtLabel}</time></dd>
-          <dt>London:</dt>
-          <dd><span data-london-clock>{londonTime}</span></dd>
+          <dt>Local time:</dt>
+          <dd><span data-london-clock>{londonTime}</span> · London, <span data-london-zone>{londonZone}</span></dd>
           <dt>Status:</dt>
           <dd class="status-open">Open to work</dd>
           <dt>Intro:</dt>
@@ -175,6 +184,11 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
     if (head) mountOwenHead(head, signal);
 
   const clock = document.querySelector<HTMLElement>("[data-london-clock]");
+  const zone = document.querySelector<HTMLElement>("[data-london-zone]");
+  const offset = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    timeZoneName: "longOffset",
+  });
   const formatTime = new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
@@ -183,6 +197,7 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
   });
   const tickClock = () => {
     if (clock) clock.textContent = formatTime.format(new Date());
+    if (zone) zone.textContent = offset.format(new Date()).includes("+01") ? "BST" : "GMT";
   };
   tickClock();
   const clockTimer = setInterval(tickClock, 1000);

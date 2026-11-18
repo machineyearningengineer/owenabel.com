@@ -4,7 +4,7 @@ import sharp from "sharp";
 
 const defaultCard = {
   name: "Owen Abel Amenze",
-  role: "Senior Software Engineer / London",
+  role: "Engineer / London",
   email: "hello@owenabel.com",
   document: "INDEX-ABEL",
   issued: "May 2026",

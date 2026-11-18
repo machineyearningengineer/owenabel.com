@@ -1,0 +1,96 @@
+---
+// A short homepage intro: Owen's head, large, looks around while
+// "machineyearningengineer" types out, then shrinks and flies to where it
+// rests on the INDEX-ABEL card. About 2.5 s. Any click, key, scroll or touch
+// skips it.
+//
+// Whether it plays is decided before first paint by the inline script in
+// BaseLayout's <head> (first visit, or a week since the last one; never with
+// reduced motion). It sets html[data-intro="play"], which shows this overlay.
+---
+
+<div class="head-intro" data-head-intro aria-hidden="true">
+  <div class="head-intro-stage">
+    <div class="head-intro-face" data-intro-face></div>
+    <p class="head-intro-name"><span data-intro-name></span><span class="head-intro-caret"></span></p>
+  </div>
+  <p class="head-intro-skip">Click anywhere to skip</p>
+</div>
+
+<script>
+  import { onPage } from "../scripts/page";
+
+  const NAME = "machineyearningengineer";
+  const LOOKS = [0, 3, 1, 7, 5, 0]; // centre, right, up, left, down, centre
+  const LOOK_MS = 300;
+  const TYPE_MS = 48;
+  const FLY_MS = 900;
+
+  onPage((signal) => {
+    const root = document.documentElement;
+    const overlay = document.querySelector<HTMLElement>("[data-head-intro]");
+    if (root.dataset.intro !== "play" || !overlay) return;
+    const face = overlay.querySelector<HTMLElement>("[data-intro-face]");
+    const name = overlay.querySelector<HTMLElement>("[data-intro-name]");
+    const target = document.querySelector<HTMLElement>("[data-owen-head]");
+    const timers: number[] = [];
+    let finished = false;
+
+    const later = (fn: () => void, ms: number) => timers.push(window.setTimeout(fn, ms));
+
+    const done = () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+      delete root.dataset.intro;
+      overlay.remove();
+    };
+
+    // Shrink the big head onto the small one on the card, then hand over.
+    const fly = (ms: number) => {
+      if (finished) return;
+      finished = true;
+      timers.forEach((timer) => window.clearTimeout(timer));
+      if (name) name.textContent = NAME;
+      face?.style.setProperty("--frame", "0");
+      overlay.dataset.leaving = "";
+      const from = face?.getBoundingClientRect();
+      const to = target?.getBoundingClientRect();
+      const visible = to && to.bottom > 0 && to.top < innerHeight;
+      if (!face || !from || !to || !visible) {
+        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: "forwards" }).finished.then(done);
+        return;
+      }
+      const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+      const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+      const scale = to.width / from.width;
+      const paper = getComputedStyle(overlay).backgroundColor;
+      overlay.animate([{ backgroundColor: paper }, { backgroundColor: "rgba(0, 0, 0, 0)" }], {
+        duration: ms,
+        fill: "forwards",
+        easing: "ease-out",
+      });
+      face
+        .animate([{ transform: "none" }, { transform: `translate(${dx}px, ${dy}px) scale(${scale})` }], {
+          duration: ms,
+          fill: "forwards",
+          easing: "cubic-bezier(0.65, 0, 0.25, 1)",
+        })
+        .finished.then(done);
+    };
+
+    const skip = () => fly(320);
+    for (const type of ["pointerdown", "keydown", "wheel", "touchstart"]) {
+      addEventListener(type, skip, { once: true, passive: true, signal });
+    }
+    signal.addEventListener("abort", done);
+
+    try {
+      localStorage.setItem("owenabel-intro-at", String(Date.now()));
+    } catch {
+      // The intro still plays; it just may play again next time.
+    }
+
+    [...NAME].forEach((_, index) => later(() => name && (name.textContent = NAME.slice(0, index + 1)), 200 + index * TYPE_MS));
+    LOOKS.forEach((look, index) => later(() => face?.style.setProperty("--frame", String(look)), 250 + index * LOOK_MS));
+    later(() => fly(FLY_MS), 250 + LOOKS.length * LOOK_MS + 150);
+  });
+</script>

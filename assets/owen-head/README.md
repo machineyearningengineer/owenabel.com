@@ -7,7 +7,8 @@ The cursor-following head on the homepage (`src/scripts/owen-head.ts`).
 - `frames/` holds the source photos, one per direction. The number is the
   frame's position in the sprite:
   `0-center`, `1-up`, `2-up-right`, `3-right`, `4-down-right`, `5-down`,
-  `6-down-left`, `7-left`, `8-up-left`.
+  `6-down-left`, `7-left`, `8-up-left`, then the reactions `9-wince`,
+  `10-teary`, `11-annoyed`, `12-sigh`, `13-shocked`.
 - `cutouts/` holds the same frames with the background removed.
 - `public/owen-head-sprite.webp` is built from `cutouts/`. Don't edit it by
   hand.
@@ -35,11 +36,16 @@ To rebuild without re-cutting anything, run `pnpm head:build`.
 > Both eyes fully visible, no profile. Do not redesign or re-age my face; it
 > must still look exactly like this photo.
 
+For a reaction, swap the "ONLY change" sentence for the expression, for
+example: "The ONLY change: a playful wince, eyes squeezed shut, nose
+scrunched. Funny, still handsome. No added graphics or text."
+
 Generate each direction from the master on its own. Asking for every angle in
 one grid image made the face drift.
 
-## Adding or removing directions
+## Frame numbers
 
-`DIRECTIONS` in `src/scripts/owen-head.ts` and the `background-size` on
-`.owen-head` in `src/styles/global.css` must match the number of frames minus
-one (the centre frame).
+Frame numbers are fixed in `src/scripts/owen-head.ts` (directions 1–8,
+reactions 9–13). The `background-size` frame count on `.owen-head`,
+`.head-intro-face` and `.not-found-head` in `src/styles/global.css` must match
+the total number of frames (14).

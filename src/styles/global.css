@@ -1792,7 +1792,7 @@ html[data-theme="dark"] .booking-embed iframe {
   padding: 0;
   background: url("/owen-head-sprite.webp") no-repeat;
   background-position: calc(var(--frame) * -96px) 0;
-  background-size: calc(9 * 96px) 104px;
+  background-size: calc(14 * 96px) 104px;
   cursor: pointer;
   filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.28));
   opacity: 0;
@@ -1809,9 +1809,11 @@ html[data-theme="dark"] .booking-embed iframe {
 }
 
 @media (max-width: 760px) {
+  /* On phones the card (head, status, contact) comes first, then the table. */
   .index-card {
+    order: -1;
     max-width: 360px;
-    margin-top: 8px;
+    margin-top: 0;
   }
 }
 
@@ -1994,4 +1996,143 @@ dd,
 figcaption,
 td {
   text-wrap: pretty;
+}
+
+/* The cartoon anger vein: four bulging arcs on the temple, in the accent,
+   pulsing while annoyed and fading out during the sigh. */
+.owen-head::after {
+  position: absolute;
+  top: 10px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  background: var(--accent);
+  content: "";
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round'%3E%3Cpath d='M3 9.5c3 0 5.5-2.5 5.5-6.5'/%3E%3Cpath d='M14.5 3c0 4 2.5 6.5 6.5 6.5'/%3E%3Cpath d='M21 14.5c-4 0-6.5 2.5-6.5 6.5'/%3E%3Cpath d='M8.5 21c0-4-2.5-6.5-5.5-6.5'/%3E%3C/g%3E%3C/svg%3E")
+    center / contain no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.4) rotate(-12deg);
+  transition:
+    opacity 260ms ease,
+    transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.owen-head[data-mood="annoyed"]::after {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  animation: vein-throb 600ms ease-in-out 3;
+}
+
+.owen-head[data-mood="sigh"]::after {
+  opacity: 0;
+  transform: scale(0.6) rotate(8deg);
+}
+
+@keyframes vein-throb {
+  50% {
+    transform: scale(1.18) rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .owen-head[data-mood="annoyed"]::after {
+    animation: none;
+  }
+}
+
+/* Homepage intro overlay (src/components/HeadIntro.astro). */
+.head-intro {
+  display: none;
+}
+
+html[data-intro="play"] .head-intro {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+}
+
+html[data-intro="play"] .owen-head {
+  visibility: hidden;
+}
+
+html[data-intro="play"] body {
+  overflow: hidden;
+}
+
+.head-intro-stage {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+
+.head-intro-face {
+  --frame: 0;
+  width: 192px;
+  height: 208px;
+  background: url("/owen-head-sprite.webp") no-repeat;
+  background-position: calc(var(--frame) * -192px) 0;
+  background-size: calc(14 * 192px) 208px;
+  filter: drop-shadow(0 14px 18px var(--shadow));
+  transform-origin: center;
+  animation: intro-rise 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.head-intro-name {
+  min-height: 1.4em;
+  margin: 0;
+  font-size: clamp(16px, 2.4vw, 22px);
+  letter-spacing: 0.02em;
+}
+
+.head-intro-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 2px;
+  background: var(--accent);
+  vertical-align: -0.15em;
+  animation: caret-blink 900ms steps(1) infinite;
+}
+
+.head-intro[data-leaving] .head-intro-name,
+.head-intro[data-leaving] .head-intro-skip {
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+
+.head-intro-skip {
+  position: absolute;
+  bottom: 24px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+@keyframes intro-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* 404: Owen, shocked (frame 13 of the head sprite). */
+.not-found-head {
+  width: 144px;
+  height: 156px;
+  margin-bottom: 12px;
+  background: url("/owen-head-sprite.webp") no-repeat;
+  background-position: calc(13 * -144px) 0;
+  background-size: calc(14 * 144px) 156px;
+  filter: drop-shadow(0 10px 14px var(--shadow));
 }
