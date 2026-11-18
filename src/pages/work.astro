@@ -1,9 +1,22 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import KoiPond from "../components/KoiPond.astro";
-import { getCaseNotes, work } from "../data/work";
+import { exhibitMark, work } from "../data/work";
+import { readMinutes } from "../lib/read-minutes";
 
-const caseOrder = work.flatMap((item) => item.caseNotes.map((note) => note.href));
+const minutes = await readMinutes();
+// One entry per story page; the hook's first sentence is the line.
+const entries = work.flatMap((item) =>
+  item.caseNotes.map((note) => ({
+    ...note,
+    year: item.year,
+    line: note.summary.split(/(?<=[.!?])\s+(?=[A-Z])/)[0],
+    mark: exhibitMark(note.href),
+    minutes: minutes[note.href],
+    slug: note.href.split("/").pop(),
+  })),
+);
+const count = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"][entries.length] ?? entries.length;
 ---
 
 <BaseLayout
@@ -13,210 +26,46 @@ const caseOrder = work.flatMap((item) => item.caseNotes.map((note) => note.href)
   <section class="section-header koi-surface koi-band" aria-labelledby="work-heading">
     <KoiPond fish={3} />
     <h1 id="work-heading">Work</h1>
-    <p>Four projects. Open one for the problem, what I built and how it went.</p>
+    <p>{count} projects: the problem, what I built, and how it went.</p>
   </section>
 
-  <div class="work-list">
+  <ol class="work-list work-entries">
     {
-      work.map((item) => (
-        <article class="work-item" data-work-item>
-          <span>{item.year}</span>
-          <div>
-            <h3>
-              <a href={getCaseNotes(item)[0]?.href ?? item.href}>{item.name}</a>
-            </h3>
-            <p>{item.detail}</p>
-            <div class="work-detail">
-              <details>
-                <summary>More detail</summary>
-                <dl>
-                <div>
-                  <dt>Problem</dt>
-                  <dd>
-                    {
-                      Array.isArray(item.tension)
-                        ? item.tension.map((part) =>
-                            part.key ? (
-                              <button
-                                type="button"
-                                class="relation-text"
-                                data-relation={part.key}
-                                aria-pressed="false"
-                              >
-                                {part.text}
-                              </button>
-                            ) : (
-                              part.text
-                            ),
-                          )
-                        : item.tension
-                    }
-                  </dd>
-                </div>
-                <div>
-                  <dt>{item.streams ? "Projects" : "My contribution"}</dt>
-                  <dd>
-                    {
-                      item.streams ? (
-                        <ol class="work-streams" data-relation-list>
-                          {item.streams.map((stream) => (
-                            <li>
-                              <button type="button" data-relation={stream.key} aria-pressed="false">
-                                <strong>{stream.label}</strong>
-                                <span>{stream.body}</span>
-                              </button>
-                            </li>
-                          ))}
-                        </ol>
-                      ) : (
-                        item.owned
-                      )
-                    }
-                  </dd>
-                </div>
-                <div>
-                  <dt>{item.signalLabel ?? "What it enables"}</dt>
-                  <dd>
-                    {
-                      Array.isArray(item.signal)
-                        ? item.signal.map((part) =>
-                            part.key ? (
-                              <button
-                                type="button"
-                                class="relation-text"
-                                data-relation={part.key}
-                                aria-pressed="false"
-                              >
-                                {part.text}
-                              </button>
-                            ) : (
-                              part.text
-                            ),
-                          )
-                        : item.signal
-                    }
-                  </dd>
-                </div>
-                <div>
-                  <dt>Links</dt>
-                  <dd>
-                    {item.links.map((link, index) => (
-                      <>
-                        {index > 0 && " / "}
-                        <a href={link.href} data-relation={link.key}>
-                          {link.label}
-                        </a>
-                      </>
-                    ))}
-                  </dd>
-                </div>
-                {
-                  getCaseNotes(item).length > 0 && (
-                    <div>
-                      <dt>{getCaseNotes(item).length > 1 ? "Case studies" : "Case study"}</dt>
-                      <dd>
-                        <ol class="case-study-list">
-                          {getCaseNotes(item).map((caseNote, index) => (
-                            <li>
-                              <a href={caseNote.href}>
-                                <span class="case-study-ref" aria-hidden="true">[{index + 1}]</span>
-                                {caseNote.label}
-                              </a>
-                            </li>
-                          ))}
-                        </ol>
-                      </dd>
-                    </div>
-                  )
-                }
-                </dl>
-              </details>
-              {
-                getCaseNotes(item).length > 0 && (
-                  <nav class="case-study-shortcuts" aria-label={`${item.name} case studies`}>
-                    {getCaseNotes(item).map((caseNote, index) => (
-                      <a
-                        class="case-study-count"
-                        href={caseNote.href}
-                        data-cite={caseNote.href}
-                        data-tone={(caseOrder.indexOf(caseNote.href) % 3) + 1}
-                        aria-label={`Case study ${index + 1}: ${caseNote.label}`}
-                      >
-                        [{index + 1}]
-                      </a>
-                    ))}
-                  </nav>
-                )
-              }
+      entries.map((entry) => (
+        <li class="work-entry">
+          <a href={entry.href}>
+            <span class="work-entry-year">{entry.year}</span>
+            <div class="work-entry-body">
+              <div class="work-entry-head">
+                <h2>{entry.label}</h2>
+                <span class="work-entry-role">{entry.role}</span>
+              </div>
+              <p class="work-entry-line">{entry.line}</p>
+              <p class="work-entry-fact">{entry.fact}</p>
+              <ul class="stack-tags" aria-label="Stack">
+                {entry.stack.map((tool) => (
+                  <li>{tool}</li>
+                ))}
+              </ul>
+              <span class="work-entry-read">
+                Read · {entry.minutes} min <span aria-hidden="true">→</span>
+              </span>
             </div>
-          </div>
-          <span class="work-role">{item.role}</span>
-        </article>
+            <span class="exhibit work-entry-exhibit" aria-hidden="true">
+              <img
+                src={entry.exhibit.src}
+                alt=""
+                width="960"
+                height="600"
+                loading="lazy"
+                decoding="async"
+                style={`view-transition-name: exhibit-${entry.slug}`}
+              />
+              <span>Exh. {entry.mark}</span>
+            </span>
+          </a>
+        </li>
       ))
     }
-  </div>
-
-  <script>
-    import { onPage } from "../scripts/page";
-
-    onPage((signal) => {
-    const relationItems = document.querySelectorAll<HTMLElement>("[data-work-item]");
-
-    const updatePressedState = (item: HTMLElement) => {
-      item.querySelectorAll<HTMLButtonElement>('button[data-relation]').forEach((node) => {
-        node.setAttribute("aria-pressed", String(item.dataset.pinnedRelation === node.dataset.relation));
-      });
-    };
-
-    const clearItem = (item: HTMLElement) => {
-      delete item.dataset.pinnedRelation;
-      item.querySelectorAll<HTMLElement>("[data-relation]").forEach((node) => {
-        node.removeAttribute("data-active");
-      });
-      updatePressedState(item);
-    };
-
-    for (const item of relationItems) {
-      const setActive = (key: string | undefined, persist = false) => {
-        if (persist) {
-          if (item.dataset.pinnedRelation === key) {
-            delete item.dataset.pinnedRelation;
-            key = undefined;
-          } else {
-            item.dataset.pinnedRelation = key ?? "";
-          }
-        }
-
-        item.querySelectorAll<HTMLElement>("[data-relation]").forEach((node) => {
-          node.toggleAttribute("data-active", Boolean(key) && node.dataset.relation === key);
-        });
-        updatePressedState(item);
-      };
-
-      item.querySelectorAll<HTMLElement>(".work-streams button[data-relation], .relation-text[data-relation]").forEach((node) => {
-        node.addEventListener("mouseenter", () => setActive(node.dataset.relation));
-        node.addEventListener("focus", () => setActive(node.dataset.relation));
-        node.addEventListener("click", () => setActive(node.dataset.relation, true));
-      });
-
-      item.addEventListener("mouseleave", () => {
-        setActive(item.dataset.pinnedRelation);
-      });
-    }
-
-    document.addEventListener("click", (event) => {
-      if (event.target instanceof Element && event.target.closest("[data-relation]")) {
-        return;
-      }
-
-      relationItems.forEach(clearItem);
-    }, { signal });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        relationItems.forEach(clearItem);
-      }
-    }, { signal });
-    });
-  </script>
+  </ol>
 </BaseLayout>
