@@ -34,7 +34,12 @@
     <line x1="78" y1="482" x2="1122" y2="482" stroke="#111111" stroke-width="1" />
 
 
-    <text x="78" y="574" font-size="18">owenabel.com</text>
-    <text x="960" y="574" font-size="18">Status: Present</text>
+  </g>
+
+  <g transform="translate(1080 512) scale(0.75)">
+    <defs><clipPath id="mark-between-rules"><rect y="9" width="64" height="46" /></clipPath></defs>
+    <path d="M18.8 40h26.4" stroke="#7b2f1d" stroke-width="4" fill="none" />
+    <path d="M12.2 56 32 8l19.8 48" stroke="#11110f" stroke-width="4.5" fill="none" clip-path="url(#mark-between-rules)" />
+    <path d="M8 10h48M8 54h48" stroke="#11110f" stroke-width="2" fill="none" />
   </g>
 </svg>

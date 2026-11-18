@@ -8,8 +8,6 @@ const defaultCard = {
   email: "hello@owenabel.com",
   document: "INDEX-ABEL",
   issued: "May 2026",
-  site: "owenabel.com",
-  status: "Present",
   sectionLabel: "Current practice",
   rows: [
     ["01", "Product systems", "Help people find what they came for"],
@@ -21,13 +19,11 @@ const defaultCard = {
 const caseCard = ({ slug, name, area, document, issued, method, rows }) => ({
   slug,
   name,
-  role: `${area} / Case study`,
-  email: `owenabel.com/work/${slug}`,
+  role: area,
+  email: "hello@owenabel.com",
   document,
   issued,
   method,
-  site: "owenabel.com",
-  status: "Case study",
   sectionLabel: "Case study",
   rows,
 });
@@ -101,6 +97,17 @@ const cards = [
   }),
 ];
 
+// The mark: an A standing between two rules. The favicon (public/favicon.svg)
+// is the plain version; at large sizes the crossbar takes the accent colour,
+// drawn under the legs so the legs cover its ends.
+export const markSvg = ({ x = 0, y = 0, size = 64 } = {}) => `
+  <g transform="translate(${x} ${y}) scale(${size / 64})">
+    <defs><clipPath id="mark-between-rules"><rect y="9" width="64" height="46" /></clipPath></defs>
+    <path d="M18.8 40h26.4" stroke="#7b2f1d" stroke-width="4" fill="none" />
+    <path d="M12.2 56 32 8l19.8 48" stroke="#11110f" stroke-width="4.5" fill="none" clip-path="url(#mark-between-rules)" />
+    <path d="M8 10h48M8 54h48" stroke="#11110f" stroke-width="2" fill="none" />
+  </g>`;
+
 const escapeXml = (value) =>
   String(value)
     .replaceAll("&", "&amp;")
@@ -115,8 +122,6 @@ export const createLedgerOgSvg = ({
   document,
   issued,
   method,
-  site,
-  status,
   sectionLabel,
   rows,
 }) => {
@@ -154,14 +159,22 @@ ${rowMarkup}
     <line x1="78" y1="482" x2="1122" y2="482" stroke="#111111" stroke-width="1" />
 
 ${method ? `    <text x="78" y="536" font-size="22">Method: ${escapeXml(method)}</text>` : ""}
-    <text x="78" y="574" font-size="18">${escapeXml(site)}</text>
-    <text x="960" y="574" font-size="18">Status: ${escapeXml(status)}</text>
   </g>
+${markSvg({ x: 1080, y: 512, size: 48 })}
 </svg>
 `;
 };
 
 await mkdir(new URL("../public/og/", import.meta.url), { recursive: true });
+
+// Home-screen icon: the accent mark on paper. iOS rounds the corners itself.
+await sharp(
+  Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180"><rect width="180" height="180" fill="#efefec" />${markSvg({ x: 26, y: 26, size: 128 })}</svg>`,
+  ),
+)
+  .png()
+  .toFile(fileURLToPath(new URL("../public/apple-touch-icon.png", import.meta.url)));
 
 await Promise.all(
   cards.map(async ({ slug, ...card }) => {
