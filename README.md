@@ -1,76 +1,96 @@
 # owenabel.com
 
-Personal portfolio site for Owen Abel Amenze.
+Personal portfolio site for Owen Abel Amenze, targeting Cloudflare Workers Static Assets.
+Live site: https://owenabel.com. The Pages project was retired after successful
+Workers deployment and domain cutover on 2026-09-30.
 
-Live preview: <https://owenabel-com.pages.dev>
+## Stack and setup
 
-## Stack
+Static Astro, TypeScript/tsgo, Oxlint and Oxfmt. A dedicated `workers/` workspace
+packages Astro's output with pinned Vite 8 and Cloudflare's cf-compatible Vite 2
+beta plugin. No SSR, runtime application code or Wrangler.
 
-- Astro static output
-- Vite under Astro's build pipeline
-- TypeScript with `tsgo`
-- Oxlint and Oxfmt where they fit
-
-## Commands
+Use Node.js >=22.18 and pinned pnpm:
 
 ```sh
+pnpm install --frozen-lockfile
 pnpm run dev
 pnpm run build
-pnpm run preview
+pnpm run test:deploy
+pnpm run test:routing
+pnpm run check:redirects
+pnpm run preview:workers
 ```
 
-Local development runs through Portless:
+The build checks formatting, lint and types, generates OG images and canonical
+redirects, builds 14 static pages, packages them with cf, and verifies packaged
+files byte for byte. Output is `workers/.cloudflare/output/v0/`, not just Astro's
+intermediate `dist/`. `preview` previews Astro; `dev:workers` runs cf/Vite against
+the latest Astro build. `preview:workers` and routing tests use the built
+Cloudflare asset runtime, including production redirects and custom 404s.
 
-```txt
-https://owenabel.localhost
-```
+Direct dependencies and the single pnpm lockfile are pinned. The workers
+lockfile symlink references the root lockfile for cf's package-manager detection.
+Native install permissions are explicit in `pnpm-workspace.yaml`. Bun is
+unsupported by cf. If Portless routes this repo, its URL is
+`https://owenabel.localhost`; `dev` and `dev:raw` both run Astro directly.
 
-To bypass Portless:
+## Cloudflare commands and credentials
 
 ```sh
-pnpm run dev:raw
+pnpm run cf:auth
+pnpm run cf:project
+pnpm run deploy:cf --dry-run
+pnpm run deploy:cf --dry-run --cutover
 ```
 
-## Cloudflare Pages
+Both previews build and invoke cf's actual `deploy --prebuilt --dry-run`, which
+makes no API requests. Default mode targets Worker `owenabel-com-preview` on workers.dev
+only. Explicit `cutover` mode targets production Worker `owenabel-com` and both portfolio custom domains. Static
+requests remain free and unlimited; this assets-only target needs no paid
+Workers subscription. `runWorkerFirst` stays false.
 
-Build command:
+For an explicitly authorized deployment, supply a distinct account-scoped
+Workers write token as `CLOUDFLARE_WORKERS_WRITE_TOKEN` and set
+`CLOUDFLARE_ACCOUNT_ID`. `pnpm run deploy:cf --execute` publishes the Worker only;
+`--execute --cutover` updates the production Worker and its custom domains.
+Both modes were deployed and verified during the authorized migration. An explicit
+operational profile can replace the token: `pnpm run deploy:cf --execute --cutover
+--profile personal-deploy`. Default profile is refused for writes.
 
-```sh
-pnpm run build
-```
+Use a dedicated scoped read token in ambient `CLOUDFLARE_API_TOKEN` for audits.
+It overrides cf profiles. A valid identity does not prove product permissions.
+To inspect saved cf identity, unset the shell token; dotenv may also override it.
+Keep credentials out of dotenv files: the wrapper rejects Cloudflare credential
+assignments there, strips credentials from build/dry-run children, and passes
+the separate write token only to the deploy child. It accepts only an explicit named operational
+profile or separate token for writes. Never commit or log secrets.
 
-Build output directory:
+Only Cloudflare documentation MCP is configured by default in
+`.codex/config.toml` and `.mcp.json`. Reopen the agent session to load it;
+host-level connections are separate.
 
-```sh
-dist
-```
+See [migration inventory, verification and cutover checklist](docs/cloudflare-migration.md)
+and [dated Cloudflare settings audit](docs/cloudflare-audit.md).
+The `cf:project` read command removes the ambient token override and selects the
+saved default read profile; that override failed Worker reads during migration.
+The separate `personal-deploy` operational profile is used only for authorized writes.
 
-Direct deploy:
+## URLs and hosting
 
-```sh
-pnpm run deploy:cf
-```
+Astro retains static file-format output, extensionless links, sitemap and
+canonical metadata. Workers uses `htmlHandling: drop-trailing-slash` and
+`notFoundHandling: 404-page`. Generated `_redirects` preserves trailing-slash
+and legacy `/page/index.html` redirects (301), and explicit HTML redirects (308).
+Unknown paths return the custom 404 with HTTP 404, never the homepage.
+Asset filenames, CV and social images are unchanged.
 
-If an exported API token overrides the saved Wrangler login and lacks Pages
-permissions, deploy with the saved login for that command:
-
-```sh
-env -u CLOUDFLARE_API_TOKEN pnpm run deploy:cf
-```
-
-## Page URLs
-
-Pages use URLs without trailing slashes (`/work`, `/contact`, `/book`). Astro
-builds named HTML files, and Cloudflare Pages serves their extensionless URLs.
-Internal links, canonical URLs, share metadata, and the sitemap use that form.
-The build generates `dist/_redirects` from the actual pages, redirecting each
-trailing-slash URL and legacy `/page/index.html` URL to `/page` with a 301.
-New pages get the same redirects automatically. Asset filenames are unchanged.
-Keep the root `404.html` so unknown routes return a real 404 instead of the homepage.
-
-The site intentionally avoids host-specific runtime code, so it can migrate to
-Cloudflare Pages, Netlify, GitHub Pages, Railway static hosting, object storage,
-or any CDN that serves static files.
+Workers asset redirects do not support hostname redirects. Preserve the zone's
+WWW-to-apex and HTTP-to-HTTPS rules during cutover and verify them live. The
+original audit had permission gaps; the authorized cutover inspected the Pages
+settings and redirects, confirmed Workers-managed DNS and valid TLS, and retired
+the old project. The HTTPS edge rule is recorded in `workers/https-redirect.rule.json`.
+The static output stays portable to other static hosts.
 
 ## CV and work content
 
