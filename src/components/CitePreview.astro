@@ -1,7 +1,16 @@
 ---
-// One shared preview card for every <Cite>. It lives in the top layer
-// (popover), sits against the hovered link, flips above when there's no room
-// below, and only opens for a mouse or keyboard focus; a tap just follows the link.
+// One shared preview card for every <Cite> (and [data-cite] link).
+//
+// Timing follows Receipts' hover rules:
+// - opens once a mouse rests on the link for 150 ms, never mid-scroll;
+// - stays open while the pointer is on the link or the card, so you can move
+//   onto it to read and click;
+// - closes 300 ms after the pointer leaves both, on Escape, on a click
+//   elsewhere, or when the page scrolls;
+// - keyboard focus opens it straight away; a tap just follows the link.
+//
+// It also draws the citation markers in, one after another, the first time
+// each group scrolls into view, so phones (no hover) see them too.
 import { work } from "../data/work";
 
 const cases = Object.fromEntries(
@@ -14,12 +23,12 @@ const cases = Object.fromEntries(
 );
 ---
 
-<aside class="cite-preview" popover="manual" data-cite-preview aria-hidden="true">
+<a class="cite-preview" popover="manual" data-cite-preview aria-hidden="true" tabindex="-1">
   <img alt="" width="320" height="200" decoding="async" data-cite-image />
   <strong data-cite-title></strong>
-  <p data-cite-summary></p>
+  <span class="cite-preview-summary" data-cite-summary></span>
   <span class="cite-preview-more">Read the case study →</span>
-</aside>
+</a>
 
 <script is:inline type="application/json" id="cite-data" set:html={JSON.stringify(cases)} />
 
@@ -28,23 +37,49 @@ const cases = Object.fromEntries(
 
   type Case = { title: string; summary: string; image: string };
 
+  const OPEN_AFTER_REST_MS = 150;
+  const CLOSE_AFTER_LEAVE_MS = 300;
+  const SCROLL_SETTLE_MS = 150;
+  const DRAW_STAGGER_MS = 140;
+
   onPage((signal) => {
-    const card = document.querySelector<HTMLElement>("[data-cite-preview]");
+    const card = document.querySelector<HTMLAnchorElement>("[data-cite-preview]");
     const cases = JSON.parse(document.getElementById("cite-data")?.textContent ?? "{}") as Record<
       string,
       Case
     >;
+    const links = [...document.querySelectorAll<HTMLElement>("[data-cite]")];
+
+    // Draw the markers in as they come into view.
+    const reveal = new IntersectionObserver(
+      (entries) => {
+        const arriving = entries.filter((entry) => entry.isIntersecting).map((entry) => entry.target);
+        arriving.forEach((link, index) => {
+          (link as HTMLElement).style.setProperty("--draw-delay", `${index * DRAW_STAGGER_MS}ms`);
+          link.setAttribute("data-drawn", "");
+          reveal.unobserve(link);
+        });
+      },
+      { rootMargin: "0px 0px -15% 0px" },
+    );
+    links.forEach((link) => reveal.observe(link));
+    signal.addEventListener("abort", () => reveal.disconnect());
+
     if (!card || !card.showPopover) return;
     const image = card.querySelector<HTMLImageElement>("[data-cite-image]");
     const title = card.querySelector<HTMLElement>("[data-cite-title]");
     const summary = card.querySelector<HTMLElement>("[data-cite-summary]");
     let openTimer = 0;
     let closeTimer = 0;
+    let scrolledAt = 0;
+    let current: HTMLElement | null = null;
+
+    const isOpen = () => card.matches(":popover-open");
 
     const place = (link: HTMLElement) => {
       const anchor = link.getBoundingClientRect();
       const { width, height } = card.getBoundingClientRect();
-      const gap = 8;
+      const gap = 6;
       const below = anchor.bottom + gap + height <= innerHeight;
       const top = below ? anchor.bottom + gap : anchor.top - gap - height;
       const left = Math.min(Math.max(12, anchor.left), innerWidth - width - 12);
@@ -52,42 +87,72 @@ const cases = Object.fromEntries(
       card.style.left = `${left}px`;
     };
 
-    const open = (link: HTMLElement) => {
+    const show = (link: HTMLElement) => {
       const data = cases[link.dataset.cite ?? ""];
       if (!data) return;
       window.clearTimeout(closeTimer);
-      window.clearTimeout(openTimer);
-      openTimer = window.setTimeout(() => {
-        if (image) image.src = data.image;
-        if (title) title.textContent = data.title;
-        if (summary) summary.textContent = data.summary;
-        if (!card.matches(":popover-open")) card.showPopover();
-        place(link);
-      }, 140);
+      current = link;
+      card.href = link.dataset.cite ?? "#";
+      if (image) image.src = data.image;
+      if (title) title.textContent = data.title;
+      if (summary) summary.textContent = data.summary;
+      if (!isOpen()) card.showPopover();
+      place(link);
     };
 
-    const close = () => {
+    const hide = () => {
       window.clearTimeout(openTimer);
-      closeTimer = window.setTimeout(() => {
-        if (card.matches(":popover-open")) card.hidePopover();
-      }, 120);
+      window.clearTimeout(closeTimer);
+      current = null;
+      if (isOpen()) card.hidePopover();
     };
 
-    for (const link of document.querySelectorAll<HTMLElement>("[data-cite]")) {
+    const scheduleClose = () => {
+      window.clearTimeout(openTimer);
+      window.clearTimeout(closeTimer);
+      closeTimer = window.setTimeout(hide, CLOSE_AFTER_LEAVE_MS);
+    };
+
+    const armOpen = (link: HTMLElement) => {
+      window.clearTimeout(openTimer);
+      window.clearTimeout(closeTimer);
+      if (performance.now() - scrolledAt < SCROLL_SETTLE_MS) return;
+      if (isOpen() && current === link) return;
+      openTimer = window.setTimeout(() => show(link), OPEN_AFTER_REST_MS);
+    };
+
+    for (const link of links) {
       link.addEventListener(
-        "pointerenter",
-        (event) => event.pointerType === "mouse" && open(link),
+        "pointermove",
+        (event) => event.pointerType === "mouse" && armOpen(link),
         { signal },
       );
-      link.addEventListener("pointerleave", close, { signal });
-      link.addEventListener("focus", () => open(link), { signal });
-      link.addEventListener("blur", close, { signal });
+      link.addEventListener("pointerleave", scheduleClose, { signal });
+      link.addEventListener("focus", () => show(link), { signal });
+      link.addEventListener("blur", scheduleClose, { signal });
     }
-    addEventListener("scroll", close, { passive: true, signal });
-    document.addEventListener("keydown", (event) => event.key === "Escape" && close(), { signal });
-    signal.addEventListener("abort", () => {
-      window.clearTimeout(openTimer);
-      if (card.matches(":popover-open")) card.hidePopover();
-    });
+
+    // The card itself keeps the preview open, so it can be read and clicked.
+    card.addEventListener("pointerenter", () => window.clearTimeout(closeTimer), { signal });
+    card.addEventListener("pointerleave", scheduleClose, { signal });
+
+    addEventListener(
+      "scroll",
+      () => {
+        scrolledAt = performance.now();
+        hide();
+      },
+      { passive: true, signal },
+    );
+    document.addEventListener("keydown", (event) => event.key === "Escape" && hide(), { signal });
+    document.addEventListener(
+      "pointerdown",
+      (event) => {
+        const target = event.target as Node;
+        if (isOpen() && !card.contains(target) && !current?.contains(target)) hide();
+      },
+      { signal },
+    );
+    signal.addEventListener("abort", hide);
   });
 </script>
