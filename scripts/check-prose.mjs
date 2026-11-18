@@ -119,7 +119,7 @@ walk(dist);
 
 let contract = 0;
 let review = 0;
-for (const page of pages.sort()) {
+for (const page of pages.sort((a, b) => a.localeCompare(b))) {
   const html = readFileSync(page, "utf8");
   const main = (html.match(/<main[\s\S]*<\/main>/i) ?? [""])[0];
   const found = [];
