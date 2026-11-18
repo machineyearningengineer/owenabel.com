@@ -78,7 +78,14 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
         </tbody>
       </table>
 
-      <aside class="invoice-box" aria-label="At a glance">
+      <div class="index-card">
+        <button
+          type="button"
+          class="owen-head"
+          data-owen-head
+          aria-label="My head. It follows your cursor; click to spin it."
+        ></button>
+        <aside class="invoice-box" aria-label="At a glance">
         <dl>
           <dt>Document:</dt>
           <dd>INDEX-ABEL</dd>
@@ -102,6 +109,7 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
         </dl>
         <p class="invoice-hint" aria-hidden="true">Tap the paper.</p>
       </aside>
+      </div>
     </div>
   </section>
 
@@ -149,6 +157,7 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 
 <script>
   import { mountKoiPond } from "../scripts/koi-pond";
+  import { mountOwenHead } from "../scripts/owen-head";
   import { onPage } from "../scripts/page";
 
   onPage((signal) => {
@@ -156,6 +165,8 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
   const canvas = document.querySelector<HTMLCanvasElement>("[data-koi-pond]");
   const surface = document.querySelector<HTMLElement>("[data-ledger-surface]");
   if (canvas && surface) mountKoiPond(canvas, surface, signal);
+    const head = document.querySelector<HTMLElement>("[data-owen-head]");
+    if (head) mountOwenHead(head, signal);
 
   const clock = document.querySelector<HTMLElement>("[data-london-clock]");
   const formatTime = new Intl.DateTimeFormat("en-GB", {

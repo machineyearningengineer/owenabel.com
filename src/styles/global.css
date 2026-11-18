@@ -1769,3 +1769,46 @@ html[data-theme="dark"] .invoice-box::before {
     animation: none;
   }
 }
+
+/* Owen's head: an ID photo clipped to the INDEX-ABEL card, following the cursor. */
+.index-card {
+  position: relative;
+  /* Room for the head to peek over the card without moving the card itself. */
+  margin-top: -96px;
+  padding-top: 96px;
+}
+
+.owen-head {
+  --frame: 0;
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 22px;
+  width: 96px;
+  height: 104px;
+  border: 0;
+  padding: 0;
+  background: url("/owen-head-sprite.webp") no-repeat;
+  background-position: calc(var(--frame) * -96px) 0;
+  background-size: calc(17 * 96px) 104px;
+  cursor: pointer;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.28));
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.owen-head[data-ready="true"] {
+  opacity: 1;
+}
+
+.owen-head:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+}
+
+@media (max-width: 760px) {
+  .index-card {
+    max-width: 360px;
+    margin-top: 8px;
+  }
+}
