@@ -37,19 +37,19 @@ export const work: WorkItem[] = [
     detail:
       "Search, maps, and saved routes that help people turn the Fête de la Musique programme into a night out.",
     featuredDetail:
-      "Event discovery and route planning: 2,601 sign-ups and about 10,900 browsers in the 2026 season.",
+      "Event discovery and route planning: about 10,900 unique visitors and 2,601 sign-ups in June 2026.",
     caseNotes: [
       {
         label: "Fête Finder",
         href: "/work/fete-finder",
         summary:
-          "Fête de la Musique fills Paris with free music for one night, and Fête Finder helps people find their night, plan a route and keep it when the signal drops. In June 2026 about 10,900 browsers used it, and 2,601 people had signed up.",
+          "Fête de la Musique fills Paris with free music for one night, and Fête Finder helps people find their night, plan a route and keep it when the signal drops. In June 2026 it had about 10,900 unique visitors, and 2,601 people had signed up.",
         role: "Product Engineer",
         years: "2025–26",
         team: { label: "Client", value: "Out Of Office Collective" },
         stage: "Live, 2026 archive",
         stack: ["Next.js", "Postgres", "MapLibre", "Railway"],
-        fact: "2,601 sign-ups, about 10,900 browsers in June 2026",
+        fact: "About 10,900 unique visitors and 2,601 sign-ups, June 2026",
         live: {
           label: "fete.outofofficecollective.co.uk",
           href: "https://fete.outofofficecollective.co.uk",
