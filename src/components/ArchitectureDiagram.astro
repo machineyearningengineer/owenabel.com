@@ -1,6 +1,7 @@
 ---
 // A small boxes-and-arrows diagram in the ledger style, behind a native
-// <details>. Only draw what the case study text already says.
+// <details>. Only draw what the case study text already says. The summary is
+// read out by screen readers (the SVG's <desc>); sighted readers have the boxes.
 // Coordinates are in viewBox units; edges route side to side or top to
 // bottom with one elbow, chosen from where the two boxes sit.
 type Box = { id: string; label: string; note?: string; x: number; y: number; w: number; h?: number };
@@ -116,6 +117,5 @@ const lines = edges.map((edge) => ({ edge, ...route(edge) }));
         }
       </svg>
     </div>
-    <figcaption>{summary}</figcaption>
   </figure>
 </details>

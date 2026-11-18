@@ -105,7 +105,8 @@ const chapters = [
     <div class="story-prose">
       <p>Before this, Mel on the team collected screenshots all day and bulk-uploaded them each evening, about 30 to 40 hours of work a season.</p>
       <p>So I built a team of agents that ran on a VPS, each driving a browser. Ticketing sites like Resident Advisor and Fatsoma were straightforward. Organisers' social pages blocked direct collection, so the agents worked through accounts and page-monitoring services that flagged new posts.</p>
-      <p>For each possible event, an agent read the organiser's profile, the post and the replies, ran OCR on the flyer, and had Gemini fill in the listing: names and descriptions as free text, and price, age range and indoor or outdoor as fixed choices. Every field carried a confidence score. Google's location API turned venues into coordinates, and known venues came from a cache, so the same bar was never looked up twice.</p>
+      <p>For each possible event, an agent read the organiser's profile, the post and the replies, ran OCR on the flyer, and had Gemini fill in the listing: names and descriptions as free text, and price, age range and indoor or outdoor as fixed choices. Every field carried a confidence score.</p>
+      <p>Google's location API turned venues into coordinates, and known venues came from a cache, so the same bar was never looked up twice.</p>
       <p>Anything doubtful went to a person: a missing date, a possible duplicate, a place Google couldn't find. Drafts landed in the same review queue as the flyer tool below, and nothing went public until someone accepted it.</p>
       <p>In the two weeks before the 2026 festival the agents suggested 87 of the 159 listings. All were used, about 20 needed a correction, mostly a clearer location, and none were rejected.</p>
       <p>Agents collect and draft; people publish.</p>

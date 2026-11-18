@@ -2794,7 +2794,6 @@ html[data-intro="play"] body {
   display: block;
   margin-top: 2px;
   font-size: 11px;
-  opacity: 0.8;
 }
 
 .clip-source a {
@@ -2920,14 +2919,6 @@ html[data-intro="play"] body {
   paint-order: stroke;
   stroke: var(--paper);
   stroke-width: 4px;
-}
-
-.case-architecture figcaption {
-  max-width: 66ch;
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
 }
 
 @media (max-width: 999px) {
