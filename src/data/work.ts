@@ -118,7 +118,7 @@ export const work: WorkItem[] = [
         role: "Lead engineer",
         years: "2026",
         team: { label: "Team", value: "Me, leading coding agents" },
-        stage: "Early access, no external users",
+        stage: "Preview access, 100 beta users",
         stack: ["Go", "ConnectRPC", "Postgres", "pgvector", "Voyage"],
         fact: "2,091 labelled eval cases",
         live: { label: "receipts.beauty", href: "https://receipts.beauty" },
