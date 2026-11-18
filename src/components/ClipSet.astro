@@ -1,0 +1,57 @@
+---
+// Two or more clips for one beat, shown one at a time with a small
+// "‹ 1 / 3 ›" control. Without JavaScript they simply stack.
+import Clip from "./Clip.astro";
+
+export interface ClipSpec {
+  beat: string;
+  caption: string;
+  local?: boolean;
+}
+interface Props {
+  project: string;
+  clips: ClipSpec[];
+}
+const { project, clips } = Astro.props;
+---
+
+<div class="clip-set" data-clip-set>
+  {
+    clips.map((clip) => (
+      <div class="clip-set-item" data-clip-set-item>
+        <Clip project={project} beat={clip.beat} caption={clip.caption} local={clip.local} />
+      </div>
+    ))
+  }
+  <div class="clip-set-nav" data-clip-set-nav hidden>
+    <button type="button" data-clip-set-step="-1" aria-label="Previous clip">‹</button>
+    <span data-clip-set-count aria-live="polite">1 / {clips.length}</span>
+    <button type="button" data-clip-set-step="1" aria-label="Next clip">›</button>
+  </div>
+</div>
+
+<script>
+  import { onPage } from "../scripts/page";
+
+  onPage((signal) => {
+    for (const set of document.querySelectorAll<HTMLElement>("[data-clip-set]")) {
+      const items = [...set.querySelectorAll<HTMLElement>("[data-clip-set-item]")];
+      const nav = set.querySelector<HTMLElement>("[data-clip-set-nav]");
+      const count = set.querySelector<HTMLElement>("[data-clip-set-count]");
+      if (items.length < 2 || !nav || !count) continue;
+      let index = 0;
+      // Hidden clips leave the viewport, so Clip's observer pauses them and
+      // starts the one that appears.
+      const show = (next: number) => {
+        index = (next + items.length) % items.length;
+        items.forEach((item, i) => (item.hidden = i !== index));
+        count.textContent = `${index + 1} / ${items.length}`;
+      };
+      for (const button of nav.querySelectorAll<HTMLButtonElement>("[data-clip-set-step]")) {
+        button.addEventListener("click", () => show(index + Number(button.dataset.clipSetStep)), { signal });
+      }
+      nav.hidden = false;
+      show(0);
+    }
+  });
+</script>

@@ -13,14 +13,23 @@ const steps = [
       "Selling tickets myself, rather than through a ticketing platform, saves the platform's per-ticket fees and keeps me in direct contact with every guest. Their questions come to me, and I can see what's working before the night, not after.",
       "Before the night, an email tells each guest their team name and colour, and the QR code on their ticket comes framed in that colour. Amber, Sage, Plum or Sky.",
     ],
-    caption: "An event page, from the details down to the tickets. Nothing is bought.",
+    clips: [
+      { beat: "tickets", caption: "An event page, from the details down to the tickets." },
+      { beat: "purchase", caption: "Choosing two tickets and filling in the guest's details, up to the payment button.", local: true },
+      { beat: "teams", caption: "The host shuffles guests into four colour teams and sends the team cards.", local: true },
+      { beat: "team-email", caption: "A guest's team email, with her ticket QR framed in Team Amber's colour.", local: true },
+    ],
   },
   {
     key: "door",
     label: "Through the door",
     text: [
       "Staff scan the QR at the door. If the signal goes, the scanner keeps working offline, catches a ticket scanned twice on the same phone with a plain “Already scanned on this device”, and replays its queue when the signal comes back.",
-      "There's no clip of this one: it only exists on a staff phone, on the night.",
+    ],
+    clips: [
+      { beat: "door-scan", caption: "The door scanner reads a guest's QR through the camera and checks her in.", local: true },
+      { beat: "door-offline", caption: "With no signal, a guest is let in from the downloaded list, and a second scan of the same ticket is refused.", local: true },
+      { beat: "door-sync", caption: "Back online, the scanner replays its two offline check-ins and the guest list shows them inside.", local: true },
     ],
   },
   {
@@ -30,7 +39,10 @@ const steps = [
       "The games run on the venue's screen, with phones as controllers. In Family Feud the TV shows the board and a one-use QR code, and the MC's phone becomes the host controller, with the answers the room can't see yet.",
       "There are a dozen games on the shelf, from Mafia and Imposter to a spelling bee, plus an icebreaker that reveals your event colour and helps you meet someone new.",
     ],
-    caption: "Family Feud's setup: the board goes on this screen, and the TV shows a one-use QR code for the MC's phone. No room is started.",
+    clips: [
+      { beat: "games", caption: "Family Feud's setup: the board goes on this screen, and the TV shows a one-use QR code for the MC's phone." },
+      { beat: "games-controller", caption: "With the MC's phone paired, the game starts from the phone.", local: true },
+    ],
   },
   {
     key: "pitch-night",
@@ -48,7 +60,10 @@ const steps = [
       "Nobody wants to make slides at a party, so guests make them before. Pitch Night Studio gives you six slides, and publishing seals them into a public snapshot.",
       "On the night the host puts the deck on the big screen. The presenter scans a QR code, the host lets them in, and they move through their slides from their own phone.",
     ],
-    caption: "The wall of published pitches, then one of them.",
+    clips: [
+      { beat: "studio-edit", caption: "Editing a slide in Pitch Night Studio: a new title, some text and a shape.", local: true },
+      { beat: "studio", caption: "The wall of published pitches, then one of them." },
+    ],
   },
   {
     key: "photos",
@@ -94,7 +109,7 @@ const chapters = [
 
   <StoryChapter id="how-it-works" title="How the night works" group="night">
     <div class="story-prose">
-      <p>From the ticket to the photos, recorded on the live site wherever there's a public screen to show.</p>
+      <p>From the ticket to the photos. Public pages are recorded on the live site; the door, the host's tools and the guest's own screens on a local build with made-up guests.</p>
     </div>
     <CaseJourney project="milk-and-henny" steps={steps} />
   </StoryChapter>

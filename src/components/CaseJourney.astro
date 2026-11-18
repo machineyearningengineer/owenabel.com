@@ -1,14 +1,16 @@
 ---
 // A demo journey: one numbered step per beat. A step with a caption shows the
-// clip of that beat (see Clip); a step without one is text only, for parts of
-// the night that have no public screen to record.
+// clip of that beat (see Clip), a step with `clips` shows several one at a
+// time (see ClipSet), and a step with neither is text only.
 import Clip from "./Clip.astro";
+import ClipSet, { type ClipSpec } from "./ClipSet.astro";
 
 interface Step {
   key: string;
   label: string;
   text: string[];
   caption?: string;
+  clips?: ClipSpec[];
 }
 interface Props {
   project: string;
@@ -34,7 +36,11 @@ const Heading = level === 4 ? "h4" : "h3";
             <p set:html={paragraph} />
           ))}
         </div>
-        {step.caption && <Clip project={project} beat={step.key} caption={step.caption} />}
+        {step.clips ? (
+          <ClipSet project={project} clips={step.clips} />
+        ) : (
+          step.caption && <Clip project={project} beat={step.key} caption={step.caption} />
+        )}
       </li>
     ))
   }
