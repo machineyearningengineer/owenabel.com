@@ -1,0 +1,304 @@
+---
+import { BOX_HEIGHT, route, type Rect, type Route } from "./architecture";
+
+// A before/after architecture diagram behind the same "View architecture"
+// disclosure as ArchitectureDiagram, with the same edge routing. Coordinates
+// are the After layout; a box that moves gives its Before position in `from`.
+// Anything drawn in only one state sets `in`. Muted coral marks a weakness or
+// what was removed; sage marks what replaced it. Colour always has words beside
+// it: a `weak` or `fix` line, a free note, or the automatic "removed"/"new" tag.
+// Each state's summary is the SVG's <title>/<desc>; nothing is printed under it.
+type State = "before" | "after";
+type Point = { x: number; y: number };
+type Box = {
+  id: string;
+  label: string;
+  note?: string;
+  weak?: string;
+  fix?: string;
+  in?: State;
+  from?: Point;
+  x: number;
+  y: number;
+  w: number;
+  h?: number;
+};
+type Group = { id: string; label: string; in?: State; x: number; y: number; w: number; h: number };
+type Edge = { from: string; to: string; label?: string; in?: State; plain?: boolean; weak?: boolean };
+type Note = { text: string; x: number; y: number; tone: "weak" | "fix" };
+type Side = { title: string; summary: string };
+
+interface Props {
+  id: string;
+  before: Side;
+  after: Side;
+  width: number;
+  height: number;
+  boxes: Box[];
+  edges: Edge[];
+  groups?: Group[];
+  notes?: Note[];
+}
+const { id, before, after, width, height, boxes, edges, groups = [], notes = [] } = Astro.props;
+const BOTH: State[] = ["before", "after"];
+const LINE = 17;
+// Berkeley Mono and its fallbacks are 0.6em wide, so a 10.5px note is ~6.3 units a character.
+const noteWidth = (text: string) => text.length * 6.3;
+
+const items = new Map<string, { rect: Rect; from?: Point; states: State[] }>();
+for (const box of boxes) {
+  const moves = box.from && (box.from.x !== box.x || box.from.y !== box.y) ? box.from : undefined;
+  items.set(box.id, { rect: { ...box, h: box.h ?? BOX_HEIGHT }, from: moves, states: box.in ? [box.in] : BOTH });
+}
+for (const group of groups) items.set(group.id, { rect: group, states: group.in ? [group.in] : BOTH });
+
+const at = (key: string, state: State): Rect => {
+  const item = items.get(key);
+  if (!item) throw new Error(`ArchitectureCompare ${id}: unknown box ${key}`);
+  return state === "before" && item.from ? { ...item.rect, ...item.from } : item.rect;
+};
+
+// An edge exists where both its ends do. When an end moves, each state gets its
+// own route and the two cross-fade.
+type Line = Route & { edge: Edge; state?: State };
+const lines = edges.flatMap((edge): Line[] => {
+  const a = items.get(edge.from);
+  const b = items.get(edge.to);
+  if (!a || !b) throw new Error(`ArchitectureCompare ${id}: unknown box in ${edge.from} → ${edge.to}`);
+  const states = BOTH.filter((s) => a.states.includes(s) && b.states.includes(s) && (!edge.in || edge.in === s));
+  const split = states.length === 1 || a.from || b.from;
+  if (!split) return [{ edge, state: undefined, ...route(at(edge.from, "after"), at(edge.to, "after")) }];
+  return states.map((state) => ({ edge, state, ...route(at(edge.from, state), at(edge.to, state)) }));
+});
+
+const layout = (box: Box) => {
+  const h = box.h ?? BOX_HEIGHT;
+  const flag = box.weak || box.fix;
+  const rows = 1 + (box.note ? 1 : 0) + (flag ? 1 : 0);
+  const label = box.y + h / 2 + 4 - (LINE * (rows - 1)) / 2;
+  return { h, label, note: label + LINE, flag: label + LINE * (box.note ? 2 : 1) };
+};
+const tag = (state: State) => (state === "before" ? { text: "removed", tone: "weak" } : { text: "new", tone: "fix" });
+const toneState = (tone: "weak" | "fix"): State => (tone === "weak" ? "before" : "after");
+const svgId = `${id}-svg`;
+---
+
+<details class="case-architecture">
+  <summary>View architecture</summary>
+  <figure
+    class="arch-compare"
+    data-arch-compare
+    data-state="after"
+    data-before-title={before.title}
+    data-before-desc={before.summary}
+    data-after-title={after.title}
+    data-after-desc={after.summary}
+  >
+    <div class="arch-toggle" role="group" aria-label="Architecture" data-arch-toggle hidden>
+      <button type="button" data-arch-state="before" aria-pressed="false" aria-controls={svgId}>Before</button>
+      <button type="button" data-arch-state="after" aria-pressed="true" aria-controls={svgId}>After</button>
+    </div>
+    <div class="case-architecture-scroll">
+      <svg
+        id={svgId}
+        viewBox={`0 0 ${width} ${height}`}
+        width={width}
+        height={height}
+        role="img"
+        aria-labelledby={`${id}-title ${id}-desc`}
+      >
+        <title id={`${id}-title`}>{after.title}</title>
+        <desc id={`${id}-desc`}>{after.summary}</desc>
+        <defs>
+          {
+            ["", "-weak"].map((suffix) => (
+              <marker
+                id={`${id}-arrow${suffix}`}
+                class={`arch-arrow${suffix}`}
+                viewBox="0 0 8 8"
+                refX="7.5"
+                refY="4"
+                markerWidth="8"
+                markerHeight="8"
+                orient="auto-start-reverse"
+              >
+                <path d="M0 0.5 L7.5 4 L0 7.5" fill="none" stroke-width="1.2" />
+              </marker>
+            ))
+          }
+          <path id={`${id}-weak`} class="arch-mark" d="M-3 -3L3 3M3 -3L-3 3" />
+          <path id={`${id}-fix`} class="arch-mark" d="M-3.5 0L-1 2.5L3.5 -2.5" />
+        </defs>
+        {
+          groups.map((group) => {
+            const only = group.in && tag(group.in);
+            return (
+              <g class:list={["arch-group", only && `is-${only.tone}`]} data-in={group.in}>
+                <rect x={group.x} y={group.y} width={group.w} height={group.h} />
+                <text x={group.x + 10} y={group.y + 17}>
+                  {group.label}
+                </text>
+                {only && (
+                  <g class={`arch-flag is-${only.tone}`}>
+                    <use href={`#${id}-${only.tone}`} x={group.x + group.w - 14 - noteWidth(only.text) - 9} y={group.y + 13.5} />
+                    <text x={group.x + group.w - 10} y={group.y + 17} text-anchor="end">
+                      {only.text}
+                    </text>
+                  </g>
+                )}
+              </g>
+            );
+          })
+        }
+        {
+          lines.map(({ edge, state, d }) => (
+            <path
+              class:list={["arch-edge", edge.weak && "is-weak"]}
+              d={d}
+              data-in={state}
+              marker-end={edge.plain ? undefined : `url(#${id}-arrow${edge.weak ? "-weak" : ""})`}
+            />
+          ))
+        }
+        {
+          boxes.map((box) => {
+            const item = items.get(box.id)!;
+            const { h, label, note, flag } = layout(box);
+            const only = box.in && tag(box.in);
+            const dx = item.from ? item.from.x - box.x : 0;
+            const dy = item.from ? item.from.y - box.y : 0;
+            return (
+              <g
+                class:list={["arch-box", only && `is-${only.tone}`]}
+                data-in={box.in}
+                data-move={item.from ? "" : undefined}
+                style={item.from ? `--dx:${dx}px;--dy:${dy}px` : undefined}
+              >
+                <rect x={box.x} y={box.y} width={box.w} height={h} />
+                {box.weak && !box.in && <rect class="arch-ring is-weak" x={box.x} y={box.y} width={box.w} height={h} data-in="before" />}
+                {box.fix && !box.in && <rect class="arch-ring is-fix" x={box.x} y={box.y} width={box.w} height={h} data-in="after" />}
+                <text x={box.x + 10} y={label}>
+                  {box.label}
+                </text>
+                {box.note && (
+                  <text class="arch-note" x={box.x + 10} y={note}>
+                    {box.note}
+                  </text>
+                )}
+                {only && (
+                  <g class={`arch-flag is-${only.tone}`}>
+                    <use href={`#${id}-${only.tone}`} x={box.x + box.w - 14 - noteWidth(only.text) - 9} y={box.y + 13.5} />
+                    <text x={box.x + box.w - 10} y={box.y + 17} text-anchor="end">
+                      {only.text}
+                    </text>
+                  </g>
+                )}
+                {(
+                  [
+                    ["weak", box.weak],
+                    ["fix", box.fix],
+                  ] as const
+                ).map(([tone, text]) =>
+                  text ? (
+                    <g class={`arch-flag is-${tone}`} data-in={box.in ? undefined : toneState(tone)}>
+                      <use href={`#${id}-${tone}`} x={box.x + 15} y={flag - 3.5} />
+                      <text x={box.x + 25} y={flag}>
+                        {text}
+                      </text>
+                    </g>
+                  ) : null,
+                )}
+              </g>
+            );
+          })
+        }
+        {
+          notes.map((n) => (
+            <g class={`arch-flag is-${n.tone}`} data-in={toneState(n.tone)}>
+              <use href={`#${id}-${n.tone}`} x={n.x + 5} y={n.y - 3.5} />
+              <text x={n.x + 15} y={n.y}>
+                {n.text}
+              </text>
+            </g>
+          ))
+        }
+        {
+          lines.map(({ edge, state, lx, ly, start }) =>
+            edge.label ? (
+              <text
+                class:list={["arch-label", edge.weak && "is-weak"]}
+                x={lx}
+                y={ly}
+                text-anchor={start ? "start" : "middle"}
+                data-in={state}
+              >
+                {edge.label}
+              </text>
+            ) : null,
+          )
+        }
+      </svg>
+    </div>
+  </figure>
+</details>
+
+<script>
+  import { onPage } from "../scripts/page";
+
+  type State = "before" | "after";
+  // How long Before stays up when the reader first opens the disclosure.
+  const HOLD_MS = 1600;
+
+  onPage((signal) => {
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    for (const figure of document.querySelectorAll<HTMLElement>("[data-arch-compare]")) {
+      const details = figure.closest("details");
+      const title = figure.querySelector("svg > title");
+      const desc = figure.querySelector("svg > desc");
+      const toggle = figure.querySelector<HTMLElement>("[data-arch-toggle]");
+      const buttons = [...figure.querySelectorAll<HTMLButtonElement>("[data-arch-state]")];
+      if (!details || !title || !desc || !toggle) continue;
+      let timer = 0;
+      let played = false;
+
+      const show = (state: State, animate: boolean) => {
+        figure.classList.toggle("is-instant", !animate);
+        figure.dataset.state = state;
+        title.textContent = figure.dataset[`${state}Title`] ?? "";
+        desc.textContent = figure.dataset[`${state}Desc`] ?? "";
+        for (const button of buttons) button.setAttribute("aria-pressed", String(button.dataset.archState === state));
+        if (!animate) {
+          // Apply the state with transitions off, then turn them back on.
+          void figure.offsetWidth;
+          figure.classList.remove("is-instant");
+        }
+      };
+
+      for (const button of buttons) {
+        button.addEventListener(
+          "click",
+          () => {
+            window.clearTimeout(timer);
+            show(button.dataset.archState as State, !still.matches);
+          },
+          { signal },
+        );
+      }
+
+      // First open: Before for a moment, then the move to After.
+      details.addEventListener(
+        "toggle",
+        () => {
+          window.clearTimeout(timer);
+          if (!details.open || played || still.matches) return;
+          played = true;
+          show("before", false);
+          timer = window.setTimeout(() => show("after", true), HOLD_MS);
+        },
+        { signal },
+      );
+      signal.addEventListener("abort", () => window.clearTimeout(timer));
+      toggle.hidden = false;
+    }
+  });
+</script>
