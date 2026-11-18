@@ -106,7 +106,12 @@ on the personal Cloudflare account, and HTTP-to-HTTPS covers every subdomain.
 - **Hosted elsewhere (Railway, Vercel, …):** add a proxied `CNAME <name>` record
   pointing at the host's target, and add the domain in that host's settings.
 
-Current showcases: `nairaandchill.owenabel.com` (NAIRAA & Chill client preview).
+- **Client previews or anything not ready to be found:** add the host to the zone's
+  response-header rule "Keep client previews out of search engines"
+  (`http_response_headers_transform`), which sends `X-Robots-Tag: noindex, nofollow`.
+  Leave public showcases out of it so they can be indexed.
+
+Current showcases: `nairaandchill.owenabel.com` (NAIRAA & Chill client preview, noindex).
 
 ## CV and work content
 
