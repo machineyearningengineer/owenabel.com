@@ -113,9 +113,9 @@ const chapters = [
 
   <StoryChapter id="components" title="Components that never broke a page" level={3}>
     <div class="story-prose">
-      <p>Pages on jisc.ac.uk are built from Wagtail components, and building them was part of my job. Some of the old ones had to go. Delete a component that live pages still use, though, and those pages break.</p>
-      <p>So I worked with the content team using expand and contract. The new component shipped alongside the old one first. Pages moved across, with the content team doing the editorial side and me running the migrations. Only when nothing used the old component did it go.</p>
-      <p>No page broke along the way, and each change landed in time for the company's deadlines, Digifest, Jisc's festival, among them.</p>
+      <p>Pages on jisc.ac.uk are built from components in Wagtail, the CMS the content team edits in, and building those components was part of my job. Some old ones had to be replaced, often against a deadline like Digifest, Jisc's yearly festival. The catch: delete a component that live pages still use, and those pages break.</p>
+      <p>So each replacement went in three steps. First I shipped the new component next to the old one, so both worked. Then the content team moved pages across, doing the editorial side while I wrote the migrations that moved the stored content. Only when no page used the old component did I delete it.</p>
+      <p>Engineers call this expand and contract: grow to support both, then shrink back to one. No page broke along the way, and each change landed in time, Digifest included.</p>
     </div>
   </StoryChapter>
 

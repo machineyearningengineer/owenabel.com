@@ -33,6 +33,24 @@ sub-chapter), **what I learned** (two or three short paragraphs).
   "machineyearningengineer"). No jokes bolted on.
 - Interview take-homes in the Lab never name the company, anywhere visible.
 
+## Explain it, then name it
+
+Owen's interview reviews found the same two habits every time: explaining
+everything before the headline, and naming a technique as if the name explained
+it. Fix both on the page.
+
+- **Lead with the headline:** the decision or the result first, then how.
+- **Tell each piece of work as a short story** (situation, task, action,
+  result): what was in the way, what had to happen, what Owen did, and what
+  changed. Then what he learned, if it's worth saying.
+- **Describe what was done in plain steps before giving a technique its name.**
+  "First I shipped the new component next to the old one… Engineers call this
+  expand and contract" works. "I used expand and contract" on its own does
+  not. A reader who doesn't know the term should lose nothing.
+- **The same goes for tools and acronyms** (nDCG, trigram matching, SKIP
+  LOCKED, an outbox): say what it does for the reader in a clause. A list of
+  tool names is not an explanation.
+
 ## Patterns that read as generated
 
 Follow Wikipedia's [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing).

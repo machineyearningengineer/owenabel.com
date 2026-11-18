@@ -5,6 +5,9 @@
 // MP4 comes first: for these screen recordings H.264 was usually the smaller file.
 // Muted and looped, it plays only while on screen. With reduced motion it
 // stays on the poster unless the reader presses Play; anyone can pause.
+// The line under it is a native range input: drag, click or use the arrow
+// keys to scrub. Scrubbing pauses the clip and resumes it if it was playing.
+// Seeking costs 10–60 ms on these files, so they need no extra keyframes.
 import { liveSources, RECORDED_ON } from "../data/clip-sources";
 
 interface Props {
@@ -37,6 +40,17 @@ const live = local ? undefined : liveSources[project];
     </video>
     <button type="button" class="journey-toggle" data-journey-toggle hidden>Play</button>
   </div>
+  <input
+    type="range"
+    class="journey-scrub"
+    min="0"
+    max="1000"
+    step="1"
+    value="0"
+    aria-label={`Scrub through the clip: ${caption}`}
+    data-journey-scrub
+    hidden
+  />
   <figcaption>
     {caption}
     <span class="clip-source">
@@ -89,6 +103,71 @@ const live = local ? undefined : liveSources[project];
       },
       { threshold: 0.45 },
     );
+
+    // ---- Scrubber ----
+    const scrubFor = (video: HTMLVideoElement) =>
+      video.closest(".journey-clip")?.querySelector<HTMLInputElement>("[data-journey-scrub]");
+    const paint = (video: HTMLVideoElement) => {
+      const scrub = scrubFor(video);
+      if (!scrub || !video.duration) return;
+      const value = Math.round((video.currentTime / video.duration) * 1000);
+      scrub.value = String(value);
+      scrub.style.setProperty("--played", `${value / 10}%`);
+    };
+    let frame = 0;
+    const tick = () => {
+      frame = 0;
+      const playing = videos.filter((video) => !video.paused);
+      playing.forEach(paint);
+      if (playing.length) frame = requestAnimationFrame(tick);
+    };
+    const follow = () => {
+      if (!frame) frame = requestAnimationFrame(tick);
+    };
+
+    for (const video of videos) {
+      const scrub = scrubFor(video);
+      if (!scrub) continue;
+      let resume = false;
+      let gesture = false;
+      const seek = () => {
+        if (!video.duration) return;
+        video.currentTime = (Number(scrub.value) / 1000) * video.duration;
+        scrub.style.setProperty("--played", `${Number(scrub.value) / 10}%`);
+      };
+      // The clip may not have loaded yet (preload="none"): start loading on first touch.
+      const warm = () => {
+        if (video.preload !== "auto") video.preload = "auto";
+        if (video.readyState === 0) video.load();
+      };
+      scrub.addEventListener("pointerdown", warm, { signal });
+      scrub.addEventListener("focus", warm, { signal });
+      scrub.addEventListener(
+        "input",
+        () => {
+          if (!gesture) {
+            gesture = true;
+            resume = !video.paused;
+            video.pause();
+          }
+          if (video.readyState >= 1) seek();
+          else video.addEventListener("loadedmetadata", seek, { once: true, signal });
+        },
+        { signal },
+      );
+      scrub.addEventListener(
+        "change",
+        () => {
+          gesture = false;
+          if (resume) video.play().catch(() => {});
+        },
+        { signal },
+      );
+      video.addEventListener("seeked", () => paint(video), { signal });
+      video.addEventListener("play", follow, { signal });
+      scrub.hidden = false;
+    }
+    signal.addEventListener("abort", () => cancelAnimationFrame(frame));
 
     for (const video of videos) {
       const toggle = toggleFor(video);

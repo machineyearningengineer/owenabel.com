@@ -2250,6 +2250,10 @@ html[data-intro="play"] body {
   line-height: 1.4;
 }
 
+.story-rail-share {
+  padding-top: 22px;
+}
+
 .story-rail-label {
   margin: 0;
   color: var(--muted);
@@ -2534,7 +2538,7 @@ html[data-intro="play"] body {
   text-transform: uppercase;
 }
 
-.story-share ul {
+.share-links {
   display: grid;
   gap: 2px;
   margin: 0;
@@ -2542,14 +2546,14 @@ html[data-intro="play"] body {
   list-style: none;
 }
 
-.story-share li {
+.share-links li {
   display: flex;
   gap: 6px;
   margin-left: 4px;
 }
 
-.story-share a,
-.story-share button {
+.share-links a,
+.share-links button {
   display: block;
   border: 0;
   padding: 3px 0 3px 8px;
@@ -2566,14 +2570,14 @@ html[data-intro="play"] body {
     box-shadow 160ms ease;
 }
 
-.story-share a:hover,
-.story-share a:focus-visible,
-.story-share button:hover,
-.story-share button:focus-visible {
+.share-links a:hover,
+.share-links a:focus-visible,
+.share-links button:hover,
+.share-links button:focus-visible {
   color: var(--ink);
 }
 
-.story-share button[data-copied] {
+.share-links button[data-copied] {
   color: var(--accent);
   box-shadow: inset 2px 0 var(--accent);
 }
@@ -2666,6 +2670,14 @@ html[data-intro="play"] body {
   border-collapse: collapse;
   border-top: 1px solid var(--rule);
   font-variant-numeric: tabular-nums;
+}
+
+.story-figures caption {
+  caption-side: top;
+  padding-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: left;
 }
 
 .story-figures th,
@@ -2780,6 +2792,98 @@ html[data-intro="play"] body {
 .journey-toggle:focus-visible {
   outline: 1px solid var(--accent-outline);
   outline-offset: -1px;
+}
+
+/* Scrubber: a hairline under the clip that fills as it plays; the knob shows on hover or focus. */
+.journey-scrub {
+  --played: 0%;
+  display: block;
+  width: 100%;
+  height: 14px;
+  margin: 2px 0 0;
+  padding: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.journey-scrub[hidden] {
+  display: none;
+}
+
+.journey-scrub::-webkit-slider-runnable-track {
+  height: 2px;
+  background:
+    linear-gradient(var(--ink), var(--ink)) 0 0 / var(--played) 100% no-repeat,
+    var(--faint);
+}
+
+.journey-scrub::-moz-range-track {
+  height: 2px;
+  background: var(--faint);
+}
+
+.journey-scrub::-moz-range-progress {
+  height: 2px;
+  background: var(--ink);
+}
+
+.journey-scrub::-webkit-slider-thumb {
+  width: 10px;
+  height: 10px;
+  margin-top: -4px;
+  border: 0;
+  border-radius: 50%;
+  appearance: none;
+  background: var(--ink);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.journey-scrub::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.journey-clip:hover .journey-scrub::-webkit-slider-thumb,
+.journey-scrub:focus-visible::-webkit-slider-thumb,
+.journey-scrub:active::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.journey-clip:hover .journey-scrub::-moz-range-thumb,
+.journey-scrub:focus-visible::-moz-range-thumb,
+.journey-scrub:active::-moz-range-thumb {
+  opacity: 1;
+}
+
+.journey-scrub:focus-visible {
+  outline: 1px solid var(--accent-outline);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .journey-scrub {
+    height: 28px;
+  }
+
+  .journey-scrub::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    margin-top: -7px;
+    opacity: 1;
+  }
+
+  .journey-scrub::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    opacity: 1;
+  }
 }
 
 .journey-clip figcaption {
@@ -3064,8 +3168,8 @@ html[data-intro="play"] body {
   .story-tree-sub,
   .story-tree-sub > ol,
   .story-tree-more,
-  .story-share a,
-  .story-share button,
+  .share-links a,
+  .share-links button,
   .plate {
     transition: none !important;
   }

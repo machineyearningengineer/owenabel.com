@@ -8,6 +8,7 @@
 import BaseLayout from "./BaseLayout.astro";
 import CaseStudyInteractions from "../components/CaseStudyInteractions.astro";
 import RelatedCaseStudies from "../components/RelatedCaseStudies.astro";
+import ShareLinks from "../components/ShareLinks.astro";
 import { exhibitMark, getCaseStudy } from "../data/work";
 import { storyMarkdown } from "../lib/story-markdown";
 
@@ -150,6 +151,10 @@ const markdownJson = JSON.stringify(markdown).replace(/</g, "\\u003c");
           <span><span data-progress-value>0%</span> read · {minutes} min</span>
         </div>
         {hasSteps && <div class="story-keys-dock" data-keys-dock />}
+        <div class="story-rail-share">
+          <p class="story-rail-label">Share</p>
+          <ShareLinks share={share} canonical={canonical} />
+        </div>
       </aside>
 
       <div class="story-main">
@@ -254,26 +259,7 @@ const markdownJson = JSON.stringify(markdown).replace(/</g, "\\u003c");
 
         <section class="story-share" aria-labelledby="story-share-title" data-share>
           <h2 id="story-share-title">Share</h2>
-          <ul>
-            {
-              share.map((item) => (
-                <li>
-                  <span class="story-branch" aria-hidden="true" />
-                  <a href={item.href} target={item.href.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">
-                    {item.label}
-                  </a>
-                </li>
-              ))
-            }
-            <li>
-              <span class="story-branch" aria-hidden="true" />
-              <button type="button" data-copy="url" data-copy-value={canonical}>Copy URL</button>
-            </li>
-            <li>
-              <span class="story-branch" aria-hidden="true" />
-              <button type="button" data-copy="markdown">Copy markdown</button>
-            </li>
-          </ul>
+          <ShareLinks share={share} canonical={canonical} />
           <p class="visually-hidden" aria-live="polite" data-copy-status></p>
           <script is:inline type="application/json" data-story-markdown set:html={markdownJson} />
         </section>

@@ -1,8 +1,9 @@
 <script>
   // Reading controls for story pages.
-  // - Threads: [data-thread-control] buttons, keys 1/2/3 and ←/→ select a step;
-  //   every [data-thread] node with that key is highlighted. Buttons are grouped
-  //   per chapter ([data-thread-buttons]); the bar shows the group being read.
+  // - Threads: [data-thread-control] buttons, number keys 1–9 and ←/→ jump to a
+  //   step of the "How it works" journey from anywhere on the page; every
+  //   [data-thread] node with that key is highlighted. Buttons are grouped per
+  //   chapter ([data-thread-buttons]); the bar shows the group being read.
   // - Journey steps follow the scroll: the step on screen becomes the thread.
   // - ↑/↓ move between chapters ([data-case-section]); Escape clears.
   // - The chapter tree marks where you are and opens only that chapter's
@@ -54,21 +55,26 @@
       });
     };
 
-    // A step in the chapter being read, if the chosen thread has one there.
-    const stepInView = (key?: string) => {
-      const section = groupSections.find((node) => node.dataset.threadGroup === caseNote.dataset.activeGroup && node.contains(document.activeElement ?? null))
-        ?? groupSections.filter((node) => node.dataset.threadGroup === caseNote.dataset.activeGroup && top(node) <= anchorY()).pop();
+    // The step to jump to: in the chapter being read if it has one, otherwise the
+    // first chapter of this group, so a number or arrow works from anywhere.
+    const stepFor = (key?: string) => {
+      const inGroup = groupSections.filter((node) => node.dataset.threadGroup === caseNote.dataset.activeGroup);
+      const section =
+        inGroup.find((node) => node.contains(document.activeElement ?? null)) ??
+        inGroup.filter((node) => top(node) <= anchorY()).pop() ??
+        inGroup[0];
       return section?.querySelector<HTMLElement>(`[data-journey-step="${key}"]`);
     };
 
+    // While a jump scrolls, the scroll-follow below must not re-pick the steps it passes.
     let followUntil = 0;
     const selectThread = (key?: string) => {
       applyThread(key);
-      const step = key ? stepInView(key) : undefined;
-      if (step) {
-        followUntil = performance.now() + 900;
-        step.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" });
-      }
+      const step = key ? stepFor(key) : undefined;
+      if (!step) return;
+      followUntil = performance.now() + 1600;
+      window.addEventListener("scrollend", () => (followUntil = 0), { once: true, signal });
+      step.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" });
     };
 
     const moveThread = (amount: number) => {
@@ -80,9 +86,7 @@
     };
 
     controls.forEach((control) => {
-      control.addEventListener("click", () =>
-        caseNote.dataset.activeThread === control.dataset.threadControl ? applyThread() : selectThread(control.dataset.threadControl),
-      );
+      control.addEventListener("click", () => selectThread(control.dataset.threadControl));
       control.addEventListener("keydown", (event) => {
         if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
         event.preventDefault();

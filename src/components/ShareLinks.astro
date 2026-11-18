@@ -1,0 +1,30 @@
+---
+// The share list, drawn as tree branches: in the desktop rail and at the end
+// of a story. The copy buttons are wired up by CaseStudyInteractions.
+interface Props {
+  share: { label: string; href: string }[];
+  canonical: string;
+}
+const { share, canonical } = Astro.props;
+---
+
+<ul class="share-links">
+  {
+    share.map((item) => (
+      <li>
+        <span class="story-branch" aria-hidden="true" />
+        <a href={item.href} target={item.href.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">
+          {item.label}
+        </a>
+      </li>
+    ))
+  }
+  <li>
+    <span class="story-branch" aria-hidden="true" />
+    <button type="button" data-copy="url" data-copy-value={canonical}>Copy URL</button>
+  </li>
+  <li>
+    <span class="story-branch" aria-hidden="true" />
+    <button type="button" data-copy="markdown">Copy markdown</button>
+  </li>
+</ul>

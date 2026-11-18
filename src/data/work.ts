@@ -37,19 +37,19 @@ export const work: WorkItem[] = [
     detail:
       "Search, maps, and saved routes that help people turn the Fête de la Musique programme into a night out.",
     featuredDetail:
-      "Event discovery and route planning, with 54,295 page views recorded in June 2026.",
+      "Event discovery and route planning: 2,601 sign-ups and about 10,900 browsers in the 2026 season.",
     caseNotes: [
       {
         label: "Fête Finder",
         href: "/work/fete-finder",
         summary:
-          "Fête de la Musique fills Paris with free music for one night, and Fête Finder helps people find their night, plan a route and keep it when the signal drops. The June 2026 recap counted 54,295 page views.",
+          "Fête de la Musique fills Paris with free music for one night, and Fête Finder helps people find their night, plan a route and keep it when the signal drops. In June 2026 about 10,900 browsers used it, and 2,601 people had signed up.",
         role: "Product Engineer",
         years: "2025–26",
         team: { label: "Client", value: "Out Of Office Collective" },
         stage: "Live, 2026 archive",
         stack: ["Next.js", "Postgres", "MapLibre", "Railway"],
-        fact: "54,295 page views, June 2026",
+        fact: "2,601 sign-ups, about 10,900 browsers in June 2026",
         live: {
           label: "fete.outofofficecollective.co.uk",
           href: "https://fete.outofofficecollective.co.uk",
@@ -155,7 +155,7 @@ export const work: WorkItem[] = [
         team: { label: "Team", value: "Jisc · Sherpa" },
         stage: "Live service",
         stack: ["Next.js", "React", "PostgreSQL", "Directus"],
-        fact: "Elasticsearch retired for PostgreSQL",
+        fact: "Data quality above 90%, Elasticsearch retired",
         live: {
           label: "openpolicyfinder.jisc.ac.uk",
           href: "https://openpolicyfinder.jisc.ac.uk",
