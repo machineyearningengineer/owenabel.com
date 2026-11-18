@@ -2,7 +2,7 @@
 import StoryLayout from "../../layouts/StoryLayout.astro";
 import StoryChapter from "../../components/StoryChapter.astro";
 import CaseJourney from "../../components/CaseJourney.astro";
-import ArchitectureDiagram from "../../components/ArchitectureDiagram.astro";
+import ArchitectureCompare from "../../components/ArchitectureCompare.astro";
 
 const steps = [
   {
@@ -40,6 +40,7 @@ const chapters = [
     label: "Under the hood",
     children: [
       { id: "fargate", label: "Fargate and previews" },
+      { id: "registry", label: "A private npm registry" },
       { id: "components", label: "Components that never broke a page" },
     ],
   },
@@ -76,39 +77,73 @@ const chapters = [
 
   <StoryChapter id="under-the-hood" title="Under the hood" part>
     <div class="story-prose">
-      <p>For engineers: the hosting, and how the components changed under live pages.</p>
+      <p>For engineers: the hosting and release path, a fix for shared builds, and how the components changed under live pages.</p>
     </div>
   </StoryChapter>
 
   <StoryChapter id="fargate" title="Fargate and previews" level={3}>
     <div class="story-prose">
-      <p>The move put both halves of the site, Wagtail for content and Next.js for the public pages, on ECS Fargate, with the database on RDS.</p>
-      <p>Changes could be reviewed in Terraform-managed preview environments, which replaced a staging site few people used. Playwright tests checked user-facing behaviour as part of release.</p>
-      <p>One smaller thing I'm fond of: when Jisc's shared Font Awesome licence limit started blocking deployments, I set up a cache and a local npm registry that several teams used.</p>
+      <p>The move to Fargate stopped the outages. From the migration until I left in February 2026, the site had no more downtime.</p>
+      <p>Before it, Wagtail and Next.js ran in containers on EC2 servers that kept running out of memory. Long migrations competed with the live site for the same resources. The network had the wrong VPC, gateway and firewall settings, and DDoS-like traffic piled on top.</p>
+      <p>The site went down at least once a day. Someone reset it by hand in the AWS console, or the budget went up so it could limp on. By my estimate, uptime was around 60–70%.</p>
+      <p>I owned the cost appraisal: the options, what each would cost and what it would fix. We moved both halves of the site, Wagtail for content and Next.js for the public pages, into containers that AWS runs and scales for us. There is no server of ours left to fill up. That service is ECS Fargate.</p>
+      <p>The database moved to RDS, AWS's managed database. A status page polls health checks on the front end and the API, and a failure pages whoever is on call.</p>
+      <p>The release path changed too. Changes used to be checked on a staging site that few people used. Now each pull request gets its own temporary copy of the site with only that change in it, and QA and reviewers try the change there before it merges.</p>
+      <p>Engineers call these ephemeral preview environments. Terraform, which builds cloud resources from files in the repository, sets each one up the same way.</p>
+      <p>Playwright tests, which click through the site in a real browser, ran as part of each release. Testing got easier, and the staging site was retired, along with what it cost to run.</p>
     </div>
-    <ArchitectureDiagram
+    <ArchitectureCompare
       id="arch-jisc"
-      title="The Jisc website after the move"
-      summary="Wagtail manages content and Next.js presents it, both on AWS ECS Fargate, with the database on RDS. Changes are reviewed in Terraform-managed preview environments and checked by Playwright before release to jisc.ac.uk."
+      before={{
+        title: "The Jisc website before the move",
+        summary:
+          "Before: Wagtail and Next.js ran in containers on EC2, next to a staging site few people used and leftover environments that were never torn down because Terraform's record of them had drifted. The containers ran out of memory, long migrations competed for resources, and the VPC, gateway and firewall settings were wrong. jisc.ac.uk went down at least daily.",
+      }}
+      after={{
+        title: "The Jisc website after the move",
+        summary:
+          "After: Wagtail manages content and Next.js presents it, both on AWS ECS Fargate, with the database on RDS. Each pull request gets its own Terraform-managed preview in place of the staging site, and Playwright checks run as part of release. A status page polls health checks. jisc.ac.uk had no downtime after the move.",
+      }}
       width={720}
-      height={290}
-      groups={[{ id: "fargate", label: "AWS ECS Fargate", x: 20, y: 20, w: 440, h: 120 }]}
+      height={396}
+      groups={[
+        { id: "ec2", label: "EC2 containers", in: "before", x: 20, y: 20, w: 290, h: 356 },
+        { id: "fargate", label: "AWS ECS Fargate", in: "after", x: 20, y: 20, w: 450, h: 104 },
+      ]}
       boxes={[
-        { id: "wagtail", label: "Wagtail", note: "editors manage content", x: 40, y: 60, w: 190 },
-        { id: "next", label: "Next.js", note: "public pages", x: 260, y: 60, w: 180 },
-        { id: "site", label: "jisc.ac.uk", x: 530, y: 60, w: 170 },
-        { id: "rds", label: "RDS", note: "database", x: 40, y: 210, w: 190 },
-        { id: "terraform", label: "Preview env", note: "Terraform-managed", x: 290, y: 210, w: 170 },
-        { id: "playwright", label: "Playwright", note: "release checks", x: 530, y: 210, w: 170 },
+        { id: "wagtail", label: "Wagtail", note: "editors manage content", x: 40, y: 52, w: 200 },
+        { id: "next", label: "Next.js", note: "public pages", x: 260, y: 52, w: 200, from: { x: 40, y: 116 } },
+        { id: "site", label: "jisc.ac.uk", weak: "down at least daily", fix: "no downtime after the move", x: 500, y: 52, w: 200, from: { x: 500, y: 116 } },
+        { id: "staging", label: "Staging site", weak: "few people used it", in: "before", x: 40, y: 180, w: 250 },
+        { id: "leftover", label: "Leftover environments", weak: "not torn down: state drifted", in: "before", x: 40, y: 244, w: 250 },
+        { id: "rds", label: "RDS", note: "database", in: "after", x: 40, y: 164, w: 200 },
+        { id: "status", label: "Status page", note: "polls health checks", in: "after", x: 500, y: 164, w: 200 },
+        { id: "preview", label: "Preview per PR", note: "Terraform-managed", fix: "replaced staging", in: "after", x: 40, y: 272, w: 200, h: 70 },
+        { id: "playwright", label: "Playwright", note: "release checks", in: "after", x: 280, y: 272, w: 190, h: 70 },
+      ]}
+      notes={[
+        { text: "ran out of memory", tone: "weak", x: 34, y: 322 },
+        { text: "migrations competed for resources", tone: "weak", x: 34, y: 342 },
+        { text: "VPC, gateway, firewall misconfigured", tone: "weak", x: 34, y: 362 },
       ]}
       edges={[
         { from: "wagtail", to: "next" },
         { from: "next", to: "site" },
         { from: "rds", to: "fargate", plain: true },
-        { from: "terraform", to: "playwright" },
-        { from: "playwright", to: "site", label: "release" },
+        { from: "status", to: "site", label: "health checks" },
+        { from: "preview", to: "playwright" },
+        { from: "playwright", to: "fargate", label: "release" },
       ]}
     />
+  </StoryChapter>
+
+  <StoryChapter id="registry" title="A private npm registry" level={3}>
+    <div class="story-prose">
+      <p>One smaller thing I'm fond of: I took a shared licence limit out of several teams' builds.</p>
+      <p>Jisc's websites use Font Awesome for icons, and the licensed usage was shared across Jisc teams. Every website build downloaded the icon packages from Font Awesome again. When the shared usage ran out early, deployments were blocked.</p>
+      <p>So I set up a cache of the packages our website builds used, and builds installed from it instead. That cache is a private npm registry: our own store of JavaScript packages, which builds fetch from in place of the public one.</p>
+      <p>I rolled it out to several teams. Their builds stopped downloading from Font Awesome, so the shared limit was no longer something a deployment could run into.</p>
+    </div>
   </StoryChapter>
 
   <StoryChapter id="components" title="Components that never broke a page" level={3}>

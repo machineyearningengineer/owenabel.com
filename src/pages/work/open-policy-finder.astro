@@ -2,6 +2,7 @@
 import StoryLayout from "../../layouts/StoryLayout.astro";
 import StoryChapter from "../../components/StoryChapter.astro";
 import CaseJourney from "../../components/CaseJourney.astro";
+import ArchitectureCompare from "../../components/ArchitectureCompare.astro";
 
 const steps = [
   {
@@ -90,6 +91,38 @@ const chapters = [
       <p>Elasticsearch wasn't meaningfully faster for this workload, and as I put it at the time, we didn't have a write problem. PostgreSQL met the product's real scale, so the search moved into it, with a simple cache in front for repeated queries, and the sync went away.</p>
       <p>The search still has to cope with imperfect queries and useful filters. It just does it in the database that already holds the truth.</p>
     </div>
+    <ArchitectureCompare
+      id="arch-opf"
+      before={{
+        title: "Open Policy Finder search before",
+        summary:
+          "Before: records from many sources were imported into PostgreSQL, then copied into Elasticsearch every day for fuzzy matching and ranking, and the Next.js search pages read from Elasticsearch. Keeping the two in step with that daily sync ate developer time.",
+      }}
+      after={{
+        title: "Open Policy Finder search after",
+        summary:
+          "After: Elasticsearch is gone, and the daily sync with it. PostgreSQL holds the records and answers the search, matching normalised names by trigram similarity so a misspelt name still lands, and a simple cache in front answers repeated queries for the Next.js pages. About once a month, gaps in the records go to the data stewards, who fix them at the source so the next import comes in cleaner.",
+      }}
+      width={720}
+      height={240}
+      boxes={[
+        { id: "sources", label: "Data sources", note: "many shapes", x: 20, y: 20, w: 120, h: 70 },
+        { id: "pg", label: "PostgreSQL", note: "the records", fix: "trigram on normalised names", x: 195, y: 20, w: 205, h: 70 },
+        { id: "cache", label: "Cache", note: "repeated queries", in: "after", x: 440, y: 20, w: 120, h: 70 },
+        { id: "next", label: "Next.js", note: "search pages", x: 595, y: 20, w: 115, h: 70 },
+        { id: "es", label: "Elasticsearch", note: "fuzzy match, ranking", weak: "ate developer time", in: "before", x: 330, y: 148, w: 230, h: 70 },
+        { id: "stewards", label: "Steward loop", note: "about once a month", fix: "stewards fix the source", in: "after", x: 20, y: 148, w: 250, h: 70 },
+      ]}
+      edges={[
+        { from: "sources", to: "pg", label: "import" },
+        { from: "pg", to: "es", label: "daily sync", weak: true },
+        { from: "es", to: "next" },
+        { from: "pg", to: "cache" },
+        { from: "cache", to: "next" },
+        { from: "pg", to: "stewards", label: "gaps" },
+        { from: "stewards", to: "sources", label: "fixes" },
+      ]}
+    />
   </StoryChapter>
 
   <StoryChapter id="queries" title="Caching and queries" level={3}>
