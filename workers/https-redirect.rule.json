@@ -1,7 +1,7 @@
 {
   "ref": "portfolio_force_https",
-  "description": "Preserve portfolio HTTPS redirects after Pages to Workers migration",
-  "expression": "(http.host in {\"owenabel.com\" \"www.owenabel.com\"} and not ssl)",
+  "description": "Redirect HTTP to HTTPS on owenabel.com and every subdomain",
+  "expression": "((http.host eq \"owenabel.com\" or ends_with(http.host, \".owenabel.com\")) and not ssl)",
   "action": "redirect",
   "action_parameters": {
     "from_value": {
