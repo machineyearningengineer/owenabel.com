@@ -5,7 +5,12 @@
   //   per chapter ([data-thread-buttons]); the bar shows the group being read.
   // - Journey steps follow the scroll: the step on screen becomes the thread.
   // - ↑/↓ move between chapters ([data-case-section]); Escape clears.
-  // - The chapter tree marks where you are, and the progress bar fills.
+  // - The chapter tree marks where you are and opens only that chapter's
+  //   sub-chapters; the progress bar fills.
+  // - Desktop: the keys strip docks under the tree once its place under the
+  //   hero scrolls away, and travels back when you return (FLIP, transform
+  //   and opacity only; a crossfade with reduced motion).
+  // - Share: copy the canonical URL or the build-time Markdown of the story.
   import { onPage } from "../scripts/page";
 
   onPage((signal) => {
@@ -23,14 +28,19 @@
     const mobileTree = caseNote.querySelector<HTMLDetailsElement>("[data-mobile-tree]");
     const progressBars = [...caseNote.querySelectorAll<HTMLElement>("[data-progress-bar]")];
     const progressValues = [...caseNote.querySelectorAll<HTMLElement>("[data-progress-value]")];
+    const hints = [...caseNote.querySelectorAll<HTMLElement>("[data-thread-hint]")];
+    const tree = caseNote.querySelector<HTMLElement>("[data-story-tree]");
+    const subTrees = [...caseNote.querySelectorAll<HTMLElement>("[data-tree-sub]")];
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const anchorY = () => window.scrollY + window.innerHeight * 0.3;
     const top = (node: HTMLElement) => node.getBoundingClientRect().top + window.scrollY;
 
     // ---- Threads ----
+    // The phone bar and the desktop strip both carry the step chips; use the one on screen.
     const groupControls = () => {
-      const set = buttonSets.find((node) => node.dataset.threadButtons === caseNote.dataset.activeGroup);
+      const sets = buttonSets.filter((node) => node.dataset.threadButtons === caseNote.dataset.activeGroup);
+      const set = sets.find((node) => node.getClientRects().length > 0) ?? sets[0];
       return set ? [...set.querySelectorAll<HTMLButtonElement>("[data-thread-control]")] : controls;
     };
 
@@ -119,15 +129,89 @@
       }),
     );
 
-    // ---- Scroll: tree, group, step, progress ----
+    // ---- Desktop keys strip: under the hero, or docked under the tree ----
+    const strip = caseNote.querySelector<HTMLElement>("[data-keys]");
+    const slot = caseNote.querySelector<HTMLElement>("[data-keys-slot]");
+    const dock = caseNote.querySelector<HTMLElement>("[data-keys-dock]");
+    const desktop = window.matchMedia("(min-width: 1000px)");
+    let ghost: HTMLElement | undefined;
+
+    const place = (docked: boolean, animate: boolean) => {
+      if (!strip || !slot || !dock || strip.hasAttribute("data-docked") === docked) return;
+      const focused = strip.contains(document.activeElement) ? (document.activeElement as HTMLElement) : null;
+      const first = strip.getBoundingClientRect();
+      ghost?.remove();
+      ghost = animate && !reduceMotion.matches ? (strip.cloneNode(true) as HTMLElement) : undefined;
+      // Hold the strip's place under the hero, so the prose never moves.
+      if (docked) slot.style.minHeight = `${slot.offsetHeight}px`;
+      (docked ? dock : slot).append(strip);
+      strip.toggleAttribute("data-docked", docked);
+      if (!docked) slot.style.minHeight = "";
+      focused?.focus({ preventScroll: true });
+      if (!animate) return;
+      if (!ghost) {
+        strip.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "ease-out" });
+        return;
+      }
+      // FLIP: the old strip travels and shrinks into the new spot as it fades;
+      // the new one sets off from the old spot and fades in. Transform and opacity only.
+      const last = strip.getBoundingClientRect();
+      const dx = last.left - first.left;
+      const dy = last.top - first.top;
+      const timing = { duration: 460, easing: "cubic-bezier(0.16, 1, 0.3, 1)" };
+      ghost.removeAttribute("data-keys");
+      ghost.querySelectorAll("[data-thread-control], [data-thread-buttons], [data-thread-hint]").forEach((node) => {
+        node.removeAttribute("data-thread-control");
+        node.removeAttribute("data-thread-buttons");
+        node.removeAttribute("data-thread-hint");
+      });
+      ghost.setAttribute("aria-hidden", "true");
+      ghost.inert = true;
+      Object.assign(ghost.style, {
+        position: "fixed",
+        left: `${first.left}px`,
+        top: `${first.top}px`,
+        width: `${first.width}px`,
+        margin: "0",
+        zIndex: "5",
+        pointerEvents: "none",
+        transformOrigin: "top left",
+      });
+      caseNote.append(ghost);
+      const leaving = ghost;
+      leaving
+        .animate(
+          [
+            { transform: "none", opacity: 1 },
+            { transform: `translate(${dx}px, ${dy}px) scale(${last.width / first.width})`, opacity: 0 },
+          ],
+          timing,
+        )
+        .finished.catch(() => {})
+        .finally(() => leaving.remove());
+      strip.animate(
+        [
+          { transformOrigin: "top left", transform: `translate(${-dx}px, ${-dy}px) scale(${Math.min(1.25, first.height / last.height)})`, opacity: 0 },
+          { transformOrigin: "top left", transform: "none", opacity: 1 },
+        ],
+        timing,
+      );
+    };
+
+    // ---- Scroll: tree, group, step, keys strip, progress ----
     const chapters = treeLinks
       .map((link) => document.getElementById(link.dataset.treeLink ?? ""))
       .filter((node, index, list): node is HTMLElement => Boolean(node) && list.indexOf(node) === index);
 
     let frame = 0;
+    let ready = false;
     const update = () => {
       frame = 0;
       const y = anchorY();
+
+      // Dock the keys strip once its place under the hero is off the top (checked
+      // every frame, so a jump past it, like a contents link, docks it too).
+      if (slot) place(desktop.matches && slot.getBoundingClientRect().bottom < 0, ready);
 
       const chapter = chapters.filter((node) => top(node) <= y).pop() ?? chapters[0];
       treeLinks.forEach((link) => {
@@ -139,13 +223,21 @@
           !here && treeLinks.some((other) => other.dataset.treeLink === chapter?.id && other.dataset.treeParent === link.dataset.treeLink),
         );
       });
-      const label = treeLinks.find((link) => link.dataset.treeLink === chapter?.id)?.textContent?.trim();
+      const activeLink = treeLinks.find((link) => link.dataset.treeLink === chapter?.id);
+      const openId = activeLink?.dataset.treeParent ?? chapter?.id;
+      subTrees.forEach((sub) => sub.toggleAttribute("data-open", sub.dataset.treeSub === openId));
+      const label = [...(activeLink?.childNodes ?? [])]
+        .filter((node) => !(node instanceof Element && node.classList.contains("story-tree-more")))
+        .map((node) => node.textContent)
+        .join("")
+        .trim();
       if (currentChapter && label) currentChapter.textContent = label;
 
       const group = groupSections.filter((node) => top(node) <= y).pop()?.dataset.threadGroup ?? buttonSets[0]?.dataset.threadButtons;
       if (group && group !== caseNote.dataset.activeGroup) {
         caseNote.dataset.activeGroup = group;
         buttonSets.forEach((set) => (set.hidden = set.dataset.threadButtons !== group));
+        hints.forEach((hint) => (hint.hidden = hint.dataset.threadHint !== group));
         const keys = groupControls().map((control) => control.dataset.threadControl);
         if (!keys.includes(caseNote.dataset.activeThread)) applyThread(keys[0]);
       }
@@ -172,7 +264,41 @@
     window.addEventListener("resize", schedule, { signal });
     signal.addEventListener("abort", () => cancelAnimationFrame(frame));
     applyThread(caseNote.dataset.activeThread || undefined);
+    // Collapse the tree without animating the first layout.
+    tree?.setAttribute("data-collapsible", "");
+    tree?.setAttribute("data-settling", "");
     update();
+    ready = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => tree?.removeAttribute("data-settling")));
+
+    desktop.addEventListener("change", () => place(desktop.matches && Boolean(slot && slot.getBoundingClientRect().bottom < 0), false), { signal });
+    signal.addEventListener("abort", () => ghost?.remove());
+
+    // ---- Share ----
+    const status = caseNote.querySelector<HTMLElement>("[data-copy-status]");
+    const storyMarkdown = () => {
+      const source = caseNote.querySelector("[data-story-markdown]")?.textContent;
+      return source ? (JSON.parse(source) as string) : "";
+    };
+    caseNote.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((button) => {
+      const label = button.textContent ?? "";
+      let timer = 0;
+      button.addEventListener("click", async () => {
+        const value = button.dataset.copy === "markdown" ? storyMarkdown() : (button.dataset.copyValue ?? location.href);
+        const copied = await navigator.clipboard?.writeText(value).then(
+          () => true,
+          () => false,
+        );
+        button.textContent = copied ? "Copied" : "Copy failed";
+        button.toggleAttribute("data-copied", copied);
+        if (status) status.textContent = copied ? `${label}: copied` : "Copy failed";
+        clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          button.textContent = label;
+          button.removeAttribute("data-copied");
+        }, 1600);
+      });
+    });
 
     // ---- Keys ----
     document.addEventListener(

@@ -36,7 +36,8 @@
     "oxlint": "1.64.0",
     "oxlint-tsgolint": "0.22.1",
     "sharp": "0.34.5",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "ultrahtml": "1.6.0"
   },
   "engines": {
     "node": ">=22.18.0"

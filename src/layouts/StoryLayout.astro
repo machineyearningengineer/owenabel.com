@@ -1,11 +1,15 @@
 ---
 // One story page per project: hook, problem, a demo journey, what happened,
-// then "Under the hood" for engineers. A sticky chapter tree, reading
-// progress and the thread controls (keys 1/2/3, ←→, ↑↓) sit alongside.
+// then "Under the hood" for engineers. The hero, ledger and exhibit plate
+// come from data/work. Alongside: a sticky chapter tree whose sub-chapters
+// open only for the chapter being read, reading progress, and the step keys
+// (1–N, ←→, ↑↓). On desktop the keys strip sits under the hero and docks
+// under the tree once it scrolls away; phones get a sticky bar instead.
 import BaseLayout from "./BaseLayout.astro";
 import CaseStudyInteractions from "../components/CaseStudyInteractions.astro";
 import RelatedCaseStudies from "../components/RelatedCaseStudies.astro";
-import { getCaseStudy } from "../data/work";
+import { exhibitMark, getCaseStudy } from "../data/work";
+import { storyMarkdown } from "../lib/story-markdown";
 
 type Chapter = { id: string; label: string; children?: { id: string; label: string }[] };
 type Group = { id: string; threads: { key: string; label: string }[] };
@@ -13,15 +17,22 @@ type Group = { id: string; threads: { key: string; label: string }[] };
 interface Props {
   title: string;
   description: string;
-  meta: { label: string; value: string; href?: string }[];
   chapters: Chapter[];
   groups: Group[];
 }
-const { title, description, meta, chapters, groups } = Astro.props;
+const { title, description, chapters, groups } = Astro.props;
 const currentHref = Astro.url.pathname.replace(/\.html$/, "").replace(/\/$/, "");
 const slug = currentHref.split("/").pop();
 const caseStudy = getCaseStudy(currentHref);
 if (!caseStudy) throw new Error(`StoryLayout: ${currentHref} is not in data/work caseNotes`);
+const mark = exhibitMark(currentHref);
+const canonical = new URL(currentHref, Astro.site ?? Astro.url).href;
+const ledger = [
+  { label: "Role", value: caseStudy.role },
+  { label: "Years", value: caseStudy.years },
+  caseStudy.team,
+  { label: "Stage", value: caseStudy.stage },
+];
 
 // Reading time from the rendered text, at a relaxed 220 words a minute.
 const body = await Astro.slots.render("default");
@@ -30,62 +41,105 @@ const words = `${caseStudy.summary} ${body.replace(/<(script|style)[\s\S]*?<\/\1
   .filter(Boolean).length;
 const minutes = Math.max(1, Math.round(words / 220));
 const firstThread = groups[0]?.threads[0]?.key ?? "";
+const hasSteps = groups.some((group) => group.threads.length > 0);
+
+// Share: the canonical URL, and the story as Markdown, built here from the rendered chapters.
+const shareText = `${title}: a case study by Owen Abel Amenze`;
+const share = [
+  { label: "X.com", href: `https://x.com/intent/post?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(canonical)}` },
+  { label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonical)}` },
+  {
+    label: "Email",
+    href: `mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(`${caseStudy.summary}\n\n${canonical}`)}`,
+  },
+];
+const markdown = storyMarkdown({
+  title,
+  summary: caseStudy.summary,
+  url: canonical,
+  facts: [...ledger.map((row) => `${row.label}: ${row.value}`), `Stack: ${caseStudy.stack.join(", ")}`, `Live: ${caseStudy.live.href}`],
+  body,
+});
+const markdownJson = JSON.stringify(markdown).replace(/</g, "\\u003c");
 ---
 
 <BaseLayout title={`${title} - Owen Abel Amenze`} description={description}>
-  <article class="story case-note" data-case-note data-active-thread={firstThread} data-active-group={groups[0]?.id}>
+  <article class="story case-note" data-case-note data-active-thread={firstThread} data-active-group={groups[0]?.id} data-read-minutes={minutes}>
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="/work">Work</a>
       <span aria-hidden="true">/</span>
       <span>{title}</span>
     </nav>
-    <header class="case-hero story-hero">
+
+    <header class="story-hero">
       <h1>{title}</h1>
-      <p>{caseStudy.summary}</p>
+      <p class="story-hook">{caseStudy.summary}</p>
+      <dl class="story-ledger" aria-label="Project summary">
+        {
+          ledger.map((row) => (
+            <div>
+              <dt>{row.label}</dt>
+              <dd>{row.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <div class="story-stack">
+        <span>Stack</span>
+        <ul aria-label="Stack">
+          {caseStudy.stack.map((tool) => <li>{tool}</li>)}
+        </ul>
+      </div>
+      <figure class="plate">
+        <div class="plate-frame">
+          <a class="plate-bar" href={caseStudy.live.href}>
+            <span class="plate-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="plate-url">{caseStudy.live.label}</span>
+            <span class="plate-go" aria-hidden="true">↗</span>
+          </a>
+          <img
+            src={caseStudy.exhibit.src}
+            alt={caseStudy.exhibit.caption}
+            width="960"
+            height="600"
+            decoding="async"
+            fetchpriority="high"
+            style={`view-transition-name: exhibit-${slug}`}
+          />
+        </div>
+        <span class="plate-tag" aria-hidden="true">Exh. {mark}</span>
+        <figcaption><span>Exh. {mark}</span>{caseStudy.exhibit.caption}</figcaption>
+      </figure>
     </header>
-    <dl class="case-meta story-meta" aria-label="Project summary">
-      {
-        meta.map((item) => (
-          <div>
-            <dt>{item.label}</dt>
-            <dd>{item.href ? <a href={item.href}>{item.value}</a> : item.value}</dd>
-          </div>
-        ))
-      }
-    </dl>
-    <figure class="case-exhibit">
-      <img
-        src={caseStudy.exhibit.src}
-        alt={caseStudy.exhibit.caption}
-        width="960"
-        height="600"
-        decoding="async"
-        style={`view-transition-name: exhibit-${slug}`}
-      />
-      <figcaption>{caseStudy.exhibit.caption}</figcaption>
-    </figure>
 
     <div class="story-body">
       <aside class="story-rail" aria-label="Chapters">
         <p class="story-rail-label">Contents</p>
-        <ol class="story-tree">
+        <ol class="story-tree" data-story-tree>
           {
             chapters.map((chapter) => (
               <li>
                 <a href={`#${chapter.id}`} data-tree-link={chapter.id}>
                   {chapter.label}
+                  {chapter.children && (
+                    <span class="story-tree-more" aria-hidden="true">
+                      +{chapter.children.length}
+                    </span>
+                  )}
                 </a>
                 {chapter.children && (
-                  <ol>
-                    {chapter.children.map((child) => (
-                      <li>
-                        <span class="story-branch" aria-hidden="true" />
-                        <a href={`#${child.id}`} data-tree-link={child.id} data-tree-parent={chapter.id}>
-                          {child.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ol>
+                  <div class="story-tree-sub" data-tree-sub={chapter.id}>
+                    <ol>
+                      {chapter.children.map((child) => (
+                        <li>
+                          <span class="story-branch" aria-hidden="true" />
+                          <a href={`#${child.id}`} data-tree-link={child.id} data-tree-parent={chapter.id}>
+                            {child.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
                 )}
               </li>
             ))
@@ -95,6 +149,7 @@ const firstThread = groups[0]?.threads[0]?.key ?? "";
           <span class="story-progress-track" aria-hidden="true"><span data-progress-bar /></span>
           <span><span data-progress-value>0%</span> read · {minutes} min</span>
         </div>
+        {hasSteps && <div class="story-keys-dock" data-keys-dock />}
       </aside>
 
       <div class="story-main">
@@ -123,33 +178,106 @@ const firstThread = groups[0]?.threads[0]?.key ?? "";
               }
             </ol>
           </details>
-          <p class="story-keys">
-            <span>{minutes} min read</span>
-            <kbd>↑</kbd><kbd>↓</kbd> chapters
-            <kbd>←</kbd><kbd>→</kbd> steps
-            <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>
-          </p>
-          <div class="story-threads">
-            {
-              groups.map((group, groupIndex) => (
-                <div data-thread-buttons={group.id} hidden={groupIndex > 0}>
-                  {group.threads.map((thread, index) => (
-                    <button
-                      type="button"
-                      data-thread-control={thread.key}
-                      data-active={thread.key === firstThread ? true : undefined}
-                      aria-pressed={thread.key === firstThread ? "true" : "false"}
-                    >
-                      [{index + 1}] {thread.label}
-                    </button>
-                  ))}
-                </div>
-              ))
-            }
-          </div>
+          {
+            hasSteps && (
+              <div class="story-threads">
+                {groups.map((group, groupIndex) => (
+                  <div data-thread-buttons={group.id} hidden={groupIndex > 0}>
+                    {group.threads.map((thread, index) => (
+                      <button
+                        type="button"
+                        class="story-chip"
+                        data-thread-control={thread.key}
+                        data-active={thread.key === firstThread ? true : undefined}
+                        aria-pressed={thread.key === firstThread ? "true" : "false"}
+                        aria-label={`${index + 1} ${thread.label}`}
+                      >
+                        <span class="story-chip-n">{index + 1}</span>
+                        <span class="story-chip-title">{thread.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )
+          }
           <span class="story-progress-line" aria-hidden="true"><span data-progress-bar /></span>
         </nav>
+
+        {
+          hasSteps && (
+            <div class="story-keys-slot" data-keys-slot>
+              <div class="story-keys" data-keys role="group" aria-label="Step keys">
+                <p class="story-keys-legend">
+                  <span class="story-keys-pair">
+                    <kbd>↑</kbd>
+                    <kbd>↓</kbd>
+                    <span class="story-keys-label">chapters</span>
+                  </span>
+                  <span class="story-keys-pair">
+                    <kbd>←</kbd>
+                    <kbd>→</kbd>
+                    <span class="story-keys-label">steps</span>
+                  </span>
+                  {groups.map((group, groupIndex) => (
+                    <span class="story-keys-pair story-keys-jump" data-thread-hint={group.id} hidden={groupIndex > 0}>
+                      <kbd>1</kbd>–<kbd>{group.threads.length}</kbd>
+                      <span class="story-keys-label">jump to a step</span>
+                    </span>
+                  ))}
+                </p>
+                <div class="story-keys-chips">
+                  {groups.map((group, groupIndex) => (
+                    <div data-thread-buttons={group.id} hidden={groupIndex > 0}>
+                      {group.threads.map((thread, index) => (
+                        <button
+                          type="button"
+                          class="story-chip"
+                          data-thread-control={thread.key}
+                          data-active={thread.key === firstThread ? true : undefined}
+                          aria-pressed={thread.key === firstThread ? "true" : "false"}
+                          aria-label={`${index + 1} ${thread.label}`}
+                        >
+                          <span class="story-chip-n">{index + 1}</span>
+                          <span class="story-chip-title">{thread.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )
+        }
+
         <Fragment set:html={body} />
+
+        <section class="story-share" aria-labelledby="story-share-title" data-share>
+          <h2 id="story-share-title">Share</h2>
+          <ul>
+            {
+              share.map((item) => (
+                <li>
+                  <span class="story-branch" aria-hidden="true" />
+                  <a href={item.href} target={item.href.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+            <li>
+              <span class="story-branch" aria-hidden="true" />
+              <button type="button" data-copy="url" data-copy-value={canonical}>Copy URL</button>
+            </li>
+            <li>
+              <span class="story-branch" aria-hidden="true" />
+              <button type="button" data-copy="markdown">Copy markdown</button>
+            </li>
+          </ul>
+          <p class="visually-hidden" aria-live="polite" data-copy-status></p>
+          <script is:inline type="application/json" data-story-markdown set:html={markdownJson} />
+        </section>
+
         <RelatedCaseStudies currentHref={currentHref} />
       </div>
     </div>
