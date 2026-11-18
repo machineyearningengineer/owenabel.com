@@ -23,7 +23,7 @@ pnpm run preview:workers
 ```
 
 The build checks formatting, lint and types, generates OG images and canonical
-redirects, builds 9 static pages, packages them with cf, and verifies packaged
+redirects, builds the static pages, packages them with cf, and verifies packaged
 files byte for byte. Output is `workers/.cloudflare/output/v0/`, not just Astro's
 intermediate `dist/`. `preview` previews Astro; `dev:workers` runs cf/Vite against
 the latest Astro build. `preview:workers` and routing tests use the built
@@ -111,7 +111,10 @@ on the personal Cloudflare account, and HTTP-to-HTTPS covers every subdomain.
   (`http_response_headers_transform`), which sends `X-Robots-Tag: noindex, nofollow`.
   Leave public showcases out of it so they can be indexed.
 
-Current showcases: `nairaandchill.owenabel.com` (NAIRAA & Chill client preview, noindex).
+Current showcases: `nairaandchill.owenabel.com` (NAIRAA & Chill client preview, noindex),
+`care-agent.owenabel.com` and `fieldnotes.owenabel.com` (static replay demos, Workers
+`care-agent-replay` and `fieldnotes-replay`, built from the local `~/dev/personal/lab-demos`
+repository), and `media.owenabel.com` (R2 bucket `owenabel-media`, the Lab's films).
 
 ## CV and work content
 
@@ -137,3 +140,14 @@ products into `public/journeys/<project>/<beat>.{webm,mp4,jpg}` (960px wide,
 silent, under about 600 KB each). Share images are generated from
 `scripts/generate-og.mjs` during the build. Keep claims aligned with the
 attributed records in the resume repository before publishing updates.
+
+## Lab
+
+`/lab` lists experiments, demos and films; each has a one-screen note at `/lab/<slug>`.
+Every entry is one file in `src/data/lab/`, ordered by file name, typed by `src/data/lab.ts`.
+Leave `source` out to show "On request"; give text for no link, or links for public code.
+Short clips and thumbnails are `public/lab/<slug>.{mp4,webm,jpg}` (960 × 600, recorded from the
+live demos). Films stream from `https://media.owenabel.com/films/<file>.{mp4,jpg,vtt}`, never from
+Workers assets; the bucket's CORS rules allow owenabel.com, the preview Worker and local ports
+4321 and 8788, so captions load across origins. Demo code stays in its own repository; the
+encoder and caption builder are in `lab-demos/films`.

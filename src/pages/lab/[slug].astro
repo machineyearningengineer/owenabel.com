@@ -1,0 +1,165 @@
+---
+// One screen per Lab entry: a plate header with the details, the exhibit,
+// three short columns, then any films. Content comes from src/data/lab/.
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Clip from "../../components/Clip.astro";
+import { filmLength, kindLabel, lab, labNumber, MEDIA, type LabEntry } from "../../data/lab";
+
+export function getStaticPaths() {
+  return lab.map((entry) => ({ params: { slug: entry.slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: LabEntry };
+const number = labNumber(entry);
+const external = (href: string) => /^https?:/.test(href);
+const length = filmLength(entry);
+const details = [
+  { label: "Built", value: entry.built },
+  { label: "Stack", value: entry.stack.join(", ") },
+  { label: "How this demo runs", value: entry.runs },
+  ...(length ? [{ label: "Film length", value: length }] : []),
+];
+const sources = typeof entry.source === "string" || !entry.source ? undefined : entry.source;
+const sourceText = typeof entry.source === "string" ? entry.source : entry.source ? undefined : "On request";
+const openLabel = entry.kind === "Replay demo" ? "Open the demo" : entry.kind === "Films" ? "Watch" : entry.kind === "Mac app" ? "Open on GitHub" : entry.kind === "Live site" ? "Open the site" : "See it on the homepage";
+const columns = [
+  { heading: "What I was testing", text: entry.testing },
+  { heading: "Where it stops", text: entry.stops },
+  { heading: "How this demo runs", text: entry.how },
+];
+---
+
+<BaseLayout title={`${entry.title} - Owen Abel Amenze`} description={entry.line}>
+  <article class="lab-note case-note">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/lab">Lab</a>
+      <span aria-hidden="true">/</span>
+      <span>{entry.title}</span>
+    </nav>
+
+    <header class="story-hero lab-hero">
+      <div class="lab-title">
+        <p class="lab-eyebrow">{number} · {kindLabel(entry)}</p>
+        <h1>{entry.title}</h1>
+      </div>
+      <p class="story-hook">{entry.line}</p>
+      <dl class="story-ledger lab-ledger" aria-label="Details">
+        {
+          details.map((row) => (
+            <div>
+              <dt>{row.label}</dt>
+              <dd>{row.value}</dd>
+            </div>
+          ))
+        }
+        <div>
+          <dt>Source</dt>
+          <dd>
+            {sourceText}
+            {
+              sources?.map((link, index) => (
+                <>
+                  {index > 0 && <br />}
+                  <a href={link.href}>{link.label} ↗</a>
+                </>
+              ))
+            }
+          </dd>
+        </div>
+      </dl>
+
+      <figure class="plate lab-plate">
+        <div class="plate-frame">
+          {
+            entry.open && !entry.open.href.startsWith("#") && (
+              <a class="plate-bar" href={entry.open.href}>
+                <span class="plate-dots" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span class="plate-url">{entry.open.label}</span>
+                <span class="plate-go" aria-hidden="true">
+                  {external(entry.open.href) ? "↗" : "→"}
+                </span>
+              </a>
+            )
+          }
+          {
+            entry.clip ? (
+              <Clip base={`/lab/${entry.slug}`} caption={entry.clip.caption} />
+            ) : (
+              <img src={`/lab/${entry.slug}.jpg`} alt={`A frame from ${entry.films?.[0]?.title ?? entry.title}`} width="960" height="600" decoding="async" />
+            )
+          }
+        </div>
+        <span class="plate-tag" aria-hidden="true">{number}</span>
+        <figcaption>
+          {
+            entry.open && (
+              <a class="lab-open" href={entry.open.href}>
+                {openLabel} {external(entry.open.href) ? "↗" : entry.open.href.startsWith("#") ? "↓" : "→"}
+              </a>
+            )
+          }
+          <span class="lab-provenance">{entry.clip?.provenance ?? `${entry.films?.length} films, streamed with captions`}</span>
+        </figcaption>
+      </figure>
+    </header>
+
+    <section class="lab-columns" aria-label="Notes">
+      {
+        columns.map((column) => (
+          <div>
+            <h2>{column.heading}</h2>
+            {column.text.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        ))
+      }
+    </section>
+
+    {
+      entry.films && (
+        <section class="lab-films" id="films" aria-labelledby="films-heading">
+          <h2 id="films-heading">{entry.films.length === 1 ? "The film" : "The films"}</h2>
+          {entry.filmsNote && <p class="lab-films-note">{entry.filmsNote}</p>}
+          <ol>
+            {entry.films.map((film) => (
+              <li>
+                <video
+                  controls
+                  playsinline
+                  preload="none"
+                  crossorigin="anonymous"
+                  width="1280"
+                  height="720"
+                  poster={`${MEDIA}/${film.file}.jpg`}
+                >
+                  <source src={`${MEDIA}/${film.file}.mp4`} type="video/mp4" />
+                  <track kind="captions" srclang="en" label="English" src={`${MEDIA}/${film.file}.vtt`} default />
+                </video>
+                <div class="lab-film-text">
+                  <h3>
+                    {film.title} <span>{film.length}</span>
+                  </h3>
+                  <p>{film.line}</p>
+                  {film.related && (
+                    <a href={film.related.href}>
+                      {film.related.label} <span aria-hidden="true">→</span>
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+
+    <nav class="lab-next" aria-label="More from the Lab">
+      <a href="/lab"><span aria-hidden="true">←</span> All of the Lab</a>
+    </nav>
+  </article>
+</BaseLayout>

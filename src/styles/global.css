@@ -3178,3 +3178,186 @@ html[data-intro="play"] body {
     animation: none;
   }
 }
+
+/* ---- Lab: the index reuses the Work ledger; each note reuses the story hero
+   and plate, then three short columns and any films. ---- */
+.lab-entry-n {
+  display: grid;
+  gap: 2px;
+}
+
+.lab-entry-n span:first-child {
+  color: var(--ink);
+}
+
+.lab-tags .lab-kind {
+  border-color: var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.lab-hero {
+  grid-template-areas:
+    "title ledger"
+    "hook ledger"
+    "plate plate";
+}
+
+.lab-title {
+  grid-area: title;
+}
+
+.lab-eyebrow {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.lab-ledger div {
+  grid-template-columns: 96px minmax(0, 1fr);
+}
+
+.lab-ledger dd a {
+  overflow-wrap: anywhere;
+}
+
+.lab-plate .journey-frame {
+  border: 0;
+}
+
+.lab-plate .journey-clip figcaption {
+  display: block;
+  max-width: none;
+  margin: 0;
+  border-top: 1px solid var(--rule);
+  padding: 6px 10px;
+}
+
+.lab-plate > figcaption {
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.lab-plate > figcaption .lab-provenance {
+  flex: 1 1 auto;
+  color: var(--muted);
+  text-transform: none;
+}
+
+.lab-open {
+  flex: none;
+  border: 1px solid var(--rule);
+  padding: 1px 8px;
+  color: var(--ink);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.lab-open:hover,
+.lab-open:focus-visible {
+  border-color: var(--accent);
+}
+
+.lab-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 40px);
+  border-top: 3px double var(--rule);
+  padding-top: 14px;
+}
+
+.lab-columns h2,
+.lab-films h2 {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.lab-columns p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.lab-films {
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+}
+
+.lab-films-note {
+  max-width: 70ch;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.lab-films ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  gap: 28px 24px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-films video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--rule);
+  background: var(--warm);
+}
+
+.lab-film-text h3 {
+  margin: 10px 0 4px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.lab-film-text h3 span {
+  margin-left: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.lab-film-text p {
+  max-width: 62ch;
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.lab-film-text a {
+  font-size: 12px;
+}
+
+.lab-next {
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.lab-next a {
+  text-decoration: none;
+}
+
+@media (max-width: 760px) {
+  .lab-hero {
+    grid-template-areas:
+      "title"
+      "hook"
+      "plate"
+      "ledger";
+  }
+
+  .lab-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

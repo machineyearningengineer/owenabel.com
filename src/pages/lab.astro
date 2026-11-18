@@ -1,0 +1,50 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import KoiPond from "../components/KoiPond.astro";
+import { kindLabel, lab, labNumber } from "../data/lab";
+---
+
+<BaseLayout
+  title="Lab - Owen Abel Amenze"
+  description="Experiments, demos and films by Owen Abel Amenze. The demos replay recorded runs, so they cost nothing and give the same answer every time."
+>
+  <section class="section-header koi-surface koi-band" aria-labelledby="lab-heading">
+    <KoiPond fish={3} />
+    <h1 id="lab-heading">Lab</h1>
+    <p>
+      Experiments, demos and films. Nothing here calls a live API: the demos replay recorded runs, so they cost nothing
+      and give the same answer every time.
+    </p>
+  </section>
+
+  <ol class="work-list work-entries lab-entries">
+    {
+      lab.map((entry) => (
+        <li class="work-entry">
+          <a href={`/lab/${entry.slug}`}>
+            <span class="work-entry-year lab-entry-n">
+              <span>{labNumber(entry)}</span>
+              <span>{entry.year}</span>
+            </span>
+            <div class="work-entry-body">
+              <div class="work-entry-head">
+                <h2>{entry.title}</h2>
+              </div>
+              <p class="work-entry-line">{entry.line}</p>
+              <ul class="stack-tags lab-tags" aria-label="What you get and the stack">
+                <li class="lab-kind">{kindLabel(entry)}</li>
+                {entry.stack.map((tool) => (
+                  <li>{tool}</li>
+                ))}
+              </ul>
+            </div>
+            <span class="exhibit work-entry-exhibit" aria-hidden="true">
+              <img src={`/lab/${entry.slug}.jpg`} alt="" width="960" height="600" loading="lazy" decoding="async" />
+              <span>{labNumber(entry)}</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</BaseLayout>

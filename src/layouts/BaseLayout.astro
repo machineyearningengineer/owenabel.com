@@ -19,6 +19,7 @@ const {
 const nav = [
   { href: "/", label: "Index" },
   { href: "/work", label: "Work" },
+  { href: "/lab", label: "Lab" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -67,7 +68,8 @@ if (pathname === "/") {
   });
 }
 
-if (pathname === "/work" || pathname.startsWith("/work/")) {
+const section = ["work", "lab"].find((name) => pathname === `/${name}` || pathname.startsWith(`/${name}/`));
+if (section) {
   const itemListElement = [
     {
       "@type": "ListItem",
@@ -78,12 +80,12 @@ if (pathname === "/work" || pathname.startsWith("/work/")) {
     {
       "@type": "ListItem",
       position: 2,
-      name: "Work",
-      item: new URL("/work", siteUrl).href,
+      name: section === "work" ? "Work" : "Lab",
+      item: new URL(`/${section}`, siteUrl).href,
     },
   ];
 
-  if (pathname.startsWith("/work/")) {
+  if (pathname.startsWith(`/${section}/`)) {
     itemListElement.push({
       "@type": "ListItem",
       position: 3,

@@ -2,6 +2,8 @@
 // A short clip of the product: public/journeys/<project>/<beat>.{webm,mp4,jpg}.
 // Under the caption it says where it was recorded: the live site, or (with
 // `local`) a local build with made-up data, for staff and signed-in screens.
+// The Lab passes `base` (public/lab/<slug>) with `live` for where it was
+// recorded, or `note` for a clip that came from elsewhere.
 // MP4 comes first: for these screen recordings H.264 was usually the smaller file.
 // Muted and looped, it plays only while on screen. With reduced motion it
 // stays on the poster unless the reader presses Play; anyone can pause.
@@ -11,14 +13,17 @@
 import { liveSources, RECORDED_ON } from "../data/clip-sources";
 
 interface Props {
-  project: string;
-  beat: string;
+  project?: string;
+  beat?: string;
+  base?: string;
   caption: string;
   local?: boolean;
+  live?: { host: string; href: string };
+  note?: string;
 }
-const { project, beat, caption, local = false } = Astro.props;
-const base = `/journeys/${project}/${beat}`;
-const live = local ? undefined : liveSources[project];
+const { project = "", beat, caption, local = false, note } = Astro.props;
+const base = Astro.props.base ?? `/journeys/${project}/${beat}`;
+const live = local ? undefined : (Astro.props.live ?? liveSources[project]);
 ---
 
 <figure class="journey-clip">
@@ -54,7 +59,9 @@ const live = local ? undefined : liveSources[project];
   <figcaption>
     {caption}
     <span class="clip-source">
-      {live ? (
+      {note ? (
+        note
+      ) : live ? (
         <>
           Recorded on <a href={live.href} rel="noopener">{live.host}</a> · {RECORDED_ON}
         </>
