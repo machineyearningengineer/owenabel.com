@@ -33,6 +33,8 @@ export type WorkItem = {
   }>;
   caseNotes: CaseStudy[];
   role: string;
+  stack: string;
+  exhibit: { src: string; alt: string };
 };
 
 export const work: WorkItem[] = [
@@ -67,6 +69,11 @@ export const work: WorkItem[] = [
       },
     ],
     role: "Product Engineer",
+    stack: "Next.js · MapLibre · Postgres",
+    exhibit: {
+      src: "/exhibits/fete-recap.webp",
+      alt: "Fête Finder 2026 recap page: a paper map of Paris with the route of the night",
+    },
   },
   {
     year: "2025–26",
@@ -92,6 +99,11 @@ export const work: WorkItem[] = [
       { label: "Milk & Henny: keeping the memories", href: "/work/milk-and-henny-media" },
     ],
     role: "Founder & Host",
+    stack: "TanStack Start · Effect · Postgres · Redis",
+    exhibit: {
+      src: "/exhibits/milk-pitch.webp",
+      alt: "Milk & Henny Pitch Night event page with a ticket button",
+    },
   },
   {
     year: "2024–26",
@@ -159,6 +171,11 @@ export const work: WorkItem[] = [
       },
     ],
     role: "Senior Software Developer",
+    stack: "PostgreSQL search · Next.js · AWS Fargate · Terraform",
+    exhibit: {
+      src: "/exhibits/opf-home.webp",
+      alt: "Open Policy Finder home page with journal and publisher search",
+    },
   },
   {
     year: "2026",
@@ -186,6 +203,11 @@ export const work: WorkItem[] = [
       },
     ],
     role: "Lead Engineer",
+    stack: "Go · ConnectRPC · Postgres · visual search",
+    exhibit: {
+      src: "/exhibits/receipts-feed.webp",
+      alt: "Receipts discovery feed: a mosaic of beauty work with search by photo",
+    },
   },
 ];
 
@@ -198,6 +220,8 @@ export const getFeaturedWork = () =>
     href: item.caseNotes[0]?.href ?? item.href,
     detail: item.featuredDetail ?? item.detail,
     role: item.role,
+    stack: item.stack,
+    exhibit: item.exhibit,
   }));
 
 export const getRelatedCaseStudies = (href: string) => {

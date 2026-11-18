@@ -82,7 +82,12 @@ async function inspect(item) {
         /BEGIN Cloudflare Managed content/,
         `Unexpected robots.txt at ${current}`,
       );
-      results.push({ url: item.url, redirects: chain.length - 1, status: 200, finalUrl: current.href });
+      results.push({
+        url: item.url,
+        redirects: chain.length - 1,
+        status: 200,
+        finalUrl: current.href,
+      });
       return;
     }
     if ([301, 302, 303, 307, 308].includes(response.status)) {

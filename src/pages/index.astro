@@ -2,17 +2,48 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getFeaturedWork } from "../data/work";
 
+const cvHref = "/owen-abel-amenze-cv.pdf?v=6b188052ea8a";
+
 const lineItems = [
-  ["01", "Product systems", "Help people find what they came for"],
-  ["02", "Data work", "Make messy records useful"],
-  ["03", "Reliability", "Keep things working when people depend on them"],
+  [
+    "01",
+    "Product systems",
+    "Event search, maps and saved routes; ticketing, check-in and party games",
+    "Next.js · TanStack Start · MapLibre",
+  ],
+  [
+    "02",
+    "Search & data",
+    "Policy search on PostgreSQL in place of Elasticsearch; visual search that shows the evidence behind each result",
+    "PostgreSQL · Go · ConnectRPC",
+  ],
+  [
+    "03",
+    "Reliability",
+    "Led the Jisc website's move to AWS Fargate after scaling issues, with Terraform previews and release checks",
+    "AWS ECS Fargate · Terraform",
+  ],
 ];
 
 const featuredWork = getFeaturedWork();
+const exhibitMarks = ["A", "B", "C", "D"];
+const built = new Date();
+const builtLabel = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "Europe/London",
+}).format(built);
+const londonTime = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Europe/London",
+}).format(built);
 ---
 
 <BaseLayout>
-  <section class="hero" aria-labelledby="intro-title">
+  <section class="hero" aria-labelledby="intro-title" data-ledger-surface>
+    <canvas class="ledger-field" aria-hidden="true" data-ledger-field></canvas>
     <div class="hero-grid">
       <div class="identity">
         <p class="eyebrow">Engineering ledger</p>
@@ -23,18 +54,33 @@ const featuredWork = getFeaturedWork();
         <div class="hero-actions" aria-label="Primary actions">
           <a class="button-link" href="#selected-work">Selected work</a>
           <a class="button-link" href="/book">Book a 20-minute intro</a>
+          <a class="button-link" href={cvHref}>CV (PDF)</a>
         </div>
       </div>
 
-      <aside class="invoice-box" aria-label="Site note">
+      <aside class="invoice-box" aria-label="At a glance">
         <dl>
           <dt>Document:</dt>
           <dd>INDEX-ABEL</dd>
-          <dt>Issued:</dt>
-          <dd>May 2026</dd>
+          <dt>Updated:</dt>
+          <dd><time datetime={built.toISOString()}>{builtLabel}</time></dd>
+          <dt>London:</dt>
+          <dd><span data-london-clock>{londonTime}</span></dd>
           <dt>Status:</dt>
-          <dd>Present</dd>
+          <dd class="status-open">Open to work</dd>
+          <dt>Reach:</dt>
+          <dd>54,295 views · Jun 2026</dd>
+          <dt>Email:</dt>
+          <dd class="invoice-email">
+            <!--email_off-->
+            <a href="mailto:work@owenabel.com">work@owenabel.com</a>
+            <!--/email_off-->
+            <button type="button" class="copy-email" data-copy-email="work@owenabel.com">
+              Copy
+            </button>
+          </dd>
         </dl>
+        <p class="invoice-hint" aria-hidden="true">Tap the paper.</p>
       </aside>
     </div>
 
@@ -45,16 +91,18 @@ const featuredWork = getFeaturedWork();
           <tr>
             <th scope="col">No.</th>
             <th scope="col">Area</th>
-            <th scope="col">Use</th>
+            <th scope="col">Shipped</th>
+            <th scope="col">Stack</th>
           </tr>
         </thead>
         <tbody>
           {
-            lineItems.map(([no, area, use]) => (
+            lineItems.map(([no, area, shipped, stack]) => (
               <tr>
                 <td>{no}</td>
                 <td>{area}</td>
-                <td>{use}</td>
+                <td>{shipped}</td>
+                <td>{stack}</td>
               </tr>
             ))
           }
@@ -74,7 +122,7 @@ const featuredWork = getFeaturedWork();
 
     <div class="work-list home-work-list">
       {
-        featuredWork.map((item) => (
+        featuredWork.map((item, index) => (
           <article class="work-item home-work-item">
             <span>{item.year}</span>
             <div>
@@ -82,8 +130,20 @@ const featuredWork = getFeaturedWork();
                 <a href={item.href}>{item.name}</a>
               </h3>
               <p>{item.detail}</p>
+              <p class="work-stack">{item.stack}</p>
             </div>
             <span class="work-role">{item.role}</span>
+            <a class="exhibit" href={item.href} tabindex="-1" aria-hidden="true">
+              <img
+                src={item.exhibit.src}
+                alt=""
+                width="960"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <span>Exh. {exhibitMarks[index]}</span>
+            </a>
           </article>
         ))
       }
@@ -114,9 +174,42 @@ const featuredWork = getFeaturedWork();
           <span aria-hidden="true"> / </span>
           <a href="/contact">Contact page</a>
           <span aria-hidden="true"> / </span>
-          <a href="/owen-abel-amenze-cv.pdf?v=6b188052ea8a">CV</a>
+          <a href={cvHref}>CV</a>
         </span>
       </div>
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  import { mountLedgerField } from "../scripts/ledger-field";
+
+  const canvas = document.querySelector<HTMLCanvasElement>("[data-ledger-field]");
+  const surface = document.querySelector<HTMLElement>("[data-ledger-surface]");
+  if (canvas && surface) mountLedgerField(canvas, surface);
+
+  const clock = document.querySelector<HTMLElement>("[data-london-clock]");
+  const formatTime = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: "Europe/London",
+  });
+  const tickClock = () => {
+    if (clock) clock.textContent = formatTime.format(new Date());
+  };
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy-email]")) {
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copyEmail ?? "");
+        button.textContent = "Copied";
+      } catch {
+        button.textContent = "Select it";
+      }
+      setTimeout(() => (button.textContent = "Copy"), 1600);
+    });
+  }
+</script>

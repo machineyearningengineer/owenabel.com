@@ -1354,3 +1354,204 @@ html[data-theme="dark"] .invoice-box::before {
   margin-top: 10px;
   color: var(--muted);
 }
+
+/* Living ledger: the @abel field shows through the paper, tap to ripple. */
+.hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.ledger-field {
+  position: absolute;
+  z-index: -1;
+  top: -140px;
+  left: 50%;
+  width: 100vw;
+  height: calc(100% + 140px);
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  mask-image: radial-gradient(
+    ellipse 62% 52% at 76% 46%,
+    black 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    transparent 86%
+  );
+  mix-blend-mode: multiply;
+  transition: opacity 1400ms ease;
+}
+
+.ledger-field[data-ready="true"] {
+  opacity: 0.62;
+}
+
+html[data-theme="dark"] .ledger-field {
+  mix-blend-mode: screen;
+}
+
+html[data-theme="dark"] .ledger-field[data-ready="true"] {
+  opacity: 0.95;
+}
+
+.invoice-box dd a {
+  text-decoration: none;
+}
+
+.invoice-box .status-open::before {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #3f8f4f;
+  box-shadow: 0 0 0 3px rgba(63, 143, 79, 0.18);
+  content: "";
+  vertical-align: 1px;
+  animation: status-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes status-pulse {
+  50% {
+    box-shadow: 0 0 0 5px rgba(63, 143, 79, 0.06);
+  }
+}
+
+.invoice-box [data-london-clock] {
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice-email {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.copy-email {
+  border: 1px solid var(--rule);
+  padding: 0 5px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.copy-email:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.invoice-hint {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  border-top: 1px dashed var(--rule);
+  padding: 6px 10px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.ledger th:nth-child(4),
+.ledger td:nth-child(4) {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Exhibits: a screenshot stapled to each work entry. */
+.home-work-item {
+  grid-template-columns: 120px minmax(0, 1fr) auto 176px;
+  align-items: start;
+}
+
+.work-stack {
+  margin-top: 6px !important;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.exhibit {
+  position: relative;
+  display: block;
+  border: 1px solid var(--rule);
+  padding: 4px;
+  background: var(--warm);
+  box-shadow:
+    0 1px 0 var(--faint),
+    0 10px 22px -16px rgba(0, 0, 0, 0.55);
+  transform: rotate(-1.4deg);
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-work-item:nth-child(even) .exhibit {
+  transform: rotate(1.2deg);
+}
+
+.home-work-item:hover .exhibit {
+  transform: rotate(0deg) scale(1.06);
+}
+
+.exhibit img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+}
+
+.exhibit span {
+  position: absolute;
+  top: -9px;
+  right: 8px;
+  border: 1px solid var(--rule);
+  padding: 0 4px;
+  background: var(--paper);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.exhibit::before {
+  position: absolute;
+  top: -6px;
+  left: 14px;
+  width: 22px;
+  height: 7px;
+  border: 1px solid var(--muted);
+  border-bottom: 0;
+  content: "";
+}
+
+@media (max-width: 760px) {
+  .home-work-item {
+    grid-template-columns: 1fr;
+  }
+
+  .exhibit {
+    max-width: 320px;
+    margin-top: 10px;
+  }
+
+  .ledger th:nth-child(4),
+  .ledger td:nth-child(4) {
+    display: none;
+  }
+
+  .ledger-field {
+    mask-image: radial-gradient(ellipse 90% 50% at 70% 22%, black, transparent 80%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .invoice-box .status-open::before {
+    animation: none;
+  }
+
+  .invoice-hint {
+    display: none;
+  }
+}
