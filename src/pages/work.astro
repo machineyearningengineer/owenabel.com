@@ -2,6 +2,8 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import KoiPond from "../components/KoiPond.astro";
 import { getCaseNotes, work } from "../data/work";
+
+const caseOrder = work.flatMap((item) => item.caseNotes.map((note) => note.href));
 ---
 
 <BaseLayout
@@ -137,6 +139,7 @@ import { getCaseNotes, work } from "../data/work";
                         class="case-study-count"
                         href={caseNote.href}
                         data-cite={caseNote.href}
+                        data-tone={(caseOrder.indexOf(caseNote.href) % 3) + 1}
                         aria-label={`Case study ${index + 1}: ${caseNote.label}`}
                       >
                         [{index + 1}]
