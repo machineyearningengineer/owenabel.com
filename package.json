@@ -18,13 +18,14 @@
     "cf:auth": "cf auth whoami",
     "cf:project": "env -u CLOUDFLARE_API_TOKEN cf workers deployments list --worker owenabel-com --profile default",
     "test:deploy": "node --test scripts/deploy-workers.test.mjs",
-    "build:site": "pnpm run format:check && pnpm run lint && pnpm run typecheck && astro build && node scripts/generate-redirects.mjs",
+    "build:site": "pnpm run format:check && pnpm run lint && pnpm run typecheck && astro build && node scripts/check-prose.mjs && node scripts/generate-redirects.mjs",
     "build:workers": "pnpm --dir workers run build && node scripts/validate-workers.mjs",
     "preview:workers": "pnpm --dir workers exec vite preview --port 8788 --strictPort",
     "dev:workers": "pnpm --dir workers exec cf dev",
     "test:routing": "pnpm --dir workers exec node test-routing.mjs",
     "check:redirects": "node scripts/check-redirects.mjs",
-    "head:build": "node scripts/build-head-sprite.mjs"
+    "head:build": "node scripts/build-head-sprite.mjs",
+    "check:prose": "node scripts/check-prose.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",

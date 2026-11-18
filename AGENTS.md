@@ -2,6 +2,10 @@
 
 Don't use Python for edits; use editing tools and JavaScript tooling.
 
+Before changing visible copy, read docs/WRITING.md (voice, paragraph size,
+AI-writing patterns, media captions, colour). `pnpm run check:prose` runs in
+the build and fails on the patterns it can detect; `-- --review` lists leads.
+
 The live portfolio runs entirely on **Cloudflare Workers Static Assets**,
 Worker `owenabel-com`, custom domains `owenabel.com` and `www.owenabel.com`.
 The former Pages project was retired after live verification on 2026-09-30.
