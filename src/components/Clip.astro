@@ -1,5 +1,6 @@
 ---
 // A short clip recorded from the live product: public/journeys/<project>/<beat>.{webm,mp4,jpg}.
+// MP4 comes first: for these screen recordings H.264 was usually the smaller file.
 // Muted and looped, it plays only while on screen. With reduced motion it
 // stays on the poster unless the reader presses Play; anyone can pause.
 interface Props {
@@ -25,8 +26,8 @@ const base = `/journeys/${project}/${beat}`;
       aria-label={caption}
       data-journey-video
     >
-      <source src={`${base}.webm`} type="video/webm" />
       <source src={`${base}.mp4`} type="video/mp4" />
+      <source src={`${base}.webm`} type="video/webm" />
     </video>
     <button type="button" class="journey-toggle" data-journey-toggle hidden>Play</button>
   </div>
