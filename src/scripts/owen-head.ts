@@ -1,9 +1,9 @@
 /**
- * Owen's head looks toward the cursor. The sprite is one row of 17 frames:
- * [looking at you, then 16 directions clockwise from straight up].
+ * Owen's head looks toward the cursor. The sprite is one row of 9 frames:
+ * [looking at you, then 8 directions clockwise from straight up].
  * With no cursor (or a still one) it glances around on its own; a tap spins it.
  */
-const DIRECTIONS = 16;
+const DIRECTIONS = 8;
 const NEAR = 48;
 const IDLE_AFTER = 2800;
 
@@ -49,7 +49,7 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
     spinning = true;
     let step = 0;
     const turn = window.setInterval(() => {
-      show(1 + ((4 + step) % DIRECTIONS));
+      show(1 + ((2 + step) % DIRECTIONS));
       step += 1;
       if (step > DIRECTIONS) {
         window.clearInterval(turn);
@@ -57,7 +57,7 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
         show(0);
         idle();
       }
-    }, 45);
+    }, 70);
   };
 
   document.addEventListener(
