@@ -1,24 +1,28 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const bookingUrl =
+  "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2LQPawHeYUD3HNEFUuFDr-0CUsi7Z8B9m-peU3KF5hTYbjP6SONeHbBNAb57dCOcX3lob_WBS1?gv=true";
 ---
 
 <BaseLayout
   title="Contact - Owen Abel Amenze"
-  description="Contact Owen Abel Amenze for software engineering work."
+  description="Email Owen Abel Amenze or book a 20-minute introductory chat on Google Meet."
 >
   <h1 class="page-title">Got a problem in mind?</h1>
 
   <section class="contact-panel" aria-label="Contact details">
     <div class="contact-row">
-      <span>Intro chat</span>
-      <a href="/book">Book a 20-minute introductory chat</a>
-    </div>
-    <div class="contact-row">
       <span>Email</span>
       <!--email_off-->
       <span class="contact-value">
         <a href="mailto:work@owenabel.com">work@owenabel.com</a>
-        <button class="copy-button" type="button" data-copy-email="work@owenabel.com" aria-label="Copy work email">
+        <button
+          class="copy-button"
+          type="button"
+          data-copy-email="work@owenabel.com"
+          aria-label="Copy work email"
+        >
           Copy
         </button>
         <span class="copy-status" data-copy-status aria-live="polite"></span>
@@ -31,9 +35,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </div>
     <div class="contact-row">
       <span>LinkedIn</span>
-      <a href="https://www.linkedin.com/in/owen-abel"
-        >linkedin.com/in/owen-abel</a
-      >
+      <a href="https://www.linkedin.com/in/owen-abel">linkedin.com/in/owen-abel</a>
     </div>
     <div class="contact-row">
       <span>CV</span>
@@ -41,32 +43,46 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </div>
   </section>
 
+  <section class="booking" id="book" aria-labelledby="booking-title">
+    <div class="section-header">
+      <h2 id="booking-title">Book a chat</h2>
+      <p>
+        20 minutes on Google Meet. Pick a time below, or
+        <a href={bookingUrl} target="_blank" rel="noopener noreferrer">open it in Google Calendar</a>.
+      </p>
+    </div>
+    <div class="booking-embed">
+      <iframe
+        src={bookingUrl}
+        title="Google Calendar booking page for a 20-minute introductory chat"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    </div>
+  </section>
+
   <script>
     import { onPage } from "../scripts/page";
 
-    onPage((signal) => {
-    const copyButton = document.querySelector<HTMLButtonElement>("[data-copy-email]");
-    const copyStatus = document.querySelector("[data-copy-status]");
+    onPage(() => {
+      const copyButton = document.querySelector<HTMLButtonElement>("[data-copy-email]");
+      const copyStatus = document.querySelector("[data-copy-status]");
+      if (!copyButton || !copyStatus) return;
 
-    if (copyButton && copyStatus) copyButton.addEventListener("click", async () => {
-      const email = copyButton.dataset.copyEmail;
-
-      if (!email) {
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(email);
-        copyButton.textContent = "Copied";
-        copyStatus.textContent = "Email copied.";
-        window.setTimeout(() => {
-          copyButton.textContent = "Copy";
-          copyStatus.textContent = "";
-        }, 1800);
-      } catch {
-        copyStatus.textContent = "Copy failed.";
-      }
-    });
+      copyButton.addEventListener("click", async () => {
+        const email = copyButton.dataset.copyEmail;
+        if (!email) return;
+        try {
+          await navigator.clipboard.writeText(email);
+          copyButton.textContent = "Copied";
+          copyStatus.textContent = "Email copied.";
+          window.setTimeout(() => {
+            copyButton.textContent = "Copy";
+            copyStatus.textContent = "";
+          }, 1800);
+        } catch {
+          copyStatus.textContent = "Copy failed.";
+        }
+      });
     });
   </script>
 </BaseLayout>

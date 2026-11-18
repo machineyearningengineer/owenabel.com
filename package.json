@@ -23,7 +23,8 @@
     "preview:workers": "pnpm --dir workers exec vite preview --port 8788 --strictPort",
     "dev:workers": "pnpm --dir workers exec cf dev",
     "test:routing": "pnpm --dir workers exec node test-routing.mjs",
-    "check:redirects": "node scripts/check-redirects.mjs"
+    "check:redirects": "node scripts/check-redirects.mjs",
+    "head:build": "node scripts/build-head-sprite.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",

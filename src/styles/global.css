@@ -746,31 +746,8 @@ html[data-theme="dark"] .invoice-box::before {
   line-height: 0.95;
 }
 
-.booking-page .page-title {
-  margin-bottom: 28px;
-}
-
-.booking-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px 32px;
-  align-items: end;
-  border-top: 1px solid var(--rule);
-  padding: 16px 0 22px;
-}
-
-.booking-intro > p {
-  max-width: 82ch;
-  margin: 0;
-}
-
-.booking-intro > p:first-child {
-  color: var(--muted);
-}
-
-.booking-intro > p:last-child {
-  grid-column: 1 / -1;
-  margin-top: 8px;
+.booking {
+  padding-top: clamp(48px, 8vw, 96px);
 }
 
 .booking-embed {
@@ -785,12 +762,6 @@ html[data-theme="dark"] .invoice-box::before {
   height: min(920px, 110vh);
   border: 0;
   background: var(--paper);
-}
-
-.booking-note {
-  margin: 12px 0 0;
-  color: var(--muted);
-  font-size: 12px;
 }
 
 @keyframes settle-in {
@@ -1204,7 +1175,6 @@ html[data-theme="dark"] .invoice-box::before {
   .site-footer,
   .hero-grid,
   .section-header,
-  .booking-intro,
   .work-item,
   .contact-row,
   .case-meta,
@@ -1811,4 +1781,15 @@ html[data-theme="dark"] .invoice-box::before {
     max-width: 360px;
     margin-top: 8px;
   }
+}
+
+/* Scrollbar: a thin ink rule on the paper. */
+html {
+  scrollbar-color: var(--rule) transparent;
+  scrollbar-width: thin;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--paper);
 }
