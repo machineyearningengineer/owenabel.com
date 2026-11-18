@@ -2833,7 +2833,7 @@ html[data-intro="play"] body {
   height: 10px;
   margin-top: -4px;
   border: 0;
-  border-radius: 50%;
+  border-radius: 0;
   appearance: none;
   background: var(--ink);
   opacity: 0;
@@ -2844,7 +2844,7 @@ html[data-intro="play"] body {
   width: 10px;
   height: 10px;
   border: 0;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--ink);
   opacity: 0;
   transition: opacity 160ms ease;
