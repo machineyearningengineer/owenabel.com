@@ -7,7 +7,7 @@ const threads = [
     key: "infrastructure",
     label: "Infrastructure",
     owned: "Stepped into infrastructure ownership after scaling and downtime issues, and led the main site's move to serverless AWS ECS Fargate and RDS.",
-    enables: "The team has a clearer hosting path for the website that Jisc's content and users depend on."
+    enables: "The main site runs on Fargate and RDS instead of the setup that had scaling and downtime problems."
   },
   {
     key: "publishing",
@@ -42,8 +42,8 @@ const mechanisms = [
 const initialThread = "infrastructure";
 ---
 
-<CaseStudyLayout title="Jisc website" description="Infrastructure and publishing work on Jisc's main website, separate from Open Policy Finder." threads={threads} initialThread={initialThread}>
-  <p slot="intro">Jisc's main site is a publishing product as well as a piece of infrastructure. I joined the Digital Experience Team's infrastructure work under a tight deadline after scaling and downtime issues, while maintaining the Wagtail and Next.js content system.</p>
+<CaseStudyLayout title="Jisc website: moving to Fargate" description="Infrastructure and publishing work on Jisc's main website, separate from Open Policy Finder." threads={threads} initialThread={initialThread}>
+  <p slot="intro">I joined the Digital Experience Team's infrastructure work under a tight deadline after scaling and downtime issues, while maintaining the Wagtail and Next.js content system.</p>
   <dl slot="meta" class="case-meta" aria-label="Case study summary">
     <div><dt>Context</dt><dd>Jisc · Digital Experience Team / April 2024–February 2026</dd></div>
     <div><dt>Focus</dt><dd>AWS ECS Fargate, RDS, Wagtail, Next.js, Terraform</dd></div>
@@ -78,7 +78,7 @@ const initialThread = "infrastructure";
     </div>
   </CaseStudySection>
 
-  <CaseStudySection id="case-result" title="What it enables">
+  <CaseStudySection id="case-result" title="Outcome">
     <div class="case-prose"><p>The main site moved to Fargate and RDS, and the team had a clearer path to preview and validate website changes. The migration, CMS work, and release checks belonged to the Digital Experience Team; my Open Policy Finder data and search work was a separate Jisc workstream.</p></div>
   </CaseStudySection>
 

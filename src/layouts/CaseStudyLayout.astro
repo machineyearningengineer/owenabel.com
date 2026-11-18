@@ -2,6 +2,7 @@
 import BaseLayout from "./BaseLayout.astro";
 import CaseStudyInteractions from "../components/CaseStudyInteractions.astro";
 import RelatedCaseStudies from "../components/RelatedCaseStudies.astro";
+import { getCaseStudy } from "../data/work";
 
 interface Props {
   title: string;
@@ -10,6 +11,8 @@ interface Props {
   threads: { key: string; label: string }[];
 }
 const { title, description, initialThread, threads } = Astro.props;
+const currentHref = Astro.url.pathname.replace(/\.html$/, "").replace(/\/$/, "");
+const caseStudy = getCaseStudy(currentHref);
 ---
 
 <BaseLayout title={`${title} - Owen Abel Amenze`} description={description}>
@@ -20,10 +23,24 @@ const { title, description, initialThread, threads } = Astro.props;
       <span>{title}</span>
     </nav>
     <header class="case-hero">
-      <p class="eyebrow">Case study</p>
       <h1>{title}</h1>
       <slot name="intro" />
     </header>
+    {
+      caseStudy && (
+        <figure class="case-exhibit">
+          <img
+            src={caseStudy.exhibit.src}
+            alt={caseStudy.exhibit.caption}
+            width="960"
+            height="600"
+            decoding="async"
+            style={`view-transition-name: exhibit-${currentHref.split("/").pop()}`}
+          />
+          <figcaption>{caseStudy.exhibit.caption}</figcaption>
+        </figure>
+      )
+    }
     <slot name="meta" />
     <nav class="case-control" aria-label="Case study controls">
       <p>
@@ -48,7 +65,7 @@ const { title, description, initialThread, threads } = Astro.props;
       </div>
     </nav>
     <slot />
-    <RelatedCaseStudies currentHref={Astro.url.pathname.replace(/\.html$/, "").replace(/\/$/, "")} />
+    <RelatedCaseStudies currentHref={currentHref} />
   </article>
   <CaseStudyInteractions />
 </BaseLayout>

@@ -42,7 +42,7 @@ const mechanisms = [
 const initialThread = "contracts";
 ---
 
-<CaseStudyLayout title="Receipts Platform" description="The Go API, generated contracts, and Postgres job lifecycle behind Receipts." threads={threads} initialThread={initialThread}>
+<CaseStudyLayout title="Receipts: the Go platform" description="The Go API, generated contracts, and Postgres job lifecycle behind Receipts." threads={threads} initialThread={initialThread}>
   <p slot="intro">An image can finish uploading and still fail during processing. I built the platform around those intermediate states, so the product can explain what is happening and the work has a recorded path through failure.</p>
   <dl slot="meta" class="case-meta" aria-label="Case study summary">
     <div><dt>Context</dt><dd>Receipts / Lead Engineer / 2026</dd></div>
@@ -79,7 +79,7 @@ const initialThread = "contracts";
     </div>
   </CaseStudySection>
 
-  <CaseStudySection id="case-result" title="What it enables">
+  <CaseStudySection id="case-result" title="Outcome">
     <div class="case-prose"><p>The platform records the stages between an upload and a publishable image. Retryable work can be scheduled again, terminal failures keep a status, and the client has a specific state to show.</p></div>
   </CaseStudySection>
 

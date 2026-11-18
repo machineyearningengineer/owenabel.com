@@ -88,7 +88,7 @@ export function mountKoiPond(canvas: HTMLCanvasElement, surface: HTMLElement) {
     canvas.height = Math.round(height * scale);
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     if (fish.length === 0 && width > 0)
-      fish = Array.from({ length: FISH }, () => spawn(width, height));
+      fish = Array.from({ length: width < 600 ? 3 : FISH }, () => spawn(width, height));
   };
 
   const swim = (f: Fish, dt: number) => {

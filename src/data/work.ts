@@ -12,6 +12,7 @@ type WorkStream = {
 export type CaseStudy = {
   label: string;
   href: string;
+  exhibit: { src: string; caption: string };
 };
 
 export type WorkItem = {
@@ -60,12 +61,20 @@ export const work: WorkItem[] = [
     ],
     caseNotes: [
       {
-        label: "Fête Finder: discovery, planning, and sharing",
+        label: "Fête Finder: finding a night out",
         href: "/work/fete-finder-discovery",
+        exhibit: {
+          src: "/exhibits/fete-recap.webp",
+          caption: "The 2026 recap page, with the route of the night drawn over Paris.",
+        },
       },
       {
-        label: "Fête Finder: data, operations, and lifecycle",
+        label: "Fête Finder: running the programme",
         href: "/work/fete-finder-operations",
+        exhibit: {
+          src: "/exhibits/fete-archive.webp",
+          caption: "The archive of Paris listings that the operations tools keep up to date.",
+        },
       },
     ],
     role: "Product Engineer",
@@ -91,12 +100,30 @@ export const work: WorkItem[] = [
       "Guests can find event information and photos in one place; hosts have tools for admission, participation, and follow-up.",
     links: [{ label: "milkandhenny.com", href: "https://milkandhenny.com" }],
     caseNotes: [
-      { label: "Milk & Henny: running the night", href: "/work/milk-and-henny-operations" },
       {
-        label: "Milk & Henny: games that bring the room together",
-        href: "/work/milk-and-henny-games",
+        label: "Milk & Henny: running the night",
+        href: "/work/milk-and-henny-operations",
+        exhibit: {
+          src: "/exhibits/milk-event.webp",
+          caption: "An event page: details, tickets and, once it sells out, a waitlist.",
+        },
       },
-      { label: "Milk & Henny: keeping the memories", href: "/work/milk-and-henny-media" },
+      {
+        label: "Milk & Henny: games for the room",
+        href: "/work/milk-and-henny-games",
+        exhibit: {
+          src: "/exhibits/milk-things.webp",
+          caption: "The games and tools index at milkandhenny.com/things.",
+        },
+      },
+      {
+        label: "Milk & Henny: keeping the photos",
+        href: "/work/milk-and-henny-media",
+        exhibit: {
+          src: "/exhibits/milk-pics.webp",
+          caption: "Published albums at milkandhenny.com/pics.",
+        },
+      },
     ],
     role: "Founder & Host",
     stack: "TanStack Start · Effect · Postgres · Redis",
@@ -162,12 +189,20 @@ export const work: WorkItem[] = [
     ],
     caseNotes: [
       {
-        label: "Open Policy Finder: search, documentation, and data quality",
+        label: "Open Policy Finder: search and data quality",
         href: "/work/open-policy-finder",
+        exhibit: {
+          src: "/exhibits/opf-home.webp",
+          caption: "The Open Policy Finder home page and journal search.",
+        },
       },
       {
-        label: "Jisc website: infrastructure and publishing",
+        label: "Jisc website: moving to Fargate",
         href: "/work/jisc-website",
+        exhibit: {
+          src: "/exhibits/jisc-home.webp",
+          caption: "The Jisc home page, served from AWS ECS Fargate since the migration.",
+        },
       },
     ],
     role: "Senior Software Developer",
@@ -194,12 +229,20 @@ export const work: WorkItem[] = [
     links: [{ label: "receipts.beauty", href: "https://receipts.beauty" }],
     caseNotes: [
       {
-        label: "Receipts: evidence, multimodal search, and ranking",
+        label: "Receipts: search you can check",
         href: "/work/receipts-discovery",
+        exhibit: {
+          src: "/exhibits/receipts-photo-search.webp",
+          caption: "Searching with a photo: pick a look, then see who has done that work.",
+        },
       },
       {
-        label: "Receipts: Go platform, media jobs, and operations",
+        label: "Receipts: the Go platform",
         href: "/work/receipts-platform",
+        exhibit: {
+          src: "/exhibits/receipts-feed.webp",
+          caption: "The discovery feed, which only shows media that has finished processing.",
+        },
       },
     ],
     role: "Lead Engineer",
@@ -223,6 +266,9 @@ export const getFeaturedWork = () =>
     stack: item.stack,
     exhibit: item.exhibit,
   }));
+
+export const getCaseStudy = (href: string) =>
+  work.flatMap((item) => item.caseNotes).find((caseNote) => caseNote.href === href);
 
 export const getRelatedCaseStudies = (href: string) => {
   const parent = work.find((item) => item.caseNotes.some((caseNote) => caseNote.href === href));

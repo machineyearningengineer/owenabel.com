@@ -2,26 +2,17 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getFeaturedWork } from "../data/work";
 
-const cvHref = "/owen-abel-amenze-cv.pdf?v=6b188052ea8a";
-
 const lineItems = [
-  [
-    "01",
-    "Product systems",
-    "Event search, maps and saved routes; ticketing, check-in and party games",
-    "Next.js · TanStack Start · MapLibre",
-  ],
+  ["01", "Product systems", "Event search, maps and saved routes; ticketing, check-in and party games"],
   [
     "02",
     "Search & data",
     "Policy search on PostgreSQL in place of Elasticsearch; visual search that shows the evidence behind each result",
-    "PostgreSQL · Go · ConnectRPC",
   ],
   [
     "03",
     "Reliability",
     "Led the Jisc website's move to AWS Fargate after scaling issues, with Terraform previews and release checks",
-    "AWS ECS Fargate · Terraform",
   ],
 ];
 
@@ -44,17 +35,31 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 <BaseLayout>
   <section class="hero" aria-labelledby="intro-title" data-ledger-surface>
     <canvas class="koi-pond" aria-hidden="true" data-koi-pond></canvas>
+    <h1 id="intro-title" class="visually-hidden">
+      Owen Abel Amenze, senior software engineer in London
+    </h1>
     <div class="hero-grid">
-      <div class="identity">
-        <h1 id="intro-title">Owen Abel Amenze</h1>
-        <p>
-          I'm a senior software engineer building products people use and the systems that keep them dependable, from search and data to live events.
-        </p>
-        <div class="hero-actions" aria-label="Primary actions">
-          <a class="button-link" href="#selected-work">Selected work</a>
-          <a class="button-link" href="/book">Book a 20-minute intro</a>
-        </div>
-      </div>
+      <table class="ledger">
+        <caption>I&rsquo;m an engineer. That means I solve problems. What kind of problems?</caption>
+        <thead>
+          <tr>
+            <th scope="col">No.</th>
+            <th scope="col">Area</th>
+            <th scope="col">Shipped</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            lineItems.map(([no, area, shipped]) => (
+              <tr>
+                <td>{no}</td>
+                <td>{area}</td>
+                <td>{shipped}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
 
       <aside class="invoice-box" aria-label="At a glance">
         <dl>
@@ -66,8 +71,8 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
           <dd><span data-london-clock>{londonTime}</span></dd>
           <dt>Status:</dt>
           <dd class="status-open">Open to work</dd>
-          <dt>Reach:</dt>
-          <dd>54,295 views · Jun 2026</dd>
+          <dt>Intro:</dt>
+          <dd><a href="/book">Book 20 minutes →</a></dd>
           <dt>Email:</dt>
           <dd class="invoice-email">
             <!--email_off-->
@@ -81,41 +86,12 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
         <p class="invoice-hint" aria-hidden="true">Tap the paper.</p>
       </aside>
     </div>
-
-    <div class="section">
-      <table class="ledger">
-        <caption>The kinds I work on</caption>
-        <thead>
-          <tr>
-            <th scope="col">No.</th>
-            <th scope="col">Area</th>
-            <th scope="col">Shipped</th>
-            <th scope="col">Stack</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            lineItems.map(([no, area, shipped, stack]) => (
-              <tr>
-                <td>{no}</td>
-                <td>{area}</td>
-                <td>{shipped}</td>
-                <td>{stack}</td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
-      <hr class="rule double-rule" />
-    </div>
   </section>
 
   <section class="home-continuation" id="selected-work" aria-labelledby="selected-work-heading">
     <div class="section-header">
       <h2 id="selected-work-heading">Work</h2>
-      <p>
-        A few problems I've worked on, and the systems I built to solve them.
-      </p>
+      <p>Each project opens a case study: the problem, what I built, and what happened.</p>
     </div>
 
     <div class="work-list home-work-list">
@@ -139,6 +115,7 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
                 height="600"
                 loading="lazy"
                 decoding="async"
+                style={`view-transition-name: exhibit-${item.href.split("/").pop()}`}
               />
               <span>Exh. {exhibitMarks[index]}</span>
             </a>
@@ -150,32 +127,6 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
     <p class="continuation-link">
       <a href="/work">View the full work ledger</a>
     </p>
-  </section>
-
-  <section class="home-continuation" id="contact" aria-labelledby="home-contact-heading">
-    <div class="section-header">
-      <h2 id="home-contact-heading">Contact</h2>
-      <p>Hit me up anytime.</p>
-    </div>
-
-    <div class="contact-panel home-contact-panel">
-      <div class="contact-row">
-        <span>Email</span>
-        <!--email_off-->
-        <a href="mailto:work@owenabel.com">work@owenabel.com</a>
-        <!--/email_off-->
-      </div>
-      <div class="contact-row">
-        <span>Links</span>
-        <span>
-          <a href="/book">Book a 20-minute intro</a>
-          <span aria-hidden="true"> / </span>
-          <a href="/contact">Contact page</a>
-          <span aria-hidden="true"> / </span>
-          <a href={cvHref}>CV</a>
-        </span>
-      </div>
-    </div>
   </section>
 </BaseLayout>
 

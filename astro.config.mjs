@@ -6,5 +6,5 @@ export default defineConfig({
   output: "static",
   trailingSlash: "never",
   build: { format: "file" },
-  integrations: [sitemap({ filter: (page) => !page.includes("/lab/") })],
+  integrations: [sitemap()],
 });
