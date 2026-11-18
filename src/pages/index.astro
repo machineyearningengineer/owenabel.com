@@ -43,10 +43,9 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 
 <BaseLayout>
   <section class="hero" aria-labelledby="intro-title" data-ledger-surface>
-    <canvas class="ledger-field" aria-hidden="true" data-ledger-field></canvas>
+    <canvas class="koi-pond" aria-hidden="true" data-koi-pond></canvas>
     <div class="hero-grid">
       <div class="identity">
-        <p class="eyebrow">Engineering ledger</p>
         <h1 id="intro-title">Owen Abel Amenze</h1>
         <p>
           I'm a senior software engineer building products people use and the systems that keep them dependable, from search and data to live events.
@@ -54,7 +53,6 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
         <div class="hero-actions" aria-label="Primary actions">
           <a class="button-link" href="#selected-work">Selected work</a>
           <a class="button-link" href="/book">Book a 20-minute intro</a>
-          <a class="button-link" href={cvHref}>CV (PDF)</a>
         </div>
       </div>
 
@@ -182,11 +180,11 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 </BaseLayout>
 
 <script>
-  import { mountLedgerField } from "../scripts/ledger-field";
+  import { mountKoiPond } from "../scripts/koi-pond";
 
-  const canvas = document.querySelector<HTMLCanvasElement>("[data-ledger-field]");
+  const canvas = document.querySelector<HTMLCanvasElement>("[data-koi-pond]");
   const surface = document.querySelector<HTMLElement>("[data-ledger-surface]");
-  if (canvas && surface) mountLedgerField(canvas, surface);
+  if (canvas && surface) mountKoiPond(canvas, surface);
 
   const clock = document.querySelector<HTMLElement>("[data-london-clock]");
   const formatTime = new Intl.DateTimeFormat("en-GB", {

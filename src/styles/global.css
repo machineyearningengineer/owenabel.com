@@ -1355,42 +1355,34 @@ html[data-theme="dark"] .invoice-box::before {
   color: var(--muted);
 }
 
-/* Living ledger: the @abel field shows through the paper, tap to ripple. */
+/* Koi pond: ink koi swim under the hero paper; tap to ripple. */
 .hero {
   position: relative;
   isolation: isolate;
 }
 
-.ledger-field {
+.identity h1 {
+  max-width: none;
+  font-size: clamp(40px, 5.4vw, 68px);
+  line-height: 1;
+}
+
+.koi-pond {
   position: absolute;
   z-index: -1;
-  top: -140px;
+  top: -120px;
   left: 50%;
   width: 100vw;
-  height: calc(100% + 140px);
+  height: calc(100% + 120px);
   transform: translateX(-50%);
   opacity: 0;
   pointer-events: none;
-  mask-image: radial-gradient(
-    ellipse 62% 52% at 76% 46%,
-    black 0%,
-    rgba(0, 0, 0, 0.6) 50%,
-    transparent 86%
-  );
-  mix-blend-mode: multiply;
-  transition: opacity 1400ms ease;
+  mask-image: linear-gradient(transparent, black 18%, black 82%, transparent);
+  transition: opacity 1200ms ease;
 }
 
-.ledger-field[data-ready="true"] {
-  opacity: 0.62;
-}
-
-html[data-theme="dark"] .ledger-field {
-  mix-blend-mode: screen;
-}
-
-html[data-theme="dark"] .ledger-field[data-ready="true"] {
-  opacity: 0.95;
+.koi-pond[data-ready="true"] {
+  opacity: 1;
 }
 
 .invoice-box dd a {
@@ -1539,10 +1531,6 @@ html[data-theme="dark"] .ledger-field[data-ready="true"] {
   .ledger th:nth-child(4),
   .ledger td:nth-child(4) {
     display: none;
-  }
-
-  .ledger-field {
-    mask-image: radial-gradient(ellipse 90% 50% at 70% 22%, black, transparent 80%);
   }
 }
 
