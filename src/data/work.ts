@@ -225,7 +225,7 @@ export const legacyCaseStudies: Record<string, string> = {
   "/work/fete-finder-discovery": "/work/fete-finder#how-it-works",
   "/work/fete-finder-operations": "/work/fete-finder#under-the-hood",
   "/work/milk-and-henny-operations": "/work/milk-and-henny#how-it-works",
-  "/work/milk-and-henny-games": "/work/milk-and-henny#live-rooms",
+  "/work/milk-and-henny-games": "/work/milk-and-henny#games",
   "/work/milk-and-henny-media": "/work/milk-and-henny#photos",
   "/work/receipts-discovery": "/work/receipts#how-it-works",
   "/work/receipts-platform": "/work/receipts#under-the-hood",

@@ -5,7 +5,7 @@ export default {
   year: "2026",
   title: "NAIRAA & Chill",
   kind: "Live site",
-  line: "The site for a London music collective's nights, sets and merch. Its moments room flies you down a tunnel made of the night's photos.",
+  line: "The site for a London music collective's nights, sets and merch: a curved strip of photo doors you swipe through, each opening onto part of the night.",
   stack: ["TanStack Start", "React", "WebGL", "Cloudflare Workers"],
   built: "Sep–Nov 2026",
   runs: "The live site, on Cloudflare Workers",
@@ -13,7 +13,7 @@ export default {
   open: { label: "nairaandchill.owenabel.com", href: "https://nairaandchill.owenabel.com" },
   clip: {
     caption:
-      "The homepage's strip of photo doors, then the moments door: a floor of photo rings that tips into a tunnel.",
+      "The homepage loading, a swipe through its curved strip of photo doors, then the moments door: a floor of photos that tips into a tunnel.",
     live: { host: "nairaandchill.owenabel.com", href: "https://nairaandchill.owenabel.com" },
   },
   testing: [
