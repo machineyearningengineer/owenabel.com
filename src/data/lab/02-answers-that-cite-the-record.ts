@@ -9,6 +9,12 @@ export default {
   stack: ["Python", "FastAPI", "SQLite", "OpenAI"],
   built: "Nov 2026",
   runs: "Recorded answers, replayed in your browser",
+  source: [
+    {
+      label: "Source on GitHub, as submitted",
+      href: "https://github.com/machineyearningengineer/emma-care-agent",
+    },
+  ],
   open: { label: "care-agent.owenabel.com", href: "https://care-agent.owenabel.com" },
   clip: {
     caption:
