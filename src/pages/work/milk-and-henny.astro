@@ -1,0 +1,160 @@
+---
+import StoryLayout from "../../layouts/StoryLayout.astro";
+import StoryChapter from "../../components/StoryChapter.astro";
+import CaseJourney from "../../components/CaseJourney.astro";
+import Clip from "../../components/Clip.astro";
+
+const steps = [
+  {
+    key: "tickets",
+    label: "Get a ticket",
+    text: [
+      "Each night has its own page with the timetable, the food and the tickets, sold through Stripe Checkout on the site itself. Guests sign in with a one-time email link and can add a passkey.",
+      "Before the night, an email tells each guest their team name and colour, and the QR code on their ticket comes framed in that colour. Amber, Sage, Plum or Sky.",
+    ],
+    caption: "An event page, from the details down to the tickets. Nothing is bought.",
+  },
+  {
+    key: "door",
+    label: "Through the door",
+    text: [
+      "Staff scan the QR at the door. If the signal goes, the scanner keeps working offline, catches a ticket scanned twice on the same phone with a plain “Already scanned on this device”, and replays its queue when the signal comes back.",
+      "There's no clip of this one: it only exists on a staff phone, on the night.",
+    ],
+  },
+  {
+    key: "games",
+    label: "Games on the TV",
+    text: [
+      "The games run on the venue's screen, with phones as controllers. In Family Feud the TV shows the board and a one-use QR code, and the MC's phone becomes the host controller, with the answers the room can't see yet.",
+      "There are a dozen games on the shelf, from Mafia and Imposter to a spelling bee, plus an icebreaker that reveals your event colour and helps you meet someone new.",
+    ],
+    caption: "Family Feud's setup: the board goes on this screen, and the TV shows a one-use QR code for the MC's phone. No room is started.",
+  },
+  {
+    key: "pitch-night",
+    label: "Pitch Night",
+    text: [
+      "Pitch Night is the part of the evening where you take the mic and try to convince a room of strangers. A bad business idea, an unpopular opinion, or the conspiracy theory you've been sitting on for years.",
+      "The site's own pitch: “Bring a pitch, an unpopular opinion, or a conspiracy theory. We'll give it a mic, a projector, and a room ready to be convinced.” After that, it promises, everyone will “dance until the room forgets it had chairs.”",
+    ],
+    caption: "The Pitch Night page for After School Club.",
+  },
+  {
+    key: "studio",
+    label: "Build your slides early",
+    text: [
+      "Nobody wants to make slides at a party, so guests make them before. Pitch Night Studio gives you six slides, and publishing seals them into a public snapshot.",
+      "On the night the host puts the deck on the big screen. The presenter scans a QR code, the host lets them in, and they move through their slides from their own phone.",
+    ],
+    caption: "The wall of published pitches, then one of them.",
+  },
+  {
+    key: "photos",
+    label: "The photos",
+    text: [
+      "Afterwards the photos go up as albums. Browsing uses smaller images prepared in advance. Downloading an original checks that the album is published, then hands out a signed link. Private batches go through transfers that expire.",
+    ],
+    caption: "Opening an album, then one of its photos.",
+  },
+];
+
+const chapters = [
+  { id: "problem", label: "The problem" },
+  { id: "how-it-works", label: "How the night works" },
+  { id: "what-happened", label: "What happened" },
+  {
+    id: "under-the-hood",
+    label: "Under the hood",
+    children: [
+      { id: "payments", label: "Payment that's safe to retry" },
+      { id: "the-door", label: "A door with no signal" },
+      { id: "live-rooms", label: "Live rooms" },
+      { id: "writing-it-down", label: "Writing it down" },
+    ],
+  },
+  { id: "lessons", label: "What I learned" },
+];
+---
+
+<StoryLayout
+  title="Milk & Henny"
+  description="One site that runs a whole party: tickets, the door, games on the TV and the photos afterwards, and how it's kept from breaking."
+  meta={[
+    { label: "Role", value: "Founder, host and engineer" },
+    { label: "Years", value: "2025–26" },
+    { label: "Stack", value: "TanStack Start · Postgres · Redis · Stripe · Railway" },
+    { label: "Live", value: "milkandhenny.com", href: "https://milkandhenny.com" },
+  ]}
+  chapters={chapters}
+  groups={[{ id: "night", threads: steps }]}
+>
+  <StoryChapter id="problem" title="The problem">
+    <div class="story-prose">
+      <p>I host parties in London. A night like that is a lot of small jobs: selling tickets, getting people through the door, getting strangers talking, and sending everyone the photos afterwards.</p>
+      <p>I could have glued that together from separate tools. Instead one site does all of it, and I'm the one running it on the night. When something breaks, I'm the person standing at the door.</p>
+      <p>That's the brief I hold it to: the night must not break. Not when two payment messages race, not when the door loses signal, not when someone's phone drops out of a game.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="how-it-works" title="How the night works" group="night">
+    <div class="story-prose">
+      <p>From the ticket to the photos, recorded on the live site wherever there's a public screen to show.</p>
+    </div>
+    <CaseJourney project="milk-and-henny" steps={steps} />
+  </StoryChapter>
+
+  <StoryChapter id="what-happened" title="What happened">
+    <div class="story-prose">
+      <p>It's real, and it's small. A read-only production query in September 2026 counted 119 tickets across three events, and 908 emails sent through the outbox. That's enough to find the real failure modes. It isn't scale, and I won't pretend it is.</p>
+      <p>The games are built and tested in software, but playtests with real groups are still to come. The playtest log is blunt about it: empty observations are pending, not passes.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="under-the-hood" title="Under the hood" part>
+    <div class="story-prose">
+      <p>For engineers: where money, doors and phones meet the software, and how each one is kept honest.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="payments" title="Payment that's safe to retry" level={3}>
+    <div class="story-prose">
+      <p>When a guest pays, two things happen: Stripe sends a webhook, and the guest lands on a success page. Either can arrive first, either can arrive twice, and either can die halfway through.</p>
+      <p>Both call the same fulfilment, and it only goes ahead if it can claim the order with one conditional update, from pending to fulfilling. A claim that has been stuck for more than two minutes can be taken over, so a crashed attempt never strands a ticket.</p>
+      <p>If the last tickets sell out between paying and fulfilling, the guest gets a refund automatically. The comment in the code says it better than I can: “Give the money back rather than hold it for an event they cannot attend.”</p>
+      <p>Refunds, failed refunds and disputes come back through the same webhook. Win a dispute and the voided tickets are restored.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="the-door" title="A door with no signal" level={3}>
+    <div class="story-prose">
+      <p>Online, check-in claims an unused ticket inside a Postgres transaction, so if two scanners submit the same ticket only one wins.</p>
+      <p>Offline, the scanner works from a list of shortened hashes rather than the tickets themselves, because, in the code's words, “a device left in a taxi cannot be turned into a ticket forgery kit.” The offline queue is a pure function, capped at 5,000 admissions a shift.</p>
+      <p>It catches a duplicate scan on the same phone. Two phones offline at the same time can't settle a duplicate between them, so those still need reconciling afterwards, and the design says so instead of pretending otherwise.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="live-rooms" title="Live rooms" level={3}>
+    <div class="story-prose">
+      <p>Phones drop out of games all the time: a lock screen, a tunnel, a flat battery. Each room changes state through a pure reducer, every action carries an ID, and the engine remembers which IDs it has already applied. A phone that resends after reconnecting gets the earlier result replayed, not applied twice.</p>
+      <p>In Redis, a room is guarded by a lock that expires after 15 seconds and can only be released by whoever holds it, so a lock that lapsed and passed to someone else is never pulled from under them.</p>
+      <p>The Postgres version locks the room row, stores a receipt for each action with the room's revision number, and writes the game result to an outbox in the same transaction.</p>
+    </div>
+    <Clip project="milk-and-henny" beat="rejoin" caption="Rejoining a room by its code in Imposter. The code is typed, never sent." />
+  </StoryChapter>
+
+  <StoryChapter id="writing-it-down" title="Writing it down" level={3}>
+    <div class="story-prose">
+      <p>Emails and game results leave through an outbox, written in the same transaction as the change that caused them. If the process dies, the work is still there to finish.</p>
+      <p>When things go wrong they get a postmortem. One idle media worker quietly used 450,061 of a 500,000-command free Redis allowance. Another bug read the guest list once a second, for no reason at all.</p>
+      <p>Before an event there's an event-night readiness ledger. Each check is graded by its evidence: seen in a browser, checked at the API and database, covered by a test, checked physically on the night, or still open. At its last count it recorded 1,448 passing tests and 12 browser journeys.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="lessons" title="What I learned">
+    <div class="story-prose">
+      <p>Hosting is the best test I know. Can someone understand this screen while a queue is forming? Can the room keep playing when one phone drops?</p>
+      <p>That makes the recovery path part of the main design. The failed scan, the double payment message and the reconnecting phone aren't edge cases on a party night. They're what a normal night looks like.</p>
+    </div>
+  </StoryChapter>
+</StoryLayout>

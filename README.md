@@ -23,7 +23,7 @@ pnpm run preview:workers
 ```
 
 The build checks formatting, lint and types, generates OG images and canonical
-redirects, builds 14 static pages, packages them with cf, and verifies packaged
+redirects, builds 8 static pages, packages them with cf, and verifies packaged
 files byte for byte. Output is `workers/.cloudflare/output/v0/`, not just Astro's
 intermediate `dist/`. `preview` previews Astro; `dev:workers` runs cf/Vite against
 the latest Astro build. `preview:workers` and routing tests use the built
@@ -124,7 +124,12 @@ The homepage and contact-page CV links include a short content hash query so a
 new upload bypasses cached copies on the custom domain; update that query when
 replacing the PDF.
 
-Project summaries and case-study links are in `src/data/work.ts`. Case-study
-pages are in `src/pages/work/`; their share images are generated from
+Project summaries and case-study links are in `src/data/work.ts`. Each project
+has one story page in `src/pages/work/` (`StoryLayout`): hook, problem, a demo
+journey, what happened, then "Under the hood". The old per-topic case-study URLs
+are listed in `legacyCaseStudies` in `src/data/work.ts`, which drives their 301s
+and lets `<Cite>` keep accepting them. Journey clips are recorded from the live
+products into `public/journeys/<project>/<beat>.{webm,mp4,jpg}` (960px wide,
+silent, under about 600 KB each). Share images are generated from
 `scripts/generate-og.mjs` during the build. Keep claims aligned with the
 attributed records in the resume repository before publishing updates.

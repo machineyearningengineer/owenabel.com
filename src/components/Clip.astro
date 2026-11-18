@@ -1,0 +1,99 @@
+---
+// A short clip recorded from the live product: public/journeys/<project>/<beat>.{webm,mp4,jpg}.
+// MP4 comes first: for these screen recordings H.264 was usually the smaller file.
+// Muted and looped, it plays only while on screen. With reduced motion it
+// stays on the poster unless the reader presses Play; anyone can pause.
+interface Props {
+  project: string;
+  beat: string;
+  caption: string;
+}
+const { project, beat, caption } = Astro.props;
+const base = `/journeys/${project}/${beat}`;
+---
+
+<figure class="journey-clip">
+  <div class="journey-frame">
+    <video
+      muted
+      loop
+      playsinline
+      disablepictureinpicture
+      preload="none"
+      width="960"
+      height="600"
+      poster={`${base}.jpg`}
+      aria-label={caption}
+      data-journey-video
+    >
+      <source src={`${base}.mp4`} type="video/mp4" />
+      <source src={`${base}.webm`} type="video/webm" />
+    </video>
+    <button type="button" class="journey-toggle" data-journey-toggle hidden>Play</button>
+  </div>
+  <figcaption>{caption}</figcaption>
+</figure>
+
+<script>
+  import { onPage } from "../scripts/page";
+
+  onPage((signal) => {
+    const videos = [...document.querySelectorAll<HTMLVideoElement>("[data-journey-video]")];
+    if (!videos.length) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const visible = new Set<HTMLVideoElement>();
+
+    const toggleFor = (video: HTMLVideoElement) =>
+      video.parentElement?.querySelector<HTMLButtonElement>("[data-journey-toggle]");
+
+    const label = (video: HTMLVideoElement) => {
+      const toggle = toggleFor(video);
+      if (!toggle) return;
+      const playing = !video.paused;
+      toggle.textContent = playing ? "Pause" : "Play";
+      toggle.setAttribute("aria-label", `${playing ? "Pause" : "Play"} clip: ${video.getAttribute("aria-label")}`);
+    };
+
+    // Autoplay only on screen, never with reduced motion, never after a reader paused it.
+    const sync = (video: HTMLVideoElement) => {
+      const wanted = visible.has(video) && (video.dataset.choice === "play" || (!reduce.matches && video.dataset.choice !== "pause"));
+      if (wanted && video.paused) video.play().catch(() => {});
+      if (!wanted && !video.paused) video.pause();
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const video = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting) visible.add(video);
+          else visible.delete(video);
+          sync(video);
+        }
+      },
+      { threshold: 0.45 },
+    );
+
+    for (const video of videos) {
+      const toggle = toggleFor(video);
+      video.addEventListener("play", () => label(video), { signal });
+      video.addEventListener("pause", () => label(video), { signal });
+      toggle?.addEventListener(
+        "click",
+        () => {
+          video.dataset.choice = video.paused ? "play" : "pause";
+          if (video.paused) video.play().catch(() => {});
+          else video.pause();
+        },
+        { signal },
+      );
+      if (toggle) toggle.hidden = false;
+      label(video);
+      observer.observe(video);
+    }
+    reduce.addEventListener("change", () => videos.forEach(sync), { signal });
+    signal.addEventListener("abort", () => {
+      observer.disconnect();
+      videos.forEach((video) => video.pause());
+    });
+  });
+</script>

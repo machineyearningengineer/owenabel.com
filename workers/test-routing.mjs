@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { preview } from "vite";
+import { legacyCaseStudies } from "../src/data/work.ts";
 
 const server = await preview({ preview: { host: "127.0.0.1", port: 8789, strictPort: true } });
 try {
@@ -37,6 +38,17 @@ try {
     const response = await fetch(origin + path);
     assert.equal(response.status, 404, path);
     assert.equal(await response.text(), await readFile(new URL("404.html", assets), "utf8"));
+  }
+  // Merged case studies: each old URL lands on the chapter that replaced it.
+  for (const [from, to] of Object.entries(legacyCaseStudies)) {
+    const [path, anchor] = to.split("#");
+    for (const variant of [from, from + "/", from + ".html"]) {
+      const redirect = await fetch(origin + variant, { redirect: "manual" });
+      assert.equal(redirect.status, 301, variant);
+      const location = new URL(redirect.headers.get("location"), origin);
+      assert.equal(location.pathname + location.hash, to, variant);
+    }
+    assert.ok((await (await fetch(origin + path)).text()).includes(`id="${anchor}"`), to);
   }
   for (const file of ["og.png", "owen-abel-amenze-cv.pdf", "sitemap-index.xml", "robots.txt"]) {
     const response = await fetch(origin + "/" + file);

@@ -1,0 +1,121 @@
+---
+// A small boxes-and-arrows diagram in the ledger style, behind a native
+// <details>. Only draw what the case study text already says.
+// Coordinates are in viewBox units; edges route side to side or top to
+// bottom with one elbow, chosen from where the two boxes sit.
+type Box = { id: string; label: string; note?: string; x: number; y: number; w: number; h?: number };
+type Edge = { from: string; to: string; label?: string; both?: boolean; plain?: boolean };
+type Group = { id: string; label: string; x: number; y: number; w: number; h: number };
+
+interface Props {
+  id: string;
+  title: string;
+  summary: string;
+  width: number;
+  height: number;
+  boxes: Box[];
+  edges: Edge[];
+  groups?: Group[];
+}
+const { id, title, summary, width, height, boxes, edges, groups = [] } = Astro.props;
+const H = 52;
+const all = new Map<string, { x: number; y: number; w: number; h: number }>();
+for (const box of boxes) all.set(box.id, { ...box, h: box.h ?? H });
+for (const group of groups) all.set(group.id, group);
+
+const route = (edge: Edge) => {
+  const a = all.get(edge.from);
+  const b = all.get(edge.to);
+  if (!a || !b) throw new Error(`ArchitectureDiagram ${id}: unknown box in ${edge.from} → ${edge.to}`);
+  const horizontal = a.x + a.w <= b.x || b.x + b.w <= a.x;
+  if (horizontal) {
+    const right = a.x + a.w <= b.x;
+    const x1 = right ? a.x + a.w : a.x;
+    const x2 = right ? b.x : b.x + b.w;
+    const y1 = a.y + a.h / 2;
+    const y2 = b.y + b.h / 2;
+    const mx = (x1 + x2) / 2;
+    const d = y1 === y2 ? `M${x1} ${y1}H${x2}` : `M${x1} ${y1}H${mx}V${y2}H${x2}`;
+    return { d, lx: mx, ly: (y1 + y2) / 2 - 7 };
+  }
+  const down = a.y + a.h <= b.y;
+  const y1 = down ? a.y + a.h : a.y;
+  const y2 = down ? b.y : b.y + b.h;
+  // Use the overlap of the two boxes for a straight vertical line when there is one.
+  const lo = Math.max(a.x, b.x);
+  const hi = Math.min(a.x + a.w, b.x + b.w);
+  if (hi - lo > 20) {
+    const x = (lo + hi) / 2;
+    return { d: `M${x} ${y1}V${y2}`, lx: x + 8, ly: (y1 + y2) / 2 + 4, start: true };
+  }
+  const x1 = a.x + a.w / 2;
+  const x2 = b.x + b.w / 2;
+  const my = (y1 + y2) / 2;
+  return { d: `M${x1} ${y1}V${my}H${x2}V${y2}`, lx: (x1 + x2) / 2, ly: my - 7 };
+};
+const lines = edges.map((edge) => ({ edge, ...route(edge) }));
+---
+
+<details class="case-architecture">
+  <summary>View architecture</summary>
+  <figure>
+    <div class="case-architecture-scroll">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        width={width}
+        height={height}
+        role="img"
+        aria-labelledby={`${id}-title ${id}-desc`}
+      >
+        <title id={`${id}-title`}>{title}</title>
+        <desc id={`${id}-desc`}>{summary}</desc>
+        <defs>
+          <marker id={`${id}-arrow`} viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M0 0.5 L7.5 4 L0 7.5" fill="none" stroke="currentColor" stroke-width="1.2" />
+          </marker>
+        </defs>
+        {
+          groups.map((group) => (
+            <g class="arch-group">
+              <rect x={group.x} y={group.y} width={group.w} height={group.h} />
+              <text x={group.x + 10} y={group.y + 17}>{group.label}</text>
+            </g>
+          ))
+        }
+        {
+          lines.map(({ edge, d }) => (
+            <path
+              class="arch-edge"
+              d={d}
+              marker-end={edge.plain ? undefined : `url(#${id}-arrow)`}
+              marker-start={edge.both ? `url(#${id}-arrow)` : undefined}
+            />
+          ))
+        }
+        {
+          boxes.map((box) => (
+            <g class="arch-box">
+              <rect x={box.x} y={box.y} width={box.w} height={box.h ?? H} />
+              <text x={box.x + 10} y={box.y + (box.note ? 21 : (box.h ?? H) / 2 + 4)}>{box.label}</text>
+              {box.note && (
+                <text class="arch-note" x={box.x + 10} y={box.y + 38}>
+                  {box.note}
+                </text>
+              )}
+            </g>
+          ))
+        }
+        {
+          lines.map(({ edge, lx, ly, start }) =>
+            edge.label ? (
+              <text class="arch-label" x={lx} y={ly} text-anchor={start ? "start" : "middle"}>
+                {edge.label}
+              </text>
+            ) : null,
+          )
+        }
+      </svg>
+    </div>
+    <figcaption>{summary}</figcaption>
+  </figure>
+</details>

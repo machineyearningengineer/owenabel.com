@@ -1,0 +1,189 @@
+---
+import StoryLayout from "../../layouts/StoryLayout.astro";
+import StoryChapter from "../../components/StoryChapter.astro";
+import CaseJourney from "../../components/CaseJourney.astro";
+import ThreadLedger from "../../components/ThreadLedger.astro";
+import ArchitectureDiagram from "../../components/ArchitectureDiagram.astro";
+
+const steps = [
+  {
+    key: "photo",
+    label: "Show it a photo",
+    text: [
+      "Start with a picture of the look you want. Receipts reads it and comes back with work by real stylists that matches, each card showing whose work it is and where they are.",
+    ],
+    caption: "Picking a look on the home page, then the matches.",
+  },
+  {
+    key: "details",
+    label: "Keep what you care about",
+    text: [
+      "The details it read from the photo come back as suggestions, not decisions. You keep the ones that matter, like the cornrows or the colour, and set the rest aside.",
+      "Only kept details count as search criteria. A detail you set aside is parked, never deleted, so you can change your mind.",
+    ],
+    caption: "Opening the photo's details and setting one aside. The matches update.",
+  },
+  {
+    key: "why",
+    label: "See why it appeared",
+    text: [
+      "Every result can explain itself: which of your details the stylist's real work shows, whether reviews back it up, and how far away they are. When something's missing it says so, in a line like “Supported in knotless braids, but not in medium knotless braids.”",
+    ],
+    caption: "“Why this appeared” for one stylist: matched details, reviews and distance.",
+  },
+];
+
+const weights = [
+  { label: "Moderator confirmed", body: ["Counts in full (1.0)."] },
+  { label: "Verified review", body: ["0.8"] },
+  { label: "Accepted by a click", body: ["0.55"] },
+  { label: "Bulk confirmed", body: ["0.45"] },
+  { label: "Proposed by AI", body: ["Nothing (0). A model's guess is never proof."] },
+];
+
+const chapters = [
+  { id: "problem", label: "The problem" },
+  { id: "how-it-works", label: "How it works" },
+  { id: "what-happened", label: "How it measures up" },
+  {
+    id: "under-the-hood",
+    label: "Under the hood",
+    children: [
+      { id: "evidence-first", label: "Evidence first" },
+      { id: "ranking", label: "Likeness against evidence" },
+      { id: "evals", label: "The eval harness" },
+      { id: "jobs", label: "Jobs that can't finish twice" },
+      { id: "decisions", label: "Decision records" },
+    ],
+  },
+  { id: "lessons", label: "What I learned" },
+];
+---
+
+<StoryLayout
+  title="Receipts"
+  description="Visual search for beauty work where every result names its evidence, and the eval harness, ranking rules and decision records behind it."
+  meta={[
+    { label: "Role", value: "Lead engineer, 2026" },
+    { label: "Stage", value: "Early access, no external users" },
+    { label: "Stack", value: "Go · ConnectRPC · Postgres · pgvector · Voyage" },
+    { label: "Live", value: "receipts.beauty", href: "https://receipts.beauty" },
+  ]}
+  chapters={chapters}
+  groups={[{ id: "search", threads: steps }]}
+>
+  <StoryChapter id="problem" title="The problem">
+    <div class="story-prose">
+      <p>Choosing someone to do your hair usually starts with a photo you like. Provider profiles are full of photos too, and reviews, and claims. They all look like evidence, but they aren't the same kind.</p>
+      <p>A menu says what a stylist offers. A portfolio shows work they've done. A review is a client's experience. And a photo that only looks similar proves nothing at all.</p>
+      <p>Receipts keeps those apart, and tells you which one it's leaning on.</p>
+      <p>Two things up front. Receipts is in early access with no external users, so there's no traction to report. And it's built with coding agents: I lead the work, and my job is to keep it honest, through its rules, its decision records and its evals.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="how-it-works" title="How it works" group="search">
+    <div class="story-prose">
+      <p>Three steps on the live site, using one of the sample looks on the home page.</p>
+    </div>
+    <CaseJourney project="receipts" steps={steps} />
+  </StoryChapter>
+
+  <StoryChapter id="what-happened" title="How it measures up">
+    <div class="story-prose">
+      <p>With no users yet, the honest measure is an eval harness: labelled cases, scored on every recorded run.</p>
+    </div>
+    <table class="story-figures">
+      <caption class="visually-hidden">Receipts evaluation results</caption>
+      <tbody>
+        <tr><th scope="row">Labelled cases, across 12 suites</th><td>2,091</td></tr>
+        <tr><th scope="row">Recorded runs, each with its cost</th><td>104 (about $8 in total)</td></tr>
+        <tr><th scope="row">Related-looks feed, nDCG@12</th><td>0.58 (nearest-only: 0.25)</td></tr>
+        <tr><th scope="row">Photo domain accuracy</th><td>88.6% (101 of 114)</td></tr>
+        <tr><th scope="row">Safety</th><td>93.1% (217 of 233)</td></tr>
+      </tbody>
+    </table>
+    <div class="story-prose">
+      <p>The related-looks feed is the clearest result: the full ranking scores more than double plain nearest-neighbour search. Safety got 10 cases wrong by letting something through and 6 by blocking something fine, and both counts are on the record.</p>
+      <p>Not every label is human. Some were drafted by Claude and then reviewed by me; on the related feed I changed 14 of 950 grades.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="under-the-hood" title="Under the hood" part>
+    <div class="story-prose">
+      <p>For engineers: the rules, the ranking and the plumbing. No source code here, just how it works and why.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="evidence-first" title="Evidence first" level={3}>
+    <div class="story-prose">
+      <p>The first decision record sets the rule everything else follows: a stylist's public capability comes only from evidence a person has accepted. Model suggestions, visual similarity and the photos people upload to search never count as proof.</p>
+      <p>The product spec keeps six questions apart, each with its own owner. What is this? Does it match? Does the stylist offer it? Is the capability supported? Was the experience good? May this screen show it?</p>
+      <p>The record's short version: “Work proves the look; the menu makes it bookable.”</p>
+      <p>The product's north star follows from that. It isn't clicks or sign-ups; it's evidence-backed provider intent per active searcher, tracked weekly.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="ranking" title="Likeness against evidence" level={3}>
+    <div class="story-prose">
+      <p>Similarity can rank results, but it never decides who is eligible. The ranking policy splits the score six ways: the look 0.32, similarity 0.22, the provider 0.18, evidence 0.16, quality 0.08 and context 0.04.</p>
+      <p>Evidence is weighted by who confirmed it:</p>
+    </div>
+    <ThreadLedger head={["Source", "Weight"]} rows={weights} />
+    <div class="story-prose">
+      <p>Strength levels off as evidence piles up, a second independent kind of source adds more, and a stylist's own photos are capped. A hundred near-identical uploads can't outrank real reviews.</p>
+      <p>Photos are embedded as Voyage multimodal vectors with 512 dimensions and searched through pgvector HNSW indexes. In photo search, results are counted by the details you kept, not by likeness, and a detail you chose to avoid is a hard no.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="evals" title="The eval harness" level={3}>
+    <div class="story-prose">
+      <p>Each suite is a file of labelled cases, and each run is saved with its scores and what it cost. That's how 104 runs add up to about eight dollars, and how a change can be compared with the last one instead of argued about.</p>
+      <p>The metrics fit the job: nDCG@12 for ranked feeds, plain accuracy for classifying a photo, and for the photo-keep suite a one-sided 95% Wilson lower bound against a 0.95 bar, so a lucky small sample can't pass.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="jobs" title="Jobs that can't finish twice" level={3}>
+    <div class="story-prose">
+      <p>Postgres is the only job dispatcher. Temporal, Inngest and River were weighed and turned down in the decision record.</p>
+      <p>Workers claim jobs with <code>FOR UPDATE SKIP LOCKED</code>. Each job carries a lease token, an expiry, a lease generation, a work generation and the revision of the thing it's working on. A job may publish only in one fenced commit, while its lease is live and both generations still match, so a slow worker that lost its lease can't overwrite a newer attempt.</p>
+      <p>On 11 November that design met a bad day. Production commits started taking up to 19 seconds on a stalled disk, and every commit that sent a Postgres <code>NOTIFY</code> held the database's single notification lock until its write finished. Enqueues queued up behind each other and about 250 scheduled ticks an hour failed with lock timeouts.</p>
+      <p>The fix replaced <code>NOTIFY</code> with a 250 ms polling check. A regression test now reproduces the convoy, and code generation refuses any query that sends a <code>NOTIFY</code>.</p>
+    </div>
+    <ArchitectureDiagram
+      id="arch-receipts"
+      title="How Receipts fits together"
+      summary="The web app talks to a Go API through generated ConnectRPC clients. Postgres is the source of truth and the only job queue, with pgvector indexes for photo embeddings. Workers claim jobs by lease and publish in one fenced commit; they call a vision model to read each photo and Voyage to embed it."
+      width={760}
+      height={290}
+      boxes={[
+        { id: "web", label: "Web app", note: "generated TS client", x: 20, y: 40, w: 160 },
+        { id: "api", label: "Go API", note: "ConnectRPC · Protobuf", x: 260, y: 40, w: 200 },
+        { id: "pg", label: "Postgres", note: "truth · job queue · pgvector", x: 260, y: 220, w: 200 },
+        { id: "workers", label: "Workers", note: "claim by lease · fenced commit", x: 520, y: 220, w: 220 },
+        { id: "vision", label: "Vision model", note: "reads each photo", x: 480, y: 110, w: 130 },
+        { id: "voyage", label: "Voyage", note: "embeddings", x: 630, y: 110, w: 110 },
+      ]}
+      edges={[
+        { from: "web", to: "api", both: true },
+        { from: "api", to: "pg", both: true },
+        { from: "workers", to: "pg", both: true },
+        { from: "workers", to: "vision" },
+        { from: "workers", to: "voyage" },
+      ]}
+    />
+  </StoryChapter>
+
+  <StoryChapter id="decisions" title="Decision records" level={3}>
+    <div class="story-prose">
+      <p>There are 12 live decision records, which absorbed 164 older ones. They cover evidence and taxonomy, media and safety, identity and private data, ranking, the photo composer, data and jobs, delivery, money and messages, operations and evals, verification, and how contracts and agents fit together.</p>
+      <p>My favourite is “The System Answers For Itself”: anything that code or a command can answer is never written down in the docs. It came from an audit. The docs had grown to 706,000 words full of stale copies, and some runbooks were prescribing destructive resets.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="lessons" title="What I learned">
+    <div class="story-prose">
+      <p>When coding agents do the building, the engineering moves to the things that keep it true: the rules about what counts as evidence, the evals that say whether a change helped, and the tests that pin an incident down so it can't come back.</p>
+      <p>A claim on a results page should be as checkable as the code behind it. That's the whole product, really.</p>
+    </div>
+  </StoryChapter>
+</StoryLayout>

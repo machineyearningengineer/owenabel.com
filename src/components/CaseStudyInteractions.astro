@@ -1,130 +1,207 @@
 <script>
+  // Reading controls for story pages.
+  // - Threads: [data-thread-control] buttons, keys 1/2/3 and ←/→ select a step;
+  //   every [data-thread] node with that key is highlighted. Buttons are grouped
+  //   per chapter ([data-thread-buttons]); the bar shows the group being read.
+  // - Journey steps follow the scroll: the step on screen becomes the thread.
+  // - ↑/↓ move between chapters ([data-case-section]); Escape clears.
+  // - The chapter tree marks where you are, and the progress bar fills.
   import { onPage } from "../scripts/page";
 
   onPage((signal) => {
-  const caseNote = document.querySelector<HTMLElement>("[data-case-note]");
-  if (caseNote) {
-    const threadControls = Array.from(caseNote.querySelectorAll<HTMLButtonElement>("[data-thread-control]"));
-    const controls = threadControls;
-    const related = caseNote.querySelectorAll<HTMLElement>("[data-thread]");
-    const sections = Array.from(caseNote.querySelectorAll<HTMLElement>("[data-case-section]"));
+    const caseNote = document.querySelector<HTMLElement>("[data-case-note]");
+    if (!caseNote) return;
+
+    const controls = [...caseNote.querySelectorAll<HTMLButtonElement>("[data-thread-control]")];
+    const related = [...caseNote.querySelectorAll<HTMLElement>("[data-thread]")];
+    const sections = [...caseNote.querySelectorAll<HTMLElement>("[data-case-section]")];
+    const groupSections = [...caseNote.querySelectorAll<HTMLElement>("[data-thread-group]")];
+    const buttonSets = [...caseNote.querySelectorAll<HTMLElement>("[data-thread-buttons]")];
+    const steps = [...caseNote.querySelectorAll<HTMLElement>("[data-journey-step]")];
+    const treeLinks = [...caseNote.querySelectorAll<HTMLAnchorElement>("[data-tree-link]")];
+    const currentChapter = caseNote.querySelector<HTMLElement>("[data-current-chapter]");
+    const mobileTree = caseNote.querySelector<HTMLDetailsElement>("[data-mobile-tree]");
+    const progressBars = [...caseNote.querySelectorAll<HTMLElement>("[data-progress-bar]")];
+    const progressValues = [...caseNote.querySelectorAll<HTMLElement>("[data-progress-value]")];
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const anchorY = () => window.scrollY + window.innerHeight * 0.3;
+    const top = (node: HTMLElement) => node.getBoundingClientRect().top + window.scrollY;
+
+    // ---- Threads ----
+    const groupControls = () => {
+      const set = buttonSets.find((node) => node.dataset.threadButtons === caseNote.dataset.activeGroup);
+      return set ? [...set.querySelectorAll<HTMLButtonElement>("[data-thread-control]")] : controls;
+    };
 
     const applyThread = (key?: string) => {
       caseNote.dataset.activeThread = key ?? "";
-
-      related.forEach((node) => {
-        const active = Boolean(key) && node.dataset.thread === key;
-        node.toggleAttribute("data-active", active);
-      });
-
-      threadControls.forEach((control) => {
+      related.forEach((node) => node.toggleAttribute("data-active", Boolean(key) && node.dataset.thread === key));
+      controls.forEach((control) => {
         const active = Boolean(key) && control.dataset.threadControl === key;
         control.toggleAttribute("data-active", active);
         control.setAttribute("aria-pressed", String(active));
       });
     };
 
-    const toggleThread = (key?: string) => {
-      applyThread(caseNote.dataset.activeThread === key ? undefined : key);
+    // A step in the chapter being read, if the chosen thread has one there.
+    const stepInView = (key?: string) => {
+      const section = groupSections.find((node) => node.dataset.threadGroup === caseNote.dataset.activeGroup && node.contains(document.activeElement ?? null))
+        ?? groupSections.filter((node) => node.dataset.threadGroup === caseNote.dataset.activeGroup && top(node) <= anchorY()).pop();
+      return section?.querySelector<HTMLElement>(`[data-journey-step="${key}"]`);
     };
 
-    const activeThreadIndex = () => {
-      const index = controls.findIndex(
-        (control) => control.dataset.threadControl === caseNote.dataset.activeThread,
-      );
-      return index < 0 ? 0 : index;
+    let followUntil = 0;
+    const selectThread = (key?: string) => {
+      applyThread(key);
+      const step = key ? stepInView(key) : undefined;
+      if (step) {
+        followUntil = performance.now() + 900;
+        step.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" });
+      }
     };
 
     const moveThread = (amount: number) => {
-      const nextControl =
-        controls[(activeThreadIndex() + amount + controls.length) % controls.length];
-
-      nextControl.focus({ preventScroll: true });
-      applyThread(nextControl.dataset.threadControl);
+      const set = groupControls();
+      const index = Math.max(0, set.findIndex((control) => control.dataset.threadControl === caseNote.dataset.activeThread));
+      const next = set[(index + amount + set.length) % set.length];
+      next.focus({ preventScroll: true });
+      selectThread(next.dataset.threadControl);
     };
 
-    const currentSectionIndex = () => {
-      const viewportAnchor = window.scrollY + window.innerHeight * 0.28;
-
-      for (let index = sections.length - 1; index >= 0; index -= 1) {
-        if (sections[index].offsetTop <= viewportAnchor) {
-          return index;
-        }
-      }
-
-      return -1;
-    };
-
-    const moveSection = (amount: number) => {
-      const currentIndex = currentSectionIndex();
-      const firstSectionTop = sections[0].offsetTop;
-      const isNearFirstSection = window.scrollY <= firstSectionTop;
-
-      if (amount < 0 && (currentIndex <= 0 || isNearFirstSection)) {
-        window.scrollTo({
-          top: Math.max(0, caseNote.offsetTop - 18),
-          behavior: "auto",
-        });
-        return;
-      }
-
-      const nextIndex = Math.min(Math.max(currentIndex + amount, 0), sections.length - 1);
-      sections[nextIndex].scrollIntoView({ behavior: "auto", block: "start" });
-    };
-
-    controls.forEach((control, index) => {
-      control.addEventListener("click", () => toggleThread(control.dataset.threadControl));
+    controls.forEach((control) => {
+      control.addEventListener("click", () =>
+        caseNote.dataset.activeThread === control.dataset.threadControl ? applyThread() : selectThread(control.dataset.threadControl),
+      );
       control.addEventListener("keydown", (event) => {
-        const keys = ["ArrowRight", "ArrowLeft", "Home", "End"];
-
-        if (!keys.includes(event.key)) {
-          return;
-        }
-
+        if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
         event.preventDefault();
-
-        const nextIndex =
-          {
-            ArrowRight: (index + 1) % controls.length,
-            ArrowLeft: (index - 1 + controls.length) % controls.length,
-            Home: 0,
-            End: controls.length - 1,
-          }[event.key as "ArrowRight" | "ArrowLeft" | "Home" | "End"] ?? index;
-        const nextControl = controls[nextIndex];
-
-        nextControl.focus({ preventScroll: true });
-        applyThread(nextControl.dataset.threadControl);
+        event.stopPropagation();
+        const set = groupControls();
+        const index = set.indexOf(control);
+        const next = {
+          ArrowRight: set[(index + 1) % set.length],
+          ArrowLeft: set[(index - 1 + set.length) % set.length],
+          Home: set[0],
+          End: set[set.length - 1],
+        }[event.key as "ArrowRight" | "ArrowLeft" | "Home" | "End"];
+        next.focus({ preventScroll: true });
+        selectThread(next.dataset.threadControl);
       });
     });
 
-    document.addEventListener("keydown", (event) => {
-      if (event.defaultPrevented || event.metaKey || event.altKey || event.ctrlKey) {
+    // Clicking a ledger row picks its thread (links inside still work).
+    caseNote.querySelectorAll<HTMLElement>(".case-ledger tr[data-thread]").forEach((row) => {
+      row.addEventListener("click", (event) => {
+        if (event.target instanceof Element && event.target.closest("a, button")) return;
+        applyThread(row.dataset.thread);
+      });
+    });
+
+    // ---- Chapters ----
+    const moveSection = (amount: number) => {
+      const y = anchorY();
+      let current = -1;
+      sections.forEach((section, index) => {
+        if (top(section) <= y) current = index;
+      });
+      if (amount < 0 && current <= 0) {
+        window.scrollTo({ top: Math.max(0, top(caseNote) - 18), behavior: "auto" });
         return;
       }
+      const next = Math.min(Math.max(current + amount, 0), sections.length - 1);
+      sections[next].scrollIntoView({ behavior: "auto", block: "start" });
+    };
 
-      if (!(event.target instanceof Node) || (!caseNote.contains(event.target) && event.target !== document.body)) {
-        return;
+    mobileTree?.querySelectorAll("a").forEach((link) =>
+      link.addEventListener("click", () => {
+        mobileTree.open = false;
+      }),
+    );
+
+    // ---- Scroll: tree, group, step, progress ----
+    const chapters = treeLinks
+      .map((link) => document.getElementById(link.dataset.treeLink ?? ""))
+      .filter((node, index, list): node is HTMLElement => Boolean(node) && list.indexOf(node) === index);
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const y = anchorY();
+
+      const chapter = chapters.filter((node) => top(node) <= y).pop() ?? chapters[0];
+      treeLinks.forEach((link) => {
+        const here = link.dataset.treeLink === chapter?.id;
+        if (here) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+        link.toggleAttribute(
+          "data-branch-active",
+          !here && treeLinks.some((other) => other.dataset.treeLink === chapter?.id && other.dataset.treeParent === link.dataset.treeLink),
+        );
+      });
+      const label = treeLinks.find((link) => link.dataset.treeLink === chapter?.id)?.textContent?.trim();
+      if (currentChapter && label) currentChapter.textContent = label;
+
+      const group = groupSections.filter((node) => top(node) <= y).pop()?.dataset.threadGroup ?? buttonSets[0]?.dataset.threadButtons;
+      if (group && group !== caseNote.dataset.activeGroup) {
+        caseNote.dataset.activeGroup = group;
+        buttonSets.forEach((set) => (set.hidden = set.dataset.threadButtons !== group));
+        const keys = groupControls().map((control) => control.dataset.threadControl);
+        if (!keys.includes(caseNote.dataset.activeThread)) applyThread(keys[0]);
       }
 
-      if (event.key === "ArrowDown") {
-        event.preventDefault();
-        moveSection(1);
-      } else if (event.key === "ArrowUp") {
-        event.preventDefault();
-        moveSection(-1);
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        moveThread(1);
-      } else if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        moveThread(-1);
-      } else if (["1", "2", "3"].includes(event.key)) {
-        event.preventDefault();
-        applyThread(controls[Number(event.key) - 1]?.dataset.threadControl);
-      } else if (event.key === "Escape") {
-        applyThread();
+      if (performance.now() > followUntil) {
+        const step = steps.filter((node) => {
+          const rect = node.getBoundingClientRect();
+          return rect.top <= window.innerHeight * 0.45 && rect.bottom > window.innerHeight * 0.2;
+        }).pop();
+        if (step && step.dataset.journeyStep !== caseNote.dataset.activeThread) applyThread(step.dataset.journeyStep);
       }
-    }, { signal });
-  }
+
+      const start = top(caseNote);
+      const span = Math.max(1, caseNote.offsetHeight - window.innerHeight);
+      const share = Math.min(1, Math.max(0, (window.scrollY - start + window.innerHeight * 0.2) / span));
+      const percent = `${Math.round(share * 100)}%`;
+      progressBars.forEach((bar) => bar.style.setProperty("--progress", String(share)));
+      progressValues.forEach((value) => (value.textContent = percent));
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", schedule, { passive: true, signal });
+    window.addEventListener("resize", schedule, { signal });
+    signal.addEventListener("abort", () => cancelAnimationFrame(frame));
+    applyThread(caseNote.dataset.activeThread || undefined);
+    update();
+
+    // ---- Keys ----
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.defaultPrevented || event.metaKey || event.altKey || event.ctrlKey) return;
+        if (!(event.target instanceof Node) || (!caseNote.contains(event.target) && event.target !== document.body)) return;
+        if (event.target instanceof HTMLElement && event.target.closest("summary, video")) return;
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          moveSection(1);
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault();
+          moveSection(-1);
+        } else if (event.key === "ArrowRight") {
+          event.preventDefault();
+          moveThread(1);
+        } else if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          moveThread(-1);
+        } else if (/^[1-9]$/.test(event.key)) {
+          event.preventDefault();
+          selectThread(groupControls()[Number(event.key) - 1]?.dataset.threadControl);
+        } else if (event.key === "Escape") {
+          applyThread();
+        }
+      },
+      { signal },
+    );
   });
 </script>

@@ -1,17 +1,19 @@
 ---
 // A link to a case study that previews it on hover or focus (see CitePreview).
-// Usage: <Cite to="/work/receipts-discovery">visual search</Cite>
-// Each case study gets one of three marker tones, so every citation of the
-// same project is highlighted in the same colour.
-import { getCaseStudy, work } from "../data/work";
+// Usage: <Cite to="/work/receipts">visual search</Cite>
+// A legacy case-study path (see legacyCaseStudies in data/work) links straight
+// to the chapter that replaced it. Each project gets one of three marker
+// tones, so every citation of the same page is highlighted in the same colour.
+import { resolveCaseStudy, work } from "../data/work";
 
 interface Props {
   to: string;
 }
 const { to } = Astro.props;
-if (!getCaseStudy(to)) throw new Error(`Cite: no case study at ${to}`);
+const resolved = resolveCaseStudy(to);
+if (!resolved) throw new Error(`Cite: no case study at ${to}`);
 const order = work.flatMap((item) => item.caseNotes.map((note) => note.href));
-const tone = (order.indexOf(to) % 3) + 1;
+const tone = (order.indexOf(resolved.note.href) % 3) + 1;
 ---
 
-<a class="cite" href={to} data-cite={to} data-tone={tone}><slot /></a>
+<a class="cite" href={resolved.href} data-cite={resolved.note.href} data-tone={tone}><slot /></a>

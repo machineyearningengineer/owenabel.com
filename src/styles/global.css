@@ -2136,3 +2136,528 @@ html[data-intro="play"] body {
   background-size: calc(14 * 144px) 156px;
   filter: drop-shadow(0 10px 14px var(--shadow));
 }
+
+/* ---- Story pages: a reading view in the ledger style ---- */
+.story-meta {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.story-body {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
+}
+
+.story-rail {
+  position: sticky;
+  top: 24px;
+  display: grid;
+  gap: 18px;
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.story-rail-label {
+  margin: 0;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.story-tree,
+.story-tree ol,
+.story-mobile-tree ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-tree > li + li {
+  margin-top: 4px;
+}
+
+.story-tree ol li {
+  display: flex;
+  gap: 6px;
+  margin-left: 4px;
+}
+
+.story-branch {
+  flex: none;
+  width: 8px;
+  height: 10px;
+  margin-top: 3px;
+  border-bottom: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+
+.story-tree a,
+.story-mobile-tree a {
+  display: block;
+  padding: 3px 0 3px 8px;
+  color: var(--muted);
+  text-decoration: none;
+  box-shadow: inset 1px 0 var(--faint);
+  transition:
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.story-tree a:hover,
+.story-tree a:focus-visible,
+.story-mobile-tree a:hover {
+  color: var(--ink);
+}
+
+.story-tree a[aria-current="location"],
+.story-mobile-tree a[aria-current="location"] {
+  color: var(--ink);
+  box-shadow: inset 2px 0 var(--accent);
+}
+
+.story-tree a[data-branch-active] {
+  color: var(--ink);
+}
+
+.story-progress {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+}
+
+.story-progress-track,
+.story-progress-line {
+  display: block;
+  height: 2px;
+  overflow: hidden;
+  background: var(--faint);
+}
+
+.story-progress-track > span,
+.story-progress-line > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(var(--progress, 0));
+  transform-origin: left;
+}
+
+.story-main {
+  display: grid;
+  gap: clamp(40px, 6vw, 64px);
+  min-width: 0;
+}
+
+.story-control {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.story-threads,
+.story-threads > div {
+  min-width: 0;
+}
+
+.story-threads > [hidden] {
+  display: none;
+}
+
+.story-mobile-tree,
+.story-progress-line {
+  display: none;
+}
+
+.story-chapter > *,
+.journey-step > * {
+  min-width: 0;
+}
+
+.story-chapter {
+  display: grid;
+  gap: 22px;
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+  scroll-margin-top: 84px;
+}
+
+.story-chapter > h2,
+.story-chapter > h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.story-chapter > h2 {
+  font-size: clamp(26px, 3.2vw, 36px);
+}
+
+.story-chapter > h3 {
+  font-size: clamp(21px, 2.4vw, 26px);
+}
+
+.story-part {
+  border-top: 3px double var(--rule);
+  padding-top: 18px;
+}
+
+.story-part > h2::before {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--accent);
+  content: "Part two";
+  font-family: "Berkeley Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.story-sub {
+  border-top-style: dashed;
+}
+
+.story-prose {
+  display: grid;
+  gap: 1.05em;
+  max-width: 66ch;
+}
+
+.story-prose p,
+.journey-text p {
+  max-width: 66ch;
+  margin: 0;
+  line-height: 1.72;
+}
+
+.story-prose code,
+.journey-text code {
+  padding: 0 3px;
+  background: var(--accent-wash-soft);
+  font: inherit;
+}
+
+.story-figures {
+  width: 100%;
+  max-width: 66ch;
+  border-collapse: collapse;
+  border-top: 1px solid var(--rule);
+  font-variant-numeric: tabular-nums;
+}
+
+.story-figures th,
+.story-figures td {
+  border-bottom: 1px solid var(--rule);
+  padding: 8px 0;
+  font-weight: 400;
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.story-figures th {
+  padding-right: 16px;
+  color: var(--muted);
+}
+
+.story-figures td {
+  text-align: right;
+}
+
+.story-main .case-ledger {
+  max-width: 66ch;
+}
+
+.story-main .case-ledger tr[data-thread] {
+  cursor: pointer;
+}
+
+/* Demo journey */
+.journey {
+  display: grid;
+  gap: clamp(36px, 5vw, 52px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.journey-step {
+  display: grid;
+  gap: 14px;
+  scroll-margin-top: 84px;
+}
+
+.journey-text {
+  display: grid;
+  gap: 0.9em;
+}
+
+.journey-text :is(h3, h4) {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.journey-n {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--rule);
+  font-size: 12px;
+  font-weight: 400;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.journey-step[data-active] .journey-n {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+}
+
+.journey-clip {
+  margin: 0;
+}
+
+.journey-frame {
+  position: relative;
+  border: 1px solid var(--rule);
+  background: var(--warm);
+}
+
+.journey-frame video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+}
+
+.journey-toggle {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  border: 1px solid var(--rule);
+  padding: 3px 8px;
+  background: var(--sticky-surface);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.journey-toggle:hover,
+.journey-toggle:focus-visible {
+  outline: 1px solid var(--accent-outline);
+  outline-offset: -1px;
+}
+
+.journey-clip figcaption {
+  max-width: 66ch;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Architecture, behind a native <details> */
+.case-architecture {
+  border: 1px solid var(--rule);
+}
+
+.case-architecture summary {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.case-architecture summary:hover,
+.case-architecture summary:focus-visible,
+.case-architecture[open] summary {
+  background: var(--accent-wash-soft);
+}
+
+.case-architecture figure {
+  margin: 0;
+  border-top: 1px solid var(--rule);
+  padding: 14px 12px 12px;
+}
+
+.case-architecture-scroll {
+  overflow-x: auto;
+}
+
+.case-architecture svg {
+  display: block;
+  width: 100%;
+  min-width: 560px;
+  height: auto;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.arch-box rect {
+  fill: var(--paper);
+  stroke: currentColor;
+  stroke-width: 1;
+}
+
+.arch-box text {
+  fill: currentColor;
+}
+
+.arch-box .arch-note {
+  fill: var(--muted);
+  font-size: 10.5px;
+}
+
+.arch-edge {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+
+.arch-group rect {
+  fill: var(--accent-wash-soft);
+  stroke: var(--rule);
+  stroke-dasharray: 4 3;
+}
+
+.arch-group text {
+  fill: var(--muted);
+  font-size: 10.5px;
+  text-transform: uppercase;
+}
+
+.arch-label {
+  fill: var(--accent);
+  font-size: 10.5px;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 4px;
+}
+
+.case-architecture figcaption {
+  max-width: 66ch;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 999px) {
+  .story-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .story-rail {
+    display: none;
+  }
+
+  .story-control {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .story-mobile-tree {
+    display: block;
+    font-size: 12px;
+  }
+
+  .story-mobile-tree summary {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    cursor: pointer;
+    list-style: none;
+    text-transform: uppercase;
+  }
+
+  .story-mobile-tree summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .story-mobile-tree summary > span:first-child::before {
+    content: "▸ ";
+    color: var(--accent);
+  }
+
+  .story-mobile-tree[open] summary > span:first-child::before {
+    content: "▾ ";
+  }
+
+  .story-mobile-progress {
+    flex: none;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .story-mobile-tree ol {
+    max-height: 55vh;
+    overflow: auto;
+    margin-top: 8px;
+    border-top: 1px solid var(--rule);
+    padding-top: 6px;
+  }
+
+  .story-mobile-child a {
+    margin-left: 14px;
+  }
+
+  .story-progress-line {
+    display: block;
+    margin: 0 0 -9px;
+  }
+
+  .story-keys {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .story-meta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .story-chapter,
+  .journey-step {
+    scroll-margin-top: 96px;
+  }
+
+  /* One row of steps, so the sticky bar stays short. */
+  .story-threads > div {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
+  .story-control .story-threads button {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    padding: 5px 6px;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .story-control .story-threads button[data-active] {
+    flex-grow: 4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-n,
+  .story-tree a {
+    transition: none;
+  }
+}

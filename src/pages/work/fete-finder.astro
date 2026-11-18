@@ -1,0 +1,181 @@
+---
+import StoryLayout from "../../layouts/StoryLayout.astro";
+import StoryChapter from "../../components/StoryChapter.astro";
+import CaseJourney from "../../components/CaseJourney.astro";
+import Clip from "../../components/Clip.astro";
+import ArchitectureDiagram from "../../components/ArchitectureDiagram.astro";
+
+const steps = [
+  {
+    key: "find",
+    label: "Find your night",
+    text: [
+      "Search by genre, area or time and the list narrows as you type. The map splits Paris into its 20 arrondissements and clusters the events, but you never have to wait for it: if the map tiles fail to load, search and the list carry on.",
+    ],
+    caption: "Searching “amapiano” in the 2026 archive, then opening the arrondissement map.",
+  },
+  {
+    key: "plan",
+    label: "Plan it",
+    text: [
+      "Choose how many stops, the vibe and a budget, and it suggests a route. It favours events you've saved, orders the stops by start time and penalises long walks between them.",
+      "Then the route goes to your calendar, or opens as walking directions in Google or Apple Maps.",
+    ],
+    caption: "Asking for a four-stop party route, then scrolling through the suggestion.",
+  },
+  {
+    key: "offline",
+    label: "Keep it with no signal",
+    text: [
+      "The night happens on a crowded street, on a phone with one bar. Fête Finder keeps a copy of the programme on the device, so search still works offline. Save an event without signal and the change waits in a queue, then goes through once you're back online.",
+    ],
+    caption: "Recorded with the network switched off: the cached-programme notice, a search, then saving an event.",
+  },
+];
+
+const chapters = [
+  { id: "problem", label: "The problem" },
+  { id: "how-it-works", label: "How it works" },
+  { id: "what-happened", label: "What happened" },
+  {
+    id: "under-the-hood",
+    label: "Under the hood",
+    children: [
+      { id: "flyers", label: "Flyers into listings" },
+      { id: "stable-links", label: "Links that survive edits" },
+      { id: "offline-properly", label: "Offline, properly" },
+      { id: "exchange", label: "Money and the exchange" },
+    ],
+  },
+  { id: "lessons", label: "What I learned" },
+];
+---
+
+<StoryLayout
+  title="Fête Finder"
+  description="Search, route planning and offline support for Fête de la Musique in Paris, with the June 2026 numbers and how it was built."
+  meta={[
+    { label: "Client", value: "Out Of Office Collective" },
+    { label: "Role", value: "Product Engineer, 2025–26" },
+    { label: "Stack", value: "Next.js · Postgres · MapLibre · Railway" },
+    { label: "Live", value: "fete.outofofficecollective.co.uk", href: "https://fete.outofofficecollective.co.uk" },
+  ]}
+  chapters={chapters}
+  groups={[{ id: "night", threads: steps }]}
+>
+  <StoryChapter id="problem" title="The problem">
+    <div class="story-prose">
+      <p>Fête de la Musique puts music on the streets of Paris every June. The 2026 programme Fête Finder carried had 159 events, spread from Friday 19 to Monday 22 June.</p>
+      <p>Hardly anyone arrives knowing an event's name. They know the part of town they'll be in, the music they like, and whether they want something free or something late. Then they need a plan their friends can follow.</p>
+      <p>And the whole thing happens outside, on phones, with bad signal.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="how-it-works" title="How it works" group="night">
+    <div class="story-prose">
+      <p>Three steps, recorded on the live site. It's the 2026 archive now, so the events are over, but search, plans and offline mode still work.</p>
+    </div>
+    <CaseJourney project="fete-finder" steps={steps} />
+  </StoryChapter>
+
+  <StoryChapter id="what-happened" title="What happened">
+    <div class="story-prose">
+      <p>The June 2026 recap was built from a production backup taken on 3 July.</p>
+    </div>
+    <table class="story-figures">
+      <caption class="visually-hidden">Fête Finder, June 2026</caption>
+      <tbody>
+        <tr><th scope="row">Events listed</th><td>159</td></tr>
+        <tr><th scope="row">Page views</th><td>54,295</td></tr>
+        <tr><th scope="row">Outbound clicks</th><td>10,270</td></tr>
+        <tr><th scope="row">Save toggles (saves and unsaves)</th><td>2,855</td></tr>
+        <tr><th scope="row">Map opens</th><td>914</td></tr>
+        <tr><th scope="row">Tracked actions on 21 June alone</th><td>26,378</td></tr>
+      </tbody>
+    </table>
+    <div class="story-prose">
+      <p>These are counts of tracked actions, not people. The recap page on the site says the same thing, in the same words I'd use: not unique people, ticket sales or attendance.</p>
+      <p>The ticket exchange also travelled beyond the site, into a WhatsApp community of about 2,000 people. More on the bot below.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="under-the-hood" title="Under the hood" part>
+    <div class="story-prose">
+      <p>For engineers: four parts I enjoyed building, and the decisions behind them.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="flyers" title="Flyers into listings" level={3}>
+    <div class="story-prose">
+      <p>Organisers announce events with flyers and screenshots, not tidy data. An admin can drop in up to six images of one event and Gemini drafts the listing from them.</p>
+      <p>Every field comes back with its value, the evidence it read, a confidence score and up to three alternatives. The prompt treats text inside an image as evidence, never as instructions, which matters when anyone can design a flyer.</p>
+      <p>The draft opens in a review screen with that evidence beside each field. A person edits it and accepts it. Until then the row is marked as a draft, and drafts are filtered out of everything public.</p>
+      <p>Before the flyer tool I also used agents that read event and ticketing pages and drafted listing suggestions, under the same rule: a person checked every one before it was published.</p>
+      <p>One honest gap: nothing yet checks whether those confidence scores are calibrated. That's the next measurement I'd add.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="stable-links" title="Links that survive edits" level={3}>
+    <div class="story-prose">
+      <p>Event details change constantly in the week before. Each event gets a key built from a hash, like <code>evt_</code> plus a short digest, and keeps it for life once it has one. Series get their own <code>ser_</code> keys.</p>
+      <p>The URL is that key plus an optional slug. Rename the event and the slug can change, but the link someone posted in a group chat on Tuesday still opens the right event on Saturday.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="offline-properly" title="Offline, properly" level={3}>
+    <div class="story-prose">
+      <p>The service worker caches public pages and event details, and nothing else. Admin, sign-in, user and webhook routes are never cached, so nothing private ends up stored on the phone.</p>
+      <p>The programme snapshot lives in IndexedDB with a schema name and version. If the app changes shape, an old snapshot is thrown away instead of being misread.</p>
+      <p>Changes made offline, like saves and route edits, go into a queue. Each one carries an idempotency key and belongs to the person who made it, and repeats collapse. Tapping save three times in a tunnel sends one change.</p>
+      <p>A Playwright test turns the map off and checks that discovery still works.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="exchange" title="Money and the exchange" level={3}>
+    <div class="story-prose">
+      <p>Partners could pay through Stripe Checkout to promote an event. The webhook checks Stripe's signature and stores each event once under its Stripe event ID, so a retried delivery can't activate a placement twice.</p>
+      <p>The ticket exchange is where people post tickets they're selling or looking for. Anyone can report a listing as a scam, the wrong event, a misleading price, abusive contact or spam, and admins see a count of reports waiting for review.</p>
+    </div>
+    <Clip project="fete-finder" beat="exchange" caption="The ticket exchange, with listings grouped by event. Nothing is posted or replied to." />
+    <div class="story-prose">
+      <p>The WhatsApp bot is a separate small service. It asks the site for new listings using a shared secret, posts each one to the community chat with a link back, then confirms the post so nothing goes out twice.</p>
+      <p>It moderates the chat too, with link and spam rules and strikes that expire after seven days. It starts in dry-run mode by default, which is the right default for a bot that can remove people.</p>
+    </div>
+    <ArchitectureDiagram
+      id="arch-fete"
+      title="How Fête Finder fits together"
+      summary="Flyer images become Gemini drafts with evidence for each field, which a person reviews before they reach Postgres and the public site. Partner payments arrive by Stripe webhook and are stored once per event. Phones keep an offline copy of the programme. The WhatsApp bot takes new ticket-exchange listings to the community chat."
+      width={800}
+      height={330}
+      boxes={[
+        { id: "flyers", label: "Flyer images", note: "up to six", x: 20, y: 30, w: 120 },
+        { id: "gemini", label: "Gemini draft", note: "value · evidence · confidence", x: 170, y: 30, w: 215 },
+        { id: "review", label: "Human review", x: 415, y: 30, w: 110 },
+        { id: "postgres", label: "Postgres", note: "events · keys", x: 555, y: 30, w: 115 },
+        { id: "site", label: "Site", note: "public", x: 700, y: 30, w: 92 },
+        { id: "stripe", label: "Stripe webhook", note: "stored once per event", x: 520, y: 130, w: 160 },
+        { id: "phone", label: "Phone", note: "offline copy", x: 700, y: 130, w: 92 },
+        { id: "exchange", label: "Ticket exchange", note: "new listings", x: 20, y: 240, w: 200 },
+        { id: "bot", label: "WhatsApp bot", note: "posts once, links back", x: 290, y: 240, w: 200 },
+        { id: "chat", label: "Community chat", note: "about 2,000 people", x: 560, y: 240, w: 220 },
+      ]}
+      edges={[
+        { from: "flyers", to: "gemini" },
+        { from: "gemini", to: "review" },
+        { from: "review", to: "postgres" },
+        { from: "postgres", to: "site" },
+        { from: "stripe", to: "postgres" },
+        { from: "site", to: "phone" },
+        { from: "exchange", to: "bot" },
+        { from: "bot", to: "chat" },
+      ]}
+    />
+  </StoryChapter>
+
+  <StoryChapter id="lessons" title="What I learned">
+    <div class="story-prose">
+      <p>Counting is a feature. The recap only says anything because the site tracked saves, map opens and outbound clicks, and labelled them honestly as actions rather than people.</p>
+      <p>And the hard part of a night-out app isn't the search box. It's everything after: the link opened later, the listing that changed, the signal that drops halfway down the street.</p>
+    </div>
+  </StoryChapter>
+</StoryLayout>
