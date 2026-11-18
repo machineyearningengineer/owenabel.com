@@ -1392,7 +1392,7 @@ html[data-theme="dark"] .invoice-box::before {
 
 .hero .hero-grid {
   gap: clamp(28px, 4vw, 56px);
-  align-items: end;
+  align-items: start;
 }
 
 @media (min-width: 761px) {
