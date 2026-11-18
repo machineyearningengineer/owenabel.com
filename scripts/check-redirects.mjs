@@ -60,6 +60,18 @@ const cases = [...paths].flatMap(([path, expected]) =>
 );
 const results = [];
 let cursor = 0;
+// The edge sometimes closes a long-lived HTTP/2 session mid-run ("fetch failed").
+// Retry only those transport failures; every status and header is still asserted.
+async function request(url) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(15_000) });
+    } catch (error) {
+      if (attempt >= 3 || !(error instanceof TypeError)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 300 * attempt));
+    }
+  }
+}
 async function inspect(item) {
   const seen = new Set();
   const chain = [];
@@ -69,10 +81,7 @@ async function inspect(item) {
     assert.ok(!seen.has(current.href), `Redirect loop: ${chain.join(" -> ")} -> ${current.href}`);
     seen.add(current.href);
     chain.push(current.href);
-    const response = await fetch(current, {
-      redirect: "manual",
-      signal: AbortSignal.timeout(15_000),
-    });
+    const response = await request(current);
     assert.equal(response.headers.get("refresh"), null, `Refresh header at ${current}`);
     // Cloudflare's managed robots.txt answers /robots.txt on every host and
     // scheme with 200, ahead of the edge redirects. Accept only its managed file.
