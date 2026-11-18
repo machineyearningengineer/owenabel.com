@@ -1611,3 +1611,161 @@ html[data-theme="dark"] .invoice-box::before {
     display: none;
   }
 }
+
+/* Sound cue: a speaker in the same square frame as the theme toggle. */
+.sound-cue {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: 6px;
+  border: 1px solid var(--rule);
+  padding: 0;
+  background: var(--surface-soft);
+  color: inherit;
+  cursor: pointer;
+  vertical-align: -0.3em;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.sound-cue:hover,
+.sound-cue[data-playing] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.sound-cue svg {
+  width: 72%;
+  height: 72%;
+}
+
+.sound-wave {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.sound-cue[data-playing] .sound-wave {
+  animation: sound-wave 900ms ease-in-out infinite;
+}
+
+.sound-cue[data-playing] .sound-wave-2 {
+  animation-delay: 180ms;
+}
+
+@keyframes sound-wave {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+/* Site-wide player: a small slip pinned to the corner, kept across pages. */
+.ledger-player {
+  position: fixed;
+  z-index: 20;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 4px 12px;
+  align-items: center;
+  width: min(340px, calc(100vw - 32px));
+  border: 1px solid var(--rule);
+  padding: 10px 10px 12px;
+  background: var(--paper);
+  box-shadow: 0 14px 30px -22px rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  view-transition-name: ledger-player;
+}
+
+.ledger-player[hidden] {
+  display: none;
+}
+
+.ledger-player-toggle,
+.ledger-player-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--rule);
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ledger-player-toggle svg {
+  width: 11px;
+  height: 11px;
+}
+
+.ledger-player-toggle [data-icon-play],
+.ledger-player-toggle[data-paused] [data-icon-pause] {
+  display: none;
+}
+
+.ledger-player-toggle[data-paused] [data-icon-play] {
+  display: block;
+}
+
+.ledger-player-toggle:hover,
+.ledger-player-close:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.ledger-player-meta {
+  display: grid;
+  min-width: 0;
+}
+
+.ledger-player-meta > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ledger-player-kicker,
+.ledger-player-meta [data-player-source],
+.ledger-player-time {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.ledger-player-kicker {
+  text-transform: uppercase;
+}
+
+.ledger-player-meta strong {
+  font-weight: 500;
+}
+
+.ledger-player-time {
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-player-track {
+  grid-column: 1 / -1;
+  height: 1px;
+  margin-top: 6px;
+  background: var(--faint);
+}
+
+.ledger-player-track span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sound-cue[data-playing] .sound-wave {
+    animation: none;
+  }
+}

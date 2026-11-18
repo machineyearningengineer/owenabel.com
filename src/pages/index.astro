@@ -40,7 +40,24 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
     </h1>
     <div class="hero-grid">
       <table class="ledger">
-        <caption>I&rsquo;m an engineer. That means I solve problems. What kind of problems?</caption>
+        <caption>
+          I&rsquo;m an engineer. That means I solve problems. What kind of problems?
+          <button
+            type="button"
+            class="sound-cue"
+            data-play="/audio/meet-the-engineer.mp3"
+            data-play-title="Meet the Engineer"
+            data-play-source="Team Fortress 2 · Valve"
+            aria-label="Play the line this is from: Meet the Engineer, Team Fortress 2"
+            aria-pressed="false"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2.5 6h2.5l3.5-3v10l-3.5-3H2.5Z" fill="currentColor"></path>
+              <path class="sound-wave sound-wave-1" d="M10.5 6.2a2.6 2.6 0 0 1 0 3.6"></path>
+              <path class="sound-wave sound-wave-2" d="M12.2 4.5a5 5 0 0 1 0 7"></path>
+            </svg>
+          </button>
+        </caption>
         <thead>
           <tr>
             <th scope="col">No.</th>
@@ -132,10 +149,13 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 
 <script>
   import { mountKoiPond } from "../scripts/koi-pond";
+  import { onPage } from "../scripts/page";
+
+  onPage((signal) => {
 
   const canvas = document.querySelector<HTMLCanvasElement>("[data-koi-pond]");
   const surface = document.querySelector<HTMLElement>("[data-ledger-surface]");
-  if (canvas && surface) mountKoiPond(canvas, surface);
+  if (canvas && surface) mountKoiPond(canvas, surface, signal);
 
   const clock = document.querySelector<HTMLElement>("[data-london-clock]");
   const formatTime = new Intl.DateTimeFormat("en-GB", {
@@ -148,7 +168,8 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
     if (clock) clock.textContent = formatTime.format(new Date());
   };
   tickClock();
-  setInterval(tickClock, 1000);
+  const clockTimer = setInterval(tickClock, 1000);
+  signal.addEventListener("abort", () => clearInterval(clockTimer));
 
   for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy-email]")) {
     button.addEventListener("click", async () => {
@@ -161,4 +182,5 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
       setTimeout(() => (button.textContent = "Copy"), 1600);
     });
   }
+  });
 </script>

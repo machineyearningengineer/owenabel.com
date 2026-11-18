@@ -58,7 +58,7 @@ const bodyWidth = (i: number, size: number) => {
   );
 };
 
-export function mountKoiPond(canvas: HTMLCanvasElement, surface: HTMLElement) {
+export function mountKoiPond(canvas: HTMLCanvasElement, surface: HTMLElement, signal: AbortSignal) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -266,15 +266,25 @@ export function mountKoiPond(canvas: HTMLCanvasElement, surface: HTMLElement) {
     { passive: true },
   );
 
-  new IntersectionObserver(([entry]) => {
+  const intersection = new IntersectionObserver(([entry]) => {
     visible = entry?.isIntersecting ?? false;
     update();
-  }).observe(canvas);
-  new ResizeObserver(update).observe(canvas);
-  new MutationObserver(() => {
+  });
+  intersection.observe(canvas);
+  const resizer = new ResizeObserver(update);
+  resizer.observe(canvas);
+  const themeWatcher = new MutationObserver(() => {
     readColours();
     draw();
-  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
-  document.addEventListener("visibilitychange", update);
-  reducedMotion.addEventListener("change", update);
+  });
+  themeWatcher.observe(document.documentElement, { attributeFilter: ["data-theme"] });
+  document.addEventListener("visibilitychange", update, { signal });
+  reducedMotion.addEventListener("change", update, { signal });
+  // Leaving the page: stop drawing and let go of every observer.
+  signal.addEventListener("abort", () => {
+    cancelAnimationFrame(frame);
+    intersection.disconnect();
+    resizer.disconnect();
+    themeWatcher.disconnect();
+  });
 }

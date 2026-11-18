@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import LedgerPlayer from "../components/LedgerPlayer.astro";
 
 interface Props {
   title?: string;
@@ -152,17 +154,25 @@ const structuredData = {
     </style>
     <script is:inline>
       (() => {
-        try {
-          const theme = localStorage.getItem("owenabel-theme");
-          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const applyTheme = () => {
+          try {
+            const theme = localStorage.getItem("owenabel-theme");
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-          if (theme === "light" || theme === "dark") {
-            document.documentElement.dataset.theme = theme;
-          } else if (prefersDark) {
-            document.documentElement.dataset.theme = "dark";
+            if (theme === "light" || theme === "dark") {
+              document.documentElement.dataset.theme = theme;
+            } else if (prefersDark) {
+              document.documentElement.dataset.theme = "dark";
+            }
+          } catch {
+            // Theme is progressive enhancement; default paper stays readable.
           }
-        } catch {
-          // Theme is progressive enhancement; default paper stays readable.
+        };
+        applyTheme();
+        // Client-side navigation swaps in the new page's <html> attributes; restore the theme.
+        if (!window.__owenTheme) {
+          window.__owenTheme = true;
+          document.addEventListener("astro:after-swap", applyTheme);
         }
       })();
     </script>
@@ -188,6 +198,7 @@ const structuredData = {
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <title>{title}</title>
+    <ClientRouter />
   </head>
   <body>
     <div class="site-shell">
@@ -244,7 +255,11 @@ const structuredData = {
         <!--/email_off-->
       </footer>
     </div>
+    <LedgerPlayer />
     <script>
+      import { onPage } from "../scripts/page";
+
+      onPage((signal) => {
       const themeToggle = document.querySelector<HTMLButtonElement>("[data-theme-toggle]");
       const setTheme = (theme: string) => {
         const isDark = theme === "dark";
@@ -272,6 +287,7 @@ const structuredData = {
           }
         });
       }
+      });
     </script>
   </body>
 </html>

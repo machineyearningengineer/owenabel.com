@@ -28,19 +28,28 @@ The background grain is a real image, so it can appear after the base
 background. We preload `/grain.png` in the document head. Cloudflare also emits
 an Early Hints preload header for it.
 
-### MPA Navigation
+### Client-side navigation
 
-The site opts into native cross-document View Transitions:
+The site uses Astro's `ClientRouter` so the audio player survives page changes.
+Pages are still static HTML; the router fetches the next page and swaps it in
+with a same-document view transition. Without JavaScript, links fall back to
+normal full-page navigation. Reduced-motion users get no transition animation.
 
-```css
-@view-transition {
-  navigation: auto;
-}
-```
+Rules that keep this working:
 
-This improves same-origin multi-page navigations in browsers that support it and
-degrades harmlessly elsewhere. Reduced-motion users opt out with
-`navigation: none`.
+- Page scripts register through `onPage` in `src/scripts/page.ts`. It runs on
+  every `astro:page-load` and passes an `AbortSignal` that fires before the
+  next swap. Attach `document`/`window` listeners with `{ signal }`, and stop
+  timers, animation frames and observers on abort.
+- The swap replaces `<html>` attributes, so the head script re-applies the
+  saved theme on `astro:after-swap`.
+- `LedgerPlayer` is `transition:persist`: one `<audio>` element for the whole
+  visit. Any element with `data-play`, `data-play-title` and
+  `data-play-source` takes it over; the player marks matching triggers with
+  `data-playing`.
+- Named view transitions: the site header, brand and nav stay put, the
+  player keeps its place, and each homepage exhibit morphs into its case
+  study's screenshot (`exhibit-<slug>`).
 
 ### Same-Page Links
 
@@ -56,13 +65,3 @@ We avoid that semantically instead of installing a global click interceptor:
 
 This prevents current-page menu clicks from reloading while keeping real links,
 hash links, external links, and mail links normal.
-
-## Why Not ClientRouter
-
-Astro's `ClientRouter` would avoid full document teardown, but it changes script
-lifecycle and moves the site toward SPA behavior. For this site, native browser
-features plus a small first-paint contract are enough.
-
-Reach for `ClientRouter` only if the remaining issue is a true content/layout
-gap between full page navigations, not a theme flash, texture pop, or same-page
-reload.

@@ -151,6 +151,9 @@ import { getCaseNotes, work } from "../data/work";
   </div>
 
   <script>
+    import { onPage } from "../scripts/page";
+
+    onPage((signal) => {
     const relationItems = document.querySelectorAll<HTMLElement>("[data-work-item]");
 
     const updatePressedState = (item: HTMLElement) => {
@@ -201,12 +204,13 @@ import { getCaseNotes, work } from "../data/work";
       }
 
       relationItems.forEach(clearItem);
-    });
+    }, { signal });
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         relationItems.forEach(clearItem);
       }
+    }, { signal });
     });
   </script>
 </BaseLayout>

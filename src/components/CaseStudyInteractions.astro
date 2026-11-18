@@ -1,4 +1,7 @@
 <script>
+  import { onPage } from "../scripts/page";
+
+  onPage((signal) => {
   const caseNote = document.querySelector<HTMLElement>("[data-case-note]");
   if (caseNote) {
     const threadControls = Array.from(caseNote.querySelectorAll<HTMLButtonElement>("[data-thread-control]"));
@@ -121,6 +124,7 @@
       } else if (event.key === "Escape") {
         applyThread();
       }
-    });
+    }, { signal });
   }
+  });
 </script>
