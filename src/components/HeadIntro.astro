@@ -1,7 +1,8 @@
 ---
-// A short homepage intro: Owen's head, large, looks around while
-// "machineyearningengineer" types out, then shrinks and flies to where it
-// rests on the INDEX-ABEL card. About 2.5 s. Any click, key, scroll or touch
+// A short homepage intro: Owen's head, large, types out
+// "machinelearning", does a double-take, corrects it to "machineyearning",
+// sighs, finishes "machineyearningengineer", then shrinks and flies to where
+// it rests on the INDEX-ABEL card. About 3.5 s. Any click, key, scroll or touch
 // skips it.
 //
 // Whether it plays is decided before first paint by the inline script in
@@ -21,16 +22,50 @@
   import { onPage } from "../scripts/page";
 
   const NAME = "machineyearningengineer";
-  const LOOKS = [0, 3, 1, 7, 5, 0]; // centre, right, up, left, down, centre
-  const LOOK_MS = 300;
-  const TYPE_MS = 48;
   const FLY_MS = 900;
+
+  // The intro as a tiny script: [ms from start, what happens].
+  // It types "machinelearning", does a double-take, corrects it to
+  // "yearning", sighs, finishes the name and flies to the card.
+  const TYPE_MS = 46;
+  const ERASE_MS = 34;
+  type Beat = [number, { text?: string; frame?: number }];
+  const beats: Beat[] = [];
+  let at = 250;
+  const type = (from: string, to: string) => {
+    for (let index = from.length + 1; index <= to.length; index += 1) {
+      beats.push([at, { text: to.slice(0, index) }]);
+      at += TYPE_MS;
+    }
+  };
+  const erase = (from: string, to: string) => {
+    for (let index = from.length - 1; index >= to.length; index -= 1) {
+      beats.push([at, { text: from.slice(0, index) }]);
+      at += ERASE_MS;
+    }
+  };
+  const face = (frame: number, hold = 0) => {
+    beats.push([at, { frame }]);
+    at += hold;
+  };
+  face(3);
+  type("", "machine");
+  face(1);
+  type("machine", "machinelearning");
+  face(13, 520); // shocked: wait, that's not it
+  erase("machinelearning", "machine");
+  face(7);
+  type("machine", "machineyearning");
+  face(12, 420); // sigh: that's better
+  face(0);
+  type("machineyearning", NAME);
+  const FLY_AT = at + 260;
 
   onPage((signal) => {
     const root = document.documentElement;
     const overlay = document.querySelector<HTMLElement>("[data-head-intro]");
     if (root.dataset.intro !== "play" || !overlay) return;
-    const face = overlay.querySelector<HTMLElement>("[data-intro-face]");
+    const head = overlay.querySelector<HTMLElement>("[data-intro-face]");
     const name = overlay.querySelector<HTMLElement>("[data-intro-name]");
     const target = document.querySelector<HTMLElement>("[data-owen-head]");
     const timers: number[] = [];
@@ -50,12 +85,12 @@
       finished = true;
       timers.forEach((timer) => window.clearTimeout(timer));
       if (name) name.textContent = NAME;
-      face?.style.setProperty("--frame", "0");
+      head?.style.setProperty("--frame", "0");
       overlay.dataset.leaving = "";
-      const from = face?.getBoundingClientRect();
+      const from = head?.getBoundingClientRect();
       const to = target?.getBoundingClientRect();
       const visible = to && to.bottom > 0 && to.top < innerHeight;
-      if (!face || !from || !to || !visible) {
+      if (!head || !from || !to || !visible) {
         overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: "forwards" }).finished.then(done);
         return;
       }
@@ -68,7 +103,7 @@
         fill: "forwards",
         easing: "ease-out",
       });
-      face
+      head
         .animate([{ transform: "none" }, { transform: `translate(${dx}px, ${dy}px) scale(${scale})` }], {
           duration: ms,
           fill: "forwards",
@@ -89,8 +124,12 @@
       // The intro still plays; it just may play again next time.
     }
 
-    [...NAME].forEach((_, index) => later(() => name && (name.textContent = NAME.slice(0, index + 1)), 200 + index * TYPE_MS));
-    LOOKS.forEach((look, index) => later(() => face?.style.setProperty("--frame", String(look)), 250 + index * LOOK_MS));
-    later(() => fly(FLY_MS), 250 + LOOKS.length * LOOK_MS + 150);
+    for (const [ms, beat] of beats) {
+      later(() => {
+        if (beat.text !== undefined && name) name.textContent = beat.text;
+        if (beat.frame !== undefined) head?.style.setProperty("--frame", String(beat.frame));
+      }, ms);
+    }
+    later(() => fly(FLY_MS), FLY_AT);
   });
 </script>
