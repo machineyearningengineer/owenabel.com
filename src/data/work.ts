@@ -62,23 +62,13 @@ export const work: WorkItem[] = [
     ],
     caseNotes: [
       {
-        label: "Fête Finder: finding a night out",
-        href: "/work/fete-finder-discovery",
+        label: "Fête Finder",
+        href: "/work/fete-finder",
         summary:
-          "Fête de la Musique fills Paris with free gigs for one night. I built the search, maps and saved routes that turn the programme into a plan: 54,295 page views in June 2026.",
+          "Fête de la Musique fills Paris with free music for one night, and Fête Finder helps people find their night, plan a route and keep it when the signal drops. The June 2026 recap counted 54,295 page views.",
         exhibit: {
           src: "/exhibits/fete-recap.webp",
           caption: "The 2026 recap page, with the route of the night drawn over Paris.",
-        },
-      },
-      {
-        label: "Fête Finder: running the programme",
-        href: "/work/fete-finder-operations",
-        summary:
-          "The programme kept changing after launch. I built the tools to edit, review and recover every listing, and a bot that took the ticket exchange into a WhatsApp chat of about 2,000 people.",
-        exhibit: {
-          src: "/exhibits/fete-archive.webp",
-          caption: "The archive of Paris listings that the operations tools keep up to date.",
         },
       },
     ],
@@ -106,33 +96,13 @@ export const work: WorkItem[] = [
     links: [{ label: "milkandhenny.com", href: "https://milkandhenny.com" }],
     caseNotes: [
       {
-        label: "Milk & Henny: running the night",
-        href: "/work/milk-and-henny-operations",
+        label: "Milk & Henny",
+        href: "/work/milk-and-henny",
         summary:
-          "I host the parties and build the software that runs them. Tickets, check-in at the door, games in the room and the photos afterwards all live in one app.",
+          "One site runs the whole night: the ticket, the door, games on the TV with phones as controllers, and the photos afterwards. I host the parties, so I built it not to break when the night gets messy.",
         exhibit: {
           src: "/exhibits/milk-event.webp",
           caption: "An event page: details, tickets and, once it sells out, a waitlist.",
-        },
-      },
-      {
-        label: "Milk & Henny: games for the room",
-        href: "/work/milk-and-henny-games",
-        summary:
-          "Party games that send people back to each other instead of their phones. Each screen has one job: the board for the room, the answers for the host, a buzzer for the team.",
-        exhibit: {
-          src: "/exhibits/milk-things.webp",
-          caption: "The games and tools index at milkandhenny.com/things.",
-        },
-      },
-      {
-        label: "Milk & Henny: keeping the photos",
-        href: "/work/milk-and-henny-media",
-        summary:
-          "It started with “can you send me the photos?” after every party. Now there are public albums to browse, and private transfers that expire for everything else.",
-        exhibit: {
-          src: "/exhibits/milk-pics.webp",
-          caption: "Published albums at milkandhenny.com/pics.",
         },
       },
     ],
@@ -141,6 +111,40 @@ export const work: WorkItem[] = [
     exhibit: {
       src: "/exhibits/milk-pitch.webp",
       alt: "Milk & Henny Pitch Night event page with a ticket button",
+    },
+  },
+  {
+    year: "2026",
+    name: "Receipts",
+    href: "https://receipts.beauty",
+    detail:
+      "A beauty discovery platform helping people judge providers using reviews, images, and the source of each claim.",
+    featuredDetail:
+      "A beauty discovery platform combining portfolios, reviews, and visual search to help people find a provider.",
+    tension:
+      "A provider claim, a client review, and a similar-looking image tell people different things. Search needs to make those differences visible.",
+    owned:
+      "Product architecture, search and evidence semantics, provider and review workflows, media and AI pipelines, generated API contracts, and release operations.",
+    signal:
+      "Results distinguish provider claims, reviews, and media evidence so people can see the basis for a recommendation.",
+    links: [{ label: "receipts.beauty", href: "https://receipts.beauty" }],
+    caseNotes: [
+      {
+        label: "Receipts",
+        href: "/work/receipts",
+        summary:
+          "Show Receipts a hairstyle, keep the details you care about, like the cornrows or the colour, and it finds stylists whose real work matches. Every result says why it appeared.",
+        exhibit: {
+          src: "/exhibits/receipts-photo-search.webp",
+          caption: "Searching with a photo: pick a look, then see who has done that work.",
+        },
+      },
+    ],
+    role: "Lead Engineer",
+    stack: "Go · ConnectRPC · Postgres · visual search",
+    exhibit: {
+      src: "/exhibits/receipts-feed.webp",
+      alt: "Receipts discovery feed: a mosaic of beauty work with search by photo",
     },
   },
   {
@@ -200,23 +204,13 @@ export const work: WorkItem[] = [
     ],
     caseNotes: [
       {
-        label: "Open Policy Finder: search and data quality",
-        href: "/work/open-policy-finder",
+        label: "Jisc: Open Policy Finder and jisc.ac.uk",
+        href: "/work/jisc",
         summary:
-          "Researchers type half a journal title and expect the right publishing policy. I built the search, moved it from Elasticsearch onto PostgreSQL, and set up a loop with data stewards to fix the records behind it.",
+          "At Jisc I worked on two public services: Open Policy Finder, where researchers check publishing policies, and the main jisc.ac.uk website. I led the first's move from Elasticsearch to PostgreSQL, and the second's move to AWS Fargate after daily outages.",
         exhibit: {
           src: "/exhibits/opf-home.webp",
           caption: "The Open Policy Finder home page and journal search.",
-        },
-      },
-      {
-        label: "Jisc website: moving to Fargate",
-        href: "/work/jisc-website",
-        summary:
-          "Jisc’s main website had scaling and downtime problems. I led its move to AWS ECS Fargate and RDS, with Terraform preview environments and release checks so every change is seen before it ships.",
-        exhibit: {
-          src: "/exhibits/jisc-home.webp",
-          caption: "The Jisc home page, served from AWS ECS Fargate since the migration.",
         },
       },
     ],
@@ -225,50 +219,6 @@ export const work: WorkItem[] = [
     exhibit: {
       src: "/exhibits/opf-home.webp",
       alt: "Open Policy Finder home page with journal and publisher search",
-    },
-  },
-  {
-    year: "2026",
-    name: "Receipts",
-    href: "https://receipts.beauty",
-    detail:
-      "A beauty discovery platform helping people judge providers using reviews, images, and the source of each claim.",
-    featuredDetail:
-      "A beauty discovery platform combining portfolios, reviews, and visual search to help people find a provider.",
-    tension:
-      "A provider claim, a client review, and a similar-looking image tell people different things. Search needs to make those differences visible.",
-    owned:
-      "Product architecture, search and evidence semantics, provider and review workflows, media and AI pipelines, generated API contracts, and release operations.",
-    signal:
-      "Results distinguish provider claims, reviews, and media evidence so people can see the basis for a recommendation.",
-    links: [{ label: "receipts.beauty", href: "https://receipts.beauty" }],
-    caseNotes: [
-      {
-        label: "Receipts: search you can check",
-        href: "/work/receipts-discovery",
-        summary:
-          "Search for a beauty provider with words or a photo, and see why each one appears. Every result names its evidence: a portfolio piece, a client review, or only a visual resemblance.",
-        exhibit: {
-          src: "/exhibits/receipts-photo-search.webp",
-          caption: "Searching with a photo: pick a look, then see who has done that work.",
-        },
-      },
-      {
-        label: "Receipts: the Go platform",
-        href: "/work/receipts-platform",
-        summary:
-          "An upload can succeed while its processing fails. I built a Go platform where every image has a recorded state, failed jobs retry on a policy, and nothing half-processed goes public.",
-        exhibit: {
-          src: "/exhibits/receipts-feed.webp",
-          caption: "The discovery feed, which only shows media that has finished processing.",
-        },
-      },
-    ],
-    role: "Lead Engineer",
-    stack: "Go · ConnectRPC · Postgres · visual search",
-    exhibit: {
-      src: "/exhibits/receipts-feed.webp",
-      alt: "Receipts discovery feed: a mosaic of beauty work with search by photo",
     },
   },
 ];
@@ -286,8 +236,32 @@ export const getFeaturedWork = () =>
     exhibit: item.exhibit,
   }));
 
-export const getCaseStudy = (href: string) =>
-  work.flatMap((item) => item.caseNotes).find((caseNote) => caseNote.href === href);
+/**
+ * The nine case studies became one story page per project in November 2026.
+ * Each old URL points at the chapter that now tells its part; the build turns
+ * this into 301s (scripts/generate-redirects.mjs) and <Cite> resolves it.
+ */
+export const legacyCaseStudies: Record<string, string> = {
+  "/work/fete-finder-discovery": "/work/fete-finder#how-it-works",
+  "/work/fete-finder-operations": "/work/fete-finder#under-the-hood",
+  "/work/milk-and-henny-operations": "/work/milk-and-henny#how-it-works",
+  "/work/milk-and-henny-games": "/work/milk-and-henny#live-rooms",
+  "/work/milk-and-henny-media": "/work/milk-and-henny#photos",
+  "/work/receipts-discovery": "/work/receipts#how-it-works",
+  "/work/receipts-platform": "/work/receipts#under-the-hood",
+  "/work/open-policy-finder": "/work/jisc#open-policy-finder",
+  "/work/jisc-website": "/work/jisc#jisc-website",
+};
+
+/** Resolves a case-study path, or a legacy one, to its note and the exact link to use. */
+export const resolveCaseStudy = (href: string) => {
+  const target = legacyCaseStudies[href] ?? href;
+  const path = target.split("#")[0];
+  const note = work.flatMap((item) => item.caseNotes).find((caseNote) => caseNote.href === path);
+  return note ? { note, href: target } : undefined;
+};
+
+export const getCaseStudy = (href: string) => resolveCaseStudy(href)?.note;
 
 export const getRelatedCaseStudies = (href: string) => {
   const parent = work.find((item) => item.caseNotes.some((caseNote) => caseNote.href === href));

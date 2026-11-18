@@ -1,5 +1,6 @@
 import { readdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { legacyCaseStudies } from "../src/data/work.ts";
 
 const outputDirectory = fileURLToPath(new URL("../dist/", import.meta.url));
 const files = await readdir(outputDirectory, { recursive: true });
@@ -7,6 +8,14 @@ const routes = files
   .filter((file) => file.endsWith(".html") && file !== "index.html" && file !== "404.html")
   .map((file) => `/${file.replaceAll("\\", "/").replace(/\.html$/, "")}`)
   .sort();
+
+// The nine case studies became one story page per project; send each old URL to its chapter.
+const legacy = Object.entries(legacyCaseStudies).flatMap(([from, to]) => [
+  `${from} ${to} 301`,
+  `${from}/ ${to} 301`,
+  `${from}/index.html ${to} 301`,
+  `${from}.html ${to} 301`,
+]);
 
 const redirects = routes.flatMap((route) => [
   `${route}/ ${route} 301`,
@@ -16,6 +25,6 @@ const redirects = routes.flatMap((route) => [
 
 await writeFile(
   new URL("../dist/_redirects", import.meta.url),
-  `# Generated from built pages; keep legacy directory URLs working.\n/index.html / 308\n# Booking moved onto the contact page.\n/book /contact#book 301\n/book.html /contact#book 301\n${redirects.join("\n")}\n`,
+  `# Generated from built pages; keep legacy directory URLs working.\n/index.html / 308\n# Booking moved onto the contact page.\n/book /contact#book 301\n/book.html /contact#book 301\n# Case studies merged into one page per project.\n${legacy.join("\n")}\n${redirects.join("\n")}\n`,
 );
 console.log(`Generated canonical URL redirects for ${routes.length} pages.`);

@@ -1,0 +1,29 @@
+---
+// A two-column ledger whose rows belong to threads: selecting a thread
+// highlights its rows, and clicking a row selects its thread.
+interface Props {
+  head: [string, string];
+  rows: { thread?: string; label: string; body: string[] }[];
+}
+const { head, rows } = Astro.props;
+---
+
+<table class="case-ledger">
+  <thead>
+    <tr><th scope="col">{head[0]}</th><th scope="col">{head[1]}</th></tr>
+  </thead>
+  <tbody>
+    {
+      rows.map((row) => (
+        <tr data-thread={row.thread}>
+          <th scope="row">{row.label}</th>
+          <td>
+            {row.body.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

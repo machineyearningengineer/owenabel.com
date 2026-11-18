@@ -1,0 +1,41 @@
+---
+// A demo journey: one numbered step per beat. A step with a caption shows the
+// clip of that beat (see Clip); a step without one is text only, for parts of
+// the night that have no public screen to record.
+import Clip from "./Clip.astro";
+
+interface Step {
+  key: string;
+  label: string;
+  text: string[];
+  caption?: string;
+}
+interface Props {
+  project: string;
+  steps: Step[];
+  level?: 3 | 4;
+}
+const { project, steps, level = 3 } = Astro.props;
+const Heading = level === 4 ? "h4" : "h3";
+---
+
+<ol class="journey" data-journey>
+  {
+    steps.map((step, index) => (
+      <li class="journey-step" id={step.key} data-thread={step.key} data-journey-step={step.key}>
+        <div class="journey-text">
+          <Heading>
+            <span class="journey-n" aria-hidden="true">
+              {index + 1}
+            </span>
+            {step.label}
+          </Heading>
+          {step.text.map((paragraph) => (
+            <p set:html={paragraph} />
+          ))}
+        </div>
+        {step.caption && <Clip project={project} beat={step.key} caption={step.caption} />}
+      </li>
+    ))
+  }
+</ol>

@@ -1,0 +1,158 @@
+---
+// One story page per project: hook, problem, a demo journey, what happened,
+// then "Under the hood" for engineers. A sticky chapter tree, reading
+// progress and the thread controls (keys 1/2/3, ←→, ↑↓) sit alongside.
+import BaseLayout from "./BaseLayout.astro";
+import CaseStudyInteractions from "../components/CaseStudyInteractions.astro";
+import RelatedCaseStudies from "../components/RelatedCaseStudies.astro";
+import { getCaseStudy } from "../data/work";
+
+type Chapter = { id: string; label: string; children?: { id: string; label: string }[] };
+type Group = { id: string; threads: { key: string; label: string }[] };
+
+interface Props {
+  title: string;
+  description: string;
+  meta: { label: string; value: string; href?: string }[];
+  chapters: Chapter[];
+  groups: Group[];
+}
+const { title, description, meta, chapters, groups } = Astro.props;
+const currentHref = Astro.url.pathname.replace(/\.html$/, "").replace(/\/$/, "");
+const slug = currentHref.split("/").pop();
+const caseStudy = getCaseStudy(currentHref);
+if (!caseStudy) throw new Error(`StoryLayout: ${currentHref} is not in data/work caseNotes`);
+
+// Reading time from the rendered text, at a relaxed 220 words a minute.
+const body = await Astro.slots.render("default");
+const words = `${caseStudy.summary} ${body.replace(/<(script|style)[\s\S]*?<\/\1>/g, " ").replace(/<[^>]+>/g, " ")}`
+  .split(/\s+/)
+  .filter(Boolean).length;
+const minutes = Math.max(1, Math.round(words / 220));
+const firstThread = groups[0]?.threads[0]?.key ?? "";
+---
+
+<BaseLayout title={`${title} - Owen Abel Amenze`} description={description}>
+  <article class="story case-note" data-case-note data-active-thread={firstThread} data-active-group={groups[0]?.id}>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/work">Work</a>
+      <span aria-hidden="true">/</span>
+      <span>{title}</span>
+    </nav>
+    <header class="case-hero story-hero">
+      <h1>{title}</h1>
+      <p>{caseStudy.summary}</p>
+    </header>
+    <dl class="case-meta story-meta" aria-label="Project summary">
+      {
+        meta.map((item) => (
+          <div>
+            <dt>{item.label}</dt>
+            <dd>{item.href ? <a href={item.href}>{item.value}</a> : item.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <figure class="case-exhibit">
+      <img
+        src={caseStudy.exhibit.src}
+        alt={caseStudy.exhibit.caption}
+        width="960"
+        height="600"
+        decoding="async"
+        style={`view-transition-name: exhibit-${slug}`}
+      />
+      <figcaption>{caseStudy.exhibit.caption}</figcaption>
+    </figure>
+
+    <div class="story-body">
+      <aside class="story-rail" aria-label="Chapters">
+        <p class="story-rail-label">Contents</p>
+        <ol class="story-tree">
+          {
+            chapters.map((chapter) => (
+              <li>
+                <a href={`#${chapter.id}`} data-tree-link={chapter.id}>
+                  {chapter.label}
+                </a>
+                {chapter.children && (
+                  <ol>
+                    {chapter.children.map((child) => (
+                      <li>
+                        <span class="story-branch" aria-hidden="true" />
+                        <a href={`#${child.id}`} data-tree-link={child.id} data-tree-parent={chapter.id}>
+                          {child.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </li>
+            ))
+          }
+        </ol>
+        <div class="story-progress">
+          <span class="story-progress-track" aria-hidden="true"><span data-progress-bar /></span>
+          <span><span data-progress-value>0%</span> read · {minutes} min</span>
+        </div>
+      </aside>
+
+      <div class="story-main">
+        <nav class="case-control story-control" aria-label="Reading controls">
+          <details class="story-mobile-tree" data-mobile-tree>
+            <summary>
+              <span data-current-chapter>{chapters[0]?.label}</span>
+              <span class="story-mobile-progress"><span data-progress-value>0%</span> · {minutes} min</span>
+            </summary>
+            <ol>
+              {
+                chapters.flatMap((chapter) => [
+                  <li>
+                    <a href={`#${chapter.id}`} data-tree-link={chapter.id}>
+                      {chapter.label}
+                    </a>
+                  </li>,
+                  ...(chapter.children ?? []).map((child) => (
+                    <li class="story-mobile-child">
+                      <a href={`#${child.id}`} data-tree-link={child.id} data-tree-parent={chapter.id}>
+                        {child.label}
+                      </a>
+                    </li>
+                  )),
+                ])
+              }
+            </ol>
+          </details>
+          <p class="story-keys">
+            <span>{minutes} min read</span>
+            <kbd>↑</kbd><kbd>↓</kbd> chapters
+            <kbd>←</kbd><kbd>→</kbd> steps
+            <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>
+          </p>
+          <div class="story-threads">
+            {
+              groups.map((group, groupIndex) => (
+                <div data-thread-buttons={group.id} hidden={groupIndex > 0}>
+                  {group.threads.map((thread, index) => (
+                    <button
+                      type="button"
+                      data-thread-control={thread.key}
+                      data-active={thread.key === firstThread ? true : undefined}
+                      aria-pressed={thread.key === firstThread ? "true" : "false"}
+                    >
+                      [{index + 1}] {thread.label}
+                    </button>
+                  ))}
+                </div>
+              ))
+            }
+          </div>
+          <span class="story-progress-line" aria-hidden="true"><span data-progress-bar /></span>
+        </nav>
+        <Fragment set:html={body} />
+        <RelatedCaseStudies currentHref={currentHref} />
+      </div>
+    </div>
+  </article>
+  <CaseStudyInteractions />
+</BaseLayout>

@@ -1,0 +1,25 @@
+---
+// A chapter of a story page. `group` ties it to a set of thread controls, so
+// the sticky bar shows that chapter's steps while you read it.
+interface Props {
+  id: string;
+  title: string;
+  level?: 2 | 3;
+  group?: string;
+  part?: boolean;
+}
+const { id, title, level = 2, group, part = false } = Astro.props;
+const Heading = level === 3 ? "h3" : "h2";
+---
+
+<section
+  id={id}
+  class:list={["story-chapter", { "story-part": part, "story-sub": level === 3 }]}
+  aria-labelledby={`${id}-title`}
+  data-case-section
+  data-story-chapter={id}
+  data-thread-group={group}
+>
+  <Heading id={`${id}-title`}>{title}</Heading>
+  <slot />
+</section>
