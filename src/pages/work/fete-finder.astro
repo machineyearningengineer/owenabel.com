@@ -127,7 +127,7 @@ const chapters = [
       <p>The service worker caches public pages and event details, and nothing else. Admin, sign-in, user and webhook routes are never cached, so nothing private ends up stored on the phone.</p>
       <p>The programme snapshot lives in IndexedDB with a schema name and version. If the app changes shape, an old snapshot is thrown away instead of being misread.</p>
       <p>Changes made offline, like saves and route edits, go into a queue. Each one carries an idempotency key and belongs to the person who made it, and repeats collapse. Tapping save three times in a tunnel sends one change.</p>
-      <p>A Playwright test turns the map off and checks that discovery still works.</p>
+      <p>The map is an extra, not a dependency: if its tiles fail to load, search, filters and the list keep working.</p>
     </div>
   </StoryChapter>
 
