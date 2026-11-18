@@ -49,7 +49,7 @@ export default {
   ],
   stops: [
     "The voice is synthetic. The app, the people and the prices are made up to fit each idea.",
-    "They teach the shape of an idea, not how to set up a particular product.",
+    "They explain how an idea works and stop short of setting up any particular product.",
   ],
   how: [
     "720p MP4 files on Cloudflare R2, played in a plain video element.",

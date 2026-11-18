@@ -13,7 +13,7 @@ export default {
   clip: {
     caption:
       "Asking who needs attention this week, then opening a citation: the claim sits above the carer's own note.",
-    provenance: "Recorded on the live demo · 18 Nov 2026",
+    live: { host: "care-agent.owenabel.com", href: "https://care-agent.owenabel.com" },
   },
   films: [
     {
@@ -30,10 +30,10 @@ export default {
   stops: [
     "It can't tell whether visits were missed or late, because the data has no planned times. It says so.",
     "It catches the medication trap: a visit marked Completed whose note says the family hadn't given the medicine.",
-    "It refuses to delete anything, and the database connection is read-only anyway. It was tested on synthetic data, not real notes.",
+    "It refuses to delete anything, and the database connection is read-only anyway. It has only been tested on synthetic data.",
   ],
   how: [
-    "No server and no model. The page is the real front end. A small script answers its API calls from files: five answers recorded from the live agent on 7 Nov 2026, the queries each one ran, and every visit and form record.",
+    "No server and no model. The page is the real front end. A small script answers its API calls from files. They hold five answers recorded from the live agent on 7 Nov 2026, the queries each one ran, and every visit and form record.",
     "Any other question gets a reply saying it is a recording, with the five questions to try.",
   ],
 } satisfies LabEntry;

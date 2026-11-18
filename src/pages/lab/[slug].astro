@@ -87,7 +87,7 @@ const columns = [
           }
           {
             entry.clip ? (
-              <Clip base={`/lab/${entry.slug}`} caption={entry.clip.caption} />
+              <Clip base={`/lab/${entry.slug}`} caption={entry.clip.caption} live={entry.clip.live} note={entry.clip.note} />
             ) : (
               <img src={`/lab/${entry.slug}.jpg`} alt={`A frame from ${entry.films?.[0]?.title ?? entry.title}`} width="960" height="600" decoding="async" />
             )
@@ -102,7 +102,7 @@ const columns = [
               </a>
             )
           }
-          <span class="lab-provenance">{entry.clip?.provenance ?? `${entry.films?.length} films, streamed with captions`}</span>
+          {!entry.clip && <span class="lab-provenance">{entry.films?.length} films, streamed with captions</span>}
         </figcaption>
       </figure>
     </header>

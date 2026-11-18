@@ -14,7 +14,7 @@ export default {
   clip: {
     caption:
       "The homepage's strip of photo doors, then the moments door: a floor of photo rings that tips into a tunnel.",
-    provenance: "Recorded on the live site · 18 Nov 2026",
+    live: { host: "nairaandchill.owenabel.com", href: "https://nairaandchill.owenabel.com" },
   },
   testing: [
     "How much motion and photography a site can carry and still read well on a phone.",
@@ -22,7 +22,7 @@ export default {
     "A WebGL shader field, adapted from OpenShaders, sits behind the opening and the footer. Three menu styles can be swapped under yourself → menu style.",
   ],
   stops: [
-    "It is a client preview, not the launched site. The merch is a concept, the playlists are groupings of existing sets, and there is no sign-in, checkout or email.",
+    "It is a client preview and hasn't launched yet. The merch is a concept, the playlists are groupings of existing sets, and there is no sign-in, checkout or email.",
     "Haptics and headphone sound still need trying on real phones.",
   ],
   how: [

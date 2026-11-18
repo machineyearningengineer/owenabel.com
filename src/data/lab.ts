@@ -32,8 +32,11 @@ export type LabEntry = {
   source?: string | LabLink[];
   /** The main action under the exhibit: the demo, the site or the repository. */
   open?: LabLink;
-  /** A clip at public/lab/<slug>, or the films' poster when there is no clip. */
-  clip?: { caption: string; provenance: string };
+  /**
+   * A clip at public/lab/<slug>, or the films' poster when there is no clip.
+   * `live` is where it was recorded; `note` replaces that line for a clip from elsewhere.
+   */
+  clip?: { caption: string; live?: { host: string; href: string }; note?: string };
   films?: LabFilm[];
   /** A line under the films heading, e.g. how they were made. */
   filmsNote?: string;

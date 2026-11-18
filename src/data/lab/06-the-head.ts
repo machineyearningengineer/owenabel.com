@@ -23,7 +23,7 @@ export default {
   clip: {
     caption:
       "The head follows the cursor round, then five quick taps: a wince, teary, annoyed with a vein, a sigh.",
-    provenance: "Recorded on owenabel.com · 18 Nov 2026",
+    live: { host: "owenabel.com", href: "/" },
   },
   testing: [
     "Whether a cheap trick can make a page feel like someone is there.",

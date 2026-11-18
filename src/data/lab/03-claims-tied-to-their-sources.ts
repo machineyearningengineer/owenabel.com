@@ -13,7 +13,7 @@ export default {
   clip: {
     caption:
       "Opening the saved Discover report, then a citation: the source card and the passage the claim rests on.",
-    provenance: "Recorded on the live demo · 18 Nov 2026",
+    live: { host: "fieldnotes.owenabel.com", href: "https://fieldnotes.owenabel.com" },
   },
   testing: [
     "Whether code, not the model, can own the link between a claim and its evidence.",

@@ -3234,6 +3234,11 @@ html[data-intro="play"] body {
   padding: 6px 10px;
 }
 
+.lab-plate .journey-clip figcaption span {
+  color: var(--muted);
+  text-transform: none;
+}
+
 .lab-plate > figcaption {
   align-items: baseline;
   flex-wrap: wrap;

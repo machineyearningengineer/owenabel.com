@@ -18,7 +18,7 @@ export default {
   open: { label: "owenabel.com", href: "/" },
   clip: {
     caption: "Three taps on the homepage paper. Each one ripples and the nearest fish dart away.",
-    provenance: "Recorded on owenabel.com · 18 Nov 2026",
+    live: { host: "owenabel.com", href: "/" },
   },
   testing: [
     "A quieter replacement for the WebGL colour field that used to sit behind the homepage.",

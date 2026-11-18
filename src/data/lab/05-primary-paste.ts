@@ -22,7 +22,7 @@ export default {
   clip: {
     caption:
       "Selecting a line in Safari, then middle-clicking in TextEdit. The normal clipboard is untouched.",
-    provenance: "From the project's demo video",
+    note: "From the demo video in the project's repository, recorded on a Mac with the app running",
   },
   testing: [
     "Whether the Linux habit of select, then middle-click, can work across Mac apps without touching ⌘C and ⌘V.",
