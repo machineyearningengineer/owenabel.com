@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import KoiPond from "../components/KoiPond.astro";
 import { getCaseNotes, work } from "../data/work";
 ---
 
@@ -7,7 +8,8 @@ import { getCaseNotes, work } from "../data/work";
   title="Work - Owen Abel Amenze"
   description="Selected software engineering work by Owen Abel Amenze."
 >
-  <section class="section-header" aria-labelledby="work-heading">
+  <section class="section-header koi-surface koi-band" aria-labelledby="work-heading">
+    <KoiPond fish={3} />
     <h1 id="work-heading">Work</h1>
     <p>Four projects. Open one for the problem, what I built and how it went.</p>
   </section>
@@ -134,6 +136,7 @@ import { getCaseNotes, work } from "../data/work";
                       <a
                         class="case-study-count"
                         href={caseNote.href}
+                        data-cite={caseNote.href}
                         aria-label={`Case study ${index + 1}: ${caseNote.label}`}
                       >
                         [{index + 1}]

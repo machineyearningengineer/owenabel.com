@@ -12,6 +12,7 @@ type WorkStream = {
 export type CaseStudy = {
   label: string;
   href: string;
+  summary: string;
   exhibit: { src: string; caption: string };
 };
 
@@ -63,6 +64,8 @@ export const work: WorkItem[] = [
       {
         label: "Fête Finder: finding a night out",
         href: "/work/fete-finder-discovery",
+        summary:
+          "Fête de la Musique fills Paris with free gigs for one night. I built the search, maps and saved routes that turn the programme into a plan: 54,295 page views in June 2026.",
         exhibit: {
           src: "/exhibits/fete-recap.webp",
           caption: "The 2026 recap page, with the route of the night drawn over Paris.",
@@ -71,6 +74,8 @@ export const work: WorkItem[] = [
       {
         label: "Fête Finder: running the programme",
         href: "/work/fete-finder-operations",
+        summary:
+          "The programme kept changing after launch. I built the tools to edit, review and recover every listing, and a bot that took the ticket exchange into a WhatsApp chat of about 2,000 people.",
         exhibit: {
           src: "/exhibits/fete-archive.webp",
           caption: "The archive of Paris listings that the operations tools keep up to date.",
@@ -103,6 +108,8 @@ export const work: WorkItem[] = [
       {
         label: "Milk & Henny: running the night",
         href: "/work/milk-and-henny-operations",
+        summary:
+          "I host the parties and build the software that runs them. Tickets, check-in at the door, games in the room and the photos afterwards all live in one app.",
         exhibit: {
           src: "/exhibits/milk-event.webp",
           caption: "An event page: details, tickets and, once it sells out, a waitlist.",
@@ -111,6 +118,8 @@ export const work: WorkItem[] = [
       {
         label: "Milk & Henny: games for the room",
         href: "/work/milk-and-henny-games",
+        summary:
+          "Party games that send people back to each other instead of their phones. Each screen has one job: the board for the room, the answers for the host, a buzzer for the team.",
         exhibit: {
           src: "/exhibits/milk-things.webp",
           caption: "The games and tools index at milkandhenny.com/things.",
@@ -119,6 +128,8 @@ export const work: WorkItem[] = [
       {
         label: "Milk & Henny: keeping the photos",
         href: "/work/milk-and-henny-media",
+        summary:
+          "It started with “can you send me the photos?” after every party. Now there are public albums to browse, and private transfers that expire for everything else.",
         exhibit: {
           src: "/exhibits/milk-pics.webp",
           caption: "Published albums at milkandhenny.com/pics.",
@@ -191,6 +202,8 @@ export const work: WorkItem[] = [
       {
         label: "Open Policy Finder: search and data quality",
         href: "/work/open-policy-finder",
+        summary:
+          "Researchers type half a journal title and expect the right publishing policy. I built the search, moved it from Elasticsearch onto PostgreSQL, and set up a loop with data stewards to fix the records behind it.",
         exhibit: {
           src: "/exhibits/opf-home.webp",
           caption: "The Open Policy Finder home page and journal search.",
@@ -199,6 +212,8 @@ export const work: WorkItem[] = [
       {
         label: "Jisc website: moving to Fargate",
         href: "/work/jisc-website",
+        summary:
+          "Jisc’s main website had scaling and downtime problems. I led its move to AWS ECS Fargate and RDS, with Terraform preview environments and release checks so every change is seen before it ships.",
         exhibit: {
           src: "/exhibits/jisc-home.webp",
           caption: "The Jisc home page, served from AWS ECS Fargate since the migration.",
@@ -231,6 +246,8 @@ export const work: WorkItem[] = [
       {
         label: "Receipts: search you can check",
         href: "/work/receipts-discovery",
+        summary:
+          "Search for a beauty provider with words or a photo, and see why each one appears. Every result names its evidence: a portfolio piece, a client review, or only a visual resemblance.",
         exhibit: {
           src: "/exhibits/receipts-photo-search.webp",
           caption: "Searching with a photo: pick a look, then see who has done that work.",
@@ -239,6 +256,8 @@ export const work: WorkItem[] = [
       {
         label: "Receipts: the Go platform",
         href: "/work/receipts-platform",
+        summary:
+          "An upload can succeed while its processing fails. I built a Go platform where every image has a recorded state, failed jobs retry on a policy, and nothing half-processed goes public.",
         exhibit: {
           src: "/exhibits/receipts-feed.webp",
           caption: "The discovery feed, which only shows media that has finished processing.",

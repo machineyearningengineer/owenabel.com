@@ -1,0 +1,13 @@
+---
+// A link to a case study that previews it on hover or focus (see CitePreview).
+// Usage: <Cite to="/work/receipts-discovery">visual search</Cite>
+import { getCaseStudy } from "../data/work";
+
+interface Props {
+  to: string;
+}
+const { to } = Astro.props;
+if (!getCaseStudy(to)) throw new Error(`Cite: no case study at ${to}`);
+---
+
+<a class="cite" href={to} data-cite={to}><slot /></a>

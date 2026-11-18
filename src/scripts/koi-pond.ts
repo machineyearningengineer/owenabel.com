@@ -2,7 +2,6 @@
  * Ink koi swimming under the ledger paper. Tap the paper to ripple the water;
  * nearby fish dart away. Drawn on a 2D canvas in the page's own ink and accent.
  */
-const FISH = 5;
 const SEGMENTS = 16;
 const RIPPLE_LIFE = 1.8;
 // Taps on these keep their normal behaviour and never ripple the pond.
@@ -60,6 +59,7 @@ const bodyWidth = (i: number, size: number) => {
 
 export function mountKoiPond(canvas: HTMLCanvasElement, surface: HTMLElement, signal: AbortSignal) {
   const ctx = canvas.getContext("2d");
+  const count = Number(canvas.dataset.fish ?? 5);
   if (!ctx) return;
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   let width = 0;
@@ -88,7 +88,9 @@ export function mountKoiPond(canvas: HTMLCanvasElement, surface: HTMLElement, si
     canvas.height = Math.round(height * scale);
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     if (fish.length === 0 && width > 0)
-      fish = Array.from({ length: width < 600 ? 3 : FISH }, () => spawn(width, height));
+      fish = Array.from({ length: width < 600 ? Math.min(3, count) : count }, () =>
+        spawn(width, height),
+      );
   };
 
   const swim = (f: Fish, dt: number) => {

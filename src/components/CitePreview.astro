@@ -1,0 +1,93 @@
+---
+// One shared preview card for every <Cite>. It lives in the top layer
+// (popover), sits against the hovered link, flips above when there's no room
+// below, and only opens for a mouse or keyboard focus; a tap just follows the link.
+import { work } from "../data/work";
+
+const cases = Object.fromEntries(
+  work.flatMap((item) =>
+    item.caseNotes.map((note) => [
+      note.href,
+      { title: note.label, summary: note.summary, image: note.exhibit.src },
+    ]),
+  ),
+);
+---
+
+<aside class="cite-preview" popover="manual" data-cite-preview aria-hidden="true">
+  <img alt="" width="320" height="200" decoding="async" data-cite-image />
+  <strong data-cite-title></strong>
+  <p data-cite-summary></p>
+  <span class="cite-preview-more">Read the case study →</span>
+</aside>
+
+<script is:inline type="application/json" id="cite-data" set:html={JSON.stringify(cases)} />
+
+<script>
+  import { onPage } from "../scripts/page";
+
+  type Case = { title: string; summary: string; image: string };
+
+  onPage((signal) => {
+    const card = document.querySelector<HTMLElement>("[data-cite-preview]");
+    const cases = JSON.parse(document.getElementById("cite-data")?.textContent ?? "{}") as Record<
+      string,
+      Case
+    >;
+    if (!card || !card.showPopover) return;
+    const image = card.querySelector<HTMLImageElement>("[data-cite-image]");
+    const title = card.querySelector<HTMLElement>("[data-cite-title]");
+    const summary = card.querySelector<HTMLElement>("[data-cite-summary]");
+    let openTimer = 0;
+    let closeTimer = 0;
+
+    const place = (link: HTMLElement) => {
+      const anchor = link.getBoundingClientRect();
+      const { width, height } = card.getBoundingClientRect();
+      const gap = 8;
+      const below = anchor.bottom + gap + height <= innerHeight;
+      const top = below ? anchor.bottom + gap : anchor.top - gap - height;
+      const left = Math.min(Math.max(12, anchor.left), innerWidth - width - 12);
+      card.style.top = `${Math.max(12, top)}px`;
+      card.style.left = `${left}px`;
+    };
+
+    const open = (link: HTMLElement) => {
+      const data = cases[link.dataset.cite ?? ""];
+      if (!data) return;
+      window.clearTimeout(closeTimer);
+      window.clearTimeout(openTimer);
+      openTimer = window.setTimeout(() => {
+        if (image) image.src = data.image;
+        if (title) title.textContent = data.title;
+        if (summary) summary.textContent = data.summary;
+        if (!card.matches(":popover-open")) card.showPopover();
+        place(link);
+      }, 140);
+    };
+
+    const close = () => {
+      window.clearTimeout(openTimer);
+      closeTimer = window.setTimeout(() => {
+        if (card.matches(":popover-open")) card.hidePopover();
+      }, 120);
+    };
+
+    for (const link of document.querySelectorAll<HTMLElement>("[data-cite]")) {
+      link.addEventListener(
+        "pointerenter",
+        (event) => event.pointerType === "mouse" && open(link),
+        { signal },
+      );
+      link.addEventListener("pointerleave", close, { signal });
+      link.addEventListener("focus", () => open(link), { signal });
+      link.addEventListener("blur", close, { signal });
+    }
+    addEventListener("scroll", close, { passive: true, signal });
+    document.addEventListener("keydown", (event) => event.key === "Escape" && close(), { signal });
+    signal.addEventListener("abort", () => {
+      window.clearTimeout(openTimer);
+      if (card.matches(":popover-open")) card.hidePopover();
+    });
+  });
+</script>

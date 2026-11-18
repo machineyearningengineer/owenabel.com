@@ -1,0 +1,22 @@
+---
+// Ink koi swimming behind whatever contains this component. The parent needs
+// the `koi-surface` class (or its own `position: relative; isolation: isolate`).
+// Tapping the parent ripples the water.
+interface Props {
+  fish?: number;
+}
+const { fish = 5 } = Astro.props;
+---
+
+<canvas class="koi-pond" aria-hidden="true" data-koi-pond data-fish={fish}></canvas>
+
+<script>
+  import { mountKoiPond } from "../scripts/koi-pond";
+  import { onPage } from "../scripts/page";
+
+  onPage((signal) => {
+    for (const canvas of document.querySelectorAll<HTMLCanvasElement>("[data-koi-pond]")) {
+      if (canvas.parentElement) mountKoiPond(canvas, canvas.parentElement, signal);
+    }
+  });
+</script>

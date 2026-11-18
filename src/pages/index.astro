@@ -1,20 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Cite from "../components/Cite.astro";
+import KoiPond from "../components/KoiPond.astro";
 import { getFeaturedWork } from "../data/work";
-
-const lineItems = [
-  ["01", "Product systems", "Event search, maps and saved routes; ticketing, check-in and party games"],
-  [
-    "02",
-    "Search & data",
-    "Policy search on PostgreSQL in place of Elasticsearch; visual search that shows the evidence behind each result",
-  ],
-  [
-    "03",
-    "Reliability",
-    "Led the Jisc website's move to AWS Fargate after scaling issues, with Terraform previews and release checks",
-  ],
-];
 
 const featuredWork = getFeaturedWork();
 const exhibitMarks = ["A", "B", "C", "D"];
@@ -33,8 +21,8 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 ---
 
 <BaseLayout>
-  <section class="hero" aria-labelledby="intro-title" data-ledger-surface>
-    <canvas class="koi-pond" aria-hidden="true" data-koi-pond></canvas>
+  <section class="hero koi-surface" aria-labelledby="intro-title">
+    <KoiPond />
     <h1 id="intro-title" class="visually-hidden">
       Owen Abel Amenze, senior software engineer in London
     </h1>
@@ -67,13 +55,35 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
         </thead>
         <tbody>
           {
-            lineItems.map(([no, area, shipped]) => (
+            <>
               <tr>
-                <td>{no}</td>
-                <td>{area}</td>
-                <td>{shipped}</td>
+                <td>01</td>
+                <td>Product systems</td>
+                <td>
+                  <Cite to="/work/fete-finder-discovery">Event search, maps and saved routes</Cite>;{" "}
+                  <Cite to="/work/milk-and-henny-operations">ticketing, check-in</Cite> and{" "}
+                  <Cite to="/work/milk-and-henny-games">party games</Cite>
+                </td>
               </tr>
-            ))
+              <tr>
+                <td>02</td>
+                <td>Search &amp; data</td>
+                <td>
+                  <Cite to="/work/open-policy-finder">Policy search on PostgreSQL</Cite> in place of
+                  Elasticsearch;{" "}
+                  <Cite to="/work/receipts-discovery">visual search</Cite> that shows the evidence
+                  behind each result
+                </td>
+              </tr>
+              <tr>
+                <td>03</td>
+                <td>Reliability</td>
+                <td>
+                  Led <Cite to="/work/jisc-website">the Jisc website's move to AWS Fargate</Cite> after
+                  scaling issues, with Terraform previews and release checks
+                </td>
+              </tr>
+            </>
           }
         </tbody>
       </table>
@@ -156,15 +166,11 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 </BaseLayout>
 
 <script>
-  import { mountKoiPond } from "../scripts/koi-pond";
   import { mountOwenHead } from "../scripts/owen-head";
   import { onPage } from "../scripts/page";
 
   onPage((signal) => {
 
-  const canvas = document.querySelector<HTMLCanvasElement>("[data-koi-pond]");
-  const surface = document.querySelector<HTMLElement>("[data-ledger-surface]");
-  if (canvas && surface) mountKoiPond(canvas, surface, signal);
     const head = document.querySelector<HTMLElement>("[data-owen-head]");
     if (head) mountOwenHead(head, signal);
 

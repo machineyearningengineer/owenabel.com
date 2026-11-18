@@ -20,6 +20,9 @@
   --grain-opacity: 0.34;
   --grain-cloud-opacity: 0.42;
   --sticky-surface: rgba(239, 239, 236, 0.88);
+  --positive: #3f8f4f;
+  --positive-ring: rgba(63, 143, 79, 0.18);
+  --shadow: var(--shadow);
   --max: 1080px;
   color-scheme: light dark;
   font-family: "Berkeley Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
@@ -51,6 +54,9 @@ html[data-theme="dark"] {
   --grain-opacity: 0.38;
   --grain-cloud-opacity: 0.48;
   --sticky-surface: rgba(17, 18, 19, 0.9);
+  --positive: #6cc07c;
+  --positive-ring: rgba(108, 192, 124, 0.2);
+  --shadow: rgba(0, 0, 0, 0.7);
   color-scheme: dark;
 }
 
@@ -77,6 +83,9 @@ html[data-theme="dark"] {
     --grain-opacity: 0.38;
     --grain-cloud-opacity: 0.48;
     --sticky-surface: rgba(17, 18, 19, 0.9);
+    --positive: #6cc07c;
+    --positive-ring: rgba(108, 192, 124, 0.2);
+    --shadow: rgba(0, 0, 0, 0.7);
     color-scheme: dark;
   }
 }
@@ -756,12 +765,26 @@ html[data-theme="dark"] .invoice-box::before {
   background: var(--surface-soft);
 }
 
+.booking-embed {
+  isolation: isolate;
+  background: var(--paper);
+}
+
+/* Google's scheduler can't be styled from outside, so it is toned to the
+   ledger instead: greyscale ink, with its white page multiplied into the
+   paper (light) or inverted and screened onto it (dark). */
 .booking-embed iframe {
   display: block;
   width: 100%;
-  height: min(920px, 110vh);
+  height: 760px;
   border: 0;
-  background: var(--paper);
+  filter: grayscale(1) sepia(0.12) contrast(1.05);
+  mix-blend-mode: multiply;
+}
+
+html[data-theme="dark"] .booking-embed iframe {
+  filter: invert(0.93) hue-rotate(180deg) grayscale(1) sepia(0.1);
+  mix-blend-mode: screen;
 }
 
 @keyframes settle-in {
@@ -1326,7 +1349,7 @@ html[data-theme="dark"] .invoice-box::before {
 }
 
 /* Koi pond: ink koi swim under the hero paper; tap to ripple. */
-.hero {
+.koi-surface {
   position: relative;
   isolation: isolate;
 }
@@ -1441,8 +1464,8 @@ html[data-theme="dark"] .invoice-box::before {
   height: 7px;
   margin-right: 7px;
   border-radius: 50%;
-  background: #3f8f4f;
-  box-shadow: 0 0 0 3px rgba(63, 143, 79, 0.18);
+  background: var(--positive);
+  box-shadow: 0 0 0 3px var(--positive-ring);
   content: "";
   vertical-align: 1px;
   animation: status-pulse 2.4s ease-in-out infinite;
@@ -1450,7 +1473,7 @@ html[data-theme="dark"] .invoice-box::before {
 
 @keyframes status-pulse {
   50% {
-    box-shadow: 0 0 0 5px rgba(63, 143, 79, 0.06);
+    box-shadow: 0 0 0 5px transparent;
   }
 }
 
@@ -1513,7 +1536,7 @@ html[data-theme="dark"] .invoice-box::before {
   background: var(--warm);
   box-shadow:
     0 1px 0 var(--faint),
-    0 10px 22px -16px rgba(0, 0, 0, 0.55);
+    0 10px 22px -16px var(--shadow);
   transform: rotate(-1.4deg);
   transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1646,7 +1669,7 @@ html[data-theme="dark"] .invoice-box::before {
   border: 1px solid var(--rule);
   padding: 10px 10px 12px;
   background: var(--paper);
-  box-shadow: 0 14px 30px -22px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 14px 30px -22px var(--shadow);
   font-size: 12px;
   view-transition-name: ledger-player;
 }
@@ -1792,4 +1815,88 @@ html {
 ::selection {
   background: var(--accent);
   color: var(--paper);
+}
+
+/* A short band of water behind a page heading (Work, Contact). */
+.koi-band {
+  padding-block: 24px;
+}
+
+.koi-band .koi-pond {
+  top: -60px;
+  height: calc(100% + 60px);
+}
+
+/* Citations: a link that previews its case study. */
+.cite {
+  text-decoration: underline;
+  text-decoration-color: var(--accent-outline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 160ms ease;
+}
+
+.cite:hover,
+.cite:focus-visible {
+  text-decoration-color: var(--accent);
+}
+
+.cite-preview {
+  position: fixed;
+  inset: auto;
+  width: min(320px, calc(100vw - 24px));
+  margin: 0;
+  border: 1px solid var(--rule);
+  padding: 8px 8px 10px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 16px 34px -22px var(--shadow);
+  font-size: 12px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    display 160ms allow-discrete,
+    overlay 160ms allow-discrete;
+}
+
+.cite-preview:popover-open {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .cite-preview:popover-open {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.cite-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+  border: 1px solid var(--faint);
+}
+
+.cite-preview strong {
+  display: block;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.cite-preview p {
+  margin: 4px 0 6px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.cite-preview-more {
+  color: var(--accent);
+  text-transform: uppercase;
+  font-size: 11px;
 }

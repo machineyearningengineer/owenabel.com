@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import KoiPond from "../components/KoiPond.astro";
 
 const bookingUrl =
   "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2LQPawHeYUD3HNEFUuFDr-0CUsi7Z8B9m-peU3KF5hTYbjP6SONeHbBNAb57dCOcX3lob_WBS1?gv=true";
@@ -9,7 +10,10 @@ const bookingUrl =
   title="Contact - Owen Abel Amenze"
   description="Email Owen Abel Amenze or book a 20-minute introductory chat on Google Meet."
 >
-  <h1 class="page-title">Got a problem in mind?</h1>
+  <div class="koi-surface koi-band">
+    <KoiPond fish={2} />
+    <h1 class="page-title">Got a problem in mind?</h1>
+  </div>
 
   <section class="contact-panel" aria-label="Contact details">
     <div class="contact-row">

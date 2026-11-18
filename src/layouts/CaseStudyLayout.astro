@@ -24,7 +24,7 @@ const caseStudy = getCaseStudy(currentHref);
     </nav>
     <header class="case-hero">
       <h1>{title}</h1>
-      <slot name="intro" />
+      {caseStudy && <p>{caseStudy.summary}</p>}
     </header>
     {
       caseStudy && (
