@@ -11,10 +11,11 @@ const routes = files
 const redirects = routes.flatMap((route) => [
   `${route}/ ${route} 301`,
   `${route}/index.html ${route} 301`,
+  `${route}.html ${route} 308`,
 ]);
 
 await writeFile(
   new URL("../dist/_redirects", import.meta.url),
-  `# Generated from built pages; keep legacy directory URLs working.\n${redirects.join("\n")}\n`,
+  `# Generated from built pages; keep legacy directory URLs working.\n/index.html / 308\n${redirects.join("\n")}\n`,
 );
 console.log(`Generated canonical URL redirects for ${routes.length} pages.`);

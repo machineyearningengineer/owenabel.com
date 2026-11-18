@@ -2,5 +2,9 @@ node_modules
 dist
 .astro
 .wrangler
+.cloudflare
+.vite
+.env*
+.dev.vars*
 .DS_Store
 *.log
