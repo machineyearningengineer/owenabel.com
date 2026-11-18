@@ -92,6 +92,22 @@ settings and redirects, confirmed Workers-managed DNS and valid TLS, and retired
 the old project. The HTTPS edge rule is recorded in `workers/https-redirect.rule.json`.
 The static output stays portable to other static hosts.
 
+## Showcasing work on a subdomain
+
+Public work goes on its own subdomain, `<name>.owenabel.com`, never a path on this
+site, so each project deploys and fails independently. The `owenabel.com` zone is
+on the personal Cloudflare account, and HTTP-to-HTTPS covers every subdomain.
+
+- **A Cloudflare Worker on the personal account:** add
+  `domains: ['<name>.owenabel.com']` to its `cloudflare.config.ts`, then run
+  `pnpm exec cf workers triggers deploy --profile personal-deploy` with
+  `CLOUDFLARE_ACCOUNT_ID` set to the personal account. That attaches the domain
+  without uploading a new version; Cloudflare creates the DNS record and certificate.
+- **Hosted elsewhere (Railway, Vercel, …):** add a proxied `CNAME <name>` record
+  pointing at the host's target, and add the domain in that host's settings.
+
+Current showcases: `nairaandchill.owenabel.com` (NAIRAA & Chill client preview).
+
 ## CV and work content
 
 The CV source and supporting career evidence live in `~/dev/work/resume`. The
