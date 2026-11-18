@@ -1,0 +1,135 @@
+---
+import StoryLayout from "../../layouts/StoryLayout.astro";
+import StoryChapter from "../../components/StoryChapter.astro";
+import CaseJourney from "../../components/CaseJourney.astro";
+
+const steps = [
+  {
+    key: "search",
+    label: "Search",
+    text: [
+      "Type part of a journal, publisher or funder and suggestions appear. Pick one and you land on its policy. Behind it is PostgreSQL, not a separate search engine, which I'll come back to.",
+    ],
+    caption: "Typing “Nature Commun” and landing on the journal's policy.",
+  },
+  {
+    key: "help",
+    label: "Help pages",
+    text: [
+      "The help, FAQ and API pages run on a small CMS I built. The content team and product owners write Markdown in Directus, and the site renders it with its own components, so they can change a page, see it on the site and change it again without a developer.",
+    ],
+    caption: "The help pages, then the open access compliance topic.",
+  },
+  {
+    key: "data",
+    label: "Data quality",
+    text: [
+      "A policy is only as good as the record behind it, and some identifiers, like ISSNs, were missing, muddled or typed wrong. Each record shows the policy for each version of an article, with a link to report an error.",
+    ],
+    caption: "The Nature Communications record: an option opened, the versions filtered, and the “Report an error” link.",
+  },
+];
+
+const chapters = [
+  { id: "problem", label: "The problem" },
+  { id: "how-it-works", label: "How it works" },
+  { id: "what-happened", label: "What happened" },
+  {
+    id: "under-the-hood",
+    label: "Under the hood",
+    children: [
+      { id: "elasticsearch", label: "Retiring Elasticsearch" },
+      { id: "queries", label: "Caching and queries" },
+      { id: "ta-lookup", label: "The agreements lookup" },
+      { id: "help-cms", label: "Help pages on a CMS" },
+      { id: "stewards", label: "The steward loop" },
+    ],
+  },
+  { id: "lessons", label: "What I learned" },
+];
+---
+
+<StoryLayout
+  title="Open Policy Finder"
+  description="Policy search moved from Elasticsearch into PostgreSQL, a data-steward feedback loop, and help pages on a Directus CMS the content team runs, for Jisc's Open Policy Finder."
+  chapters={chapters}
+  groups={[{ id: "policy", threads: steps }]}
+>
+  <StoryChapter id="problem" title="The problem">
+    <div class="story-prose">
+      <p>Researchers search with half a title, an acronym or a publisher's name, and the answer is only as good as the record behind it.</p>
+      <p>Two more things made it harder. The search ran on Elasticsearch, kept in step with the database by a daily sync. And the guidance around the search, the help, FAQ and API pages, had to stay current without queueing for a developer.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="how-it-works" title="How it works" group="policy">
+    <div class="story-prose">
+      <p>In the Sherpa Team I led the architecture and technical delivery of the data and search work, with two other developers. Three steps, recorded on the live site.</p>
+    </div>
+    <CaseJourney project="open-policy-finder" steps={steps} />
+  </StoryChapter>
+
+  <StoryChapter id="what-happened" title="What happened">
+    <div class="story-prose">
+      <p>Retiring Elasticsearch removed a daily sync between PostgreSQL and the search index, which had been eating developer time in the middle of a hard data migration. There's no benchmark on record, so I won't quote a speed-up.</p>
+      <p>Other teams with similar datasets adopted the data-quality tooling and the steward loop, including a separate API team.</p>
+      <p>The content team and product owners edit the help, FAQ and API pages themselves.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="under-the-hood" title="Under the hood" part>
+    <div class="story-prose">
+      <p>For engineers: the decisions behind the search, the content and the data.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="elasticsearch" title="Retiring Elasticsearch" level={3}>
+    <div class="story-prose">
+      <p>Open Policy Finder used to copy its records from PostgreSQL into Elasticsearch every day for fuzzy matching and ranking. Keeping the two in step was fiddly: the agreements data alone was keyed by date, year, name and ID.</p>
+      <p>Elasticsearch wasn't meaningfully faster for this workload, and as I put it at the time, we didn't have a write problem. PostgreSQL met the product's real scale, so the search moved into it, with a simple cache in front for repeated queries, and the sync went away.</p>
+      <p>The search still has to cope with imperfect queries and useful filters. It just does it in the database that already holds the truth.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="queries" title="Caching and queries" level={3}>
+    <div class="story-prose">
+      <p>Moving search into PostgreSQL only pays off if the queries around it are sound, so I went through the caching and search logic as well.</p>
+      <p>I fixed N+1 queries, where a page fetched a list and then went back to the database once per row. I replaced bad practices that had built up around them, and filled in data that was missing.</p>
+      <p>As with the search move, there's no benchmark on record, so no figure here either. What changed is that the database does less work for the same page.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="ta-lookup" title="The agreements lookup" level={3}>
+    <div class="story-prose">
+      <p>A UK researcher's question is short: my institution, this journal, is it covered? The <a href="https://openpolicyfinder.jisc.ac.uk/ta-lookup">transitional agreement lookup</a> answers it in two picks, and remembers your institution for next time.</p>
+      <p>The hard part is how people type. Institutions and publishers go by acronyms and old names, so the search expands them first: "UCL" finds University College London, "RSC" finds the Royal Society of Chemistry. Matching then happens in PostgreSQL with trigram similarity on normalised names, so a half-typed or misspelt name still lands.</p>
+      <p>The split between front end and back end is deliberate. Next.js renders the page and the agreement result on the server, so the answer arrives as HTML. In the browser, typing is debounced and each new keystroke cancels the request before it, so a slow early response can never overwrite a newer one.</p>
+      <p>Suggestions update optimistically from what's already loaded while the fresh answer is fetched. Responses are cached by normalised query, because agreement data changes on a monthly import, not by the minute, and the cache clears when a new import lands.</p>
+      <p>The notes on the page carry the rules people trip over: agreements apply only to the corresponding author, and merged institutions may follow separate agreements until they renew.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="help-cms" title="Help pages on a CMS" level={3}>
+    <div class="story-prose">
+      <p>The help, FAQ and API pages run on a custom CMS I built. Directus, with PostgreSQL underneath, holds each page as Markdown.</p>
+      <p>The site fetches that Markdown, parses it into a syntax tree and renders the tree through a React Markdown renderer with our own components, so the pages look and behave like the rest of the site rather than like pasted text.</p>
+      <p>That split is the point. The content team and product owners edit in Directus and see the result on the site, back and forth, without a developer in the loop. Developers own the components; editors own the words.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="stewards" title="The steward loop" level={3}>
+    <div class="story-prose">
+      <p>Records arrived from many sources in many shapes. The pipeline ran ingest, improve, display, fix: it normalised records, flagged missing or wrongly typed identifiers with classifiers and deterministic checks, including validation against an external endpoint, and kept traces and reports.</p>
+      <p>Roughly once a month, the gaps went back to the data stewards. They checked them against their own sets and fixed them at the source, so the next import came in cleaner.</p>
+      <p>I defined the lifecycle around it as well: the schedule, the meetings and a runbook for issues. A better query can't supply a field that isn't in the record, so the people who own the data are part of the search.</p>
+      <p>One smaller thing I'm fond of: in the Sherpa Team I prototyped an engineering harness with MCP that could inspect the codebase, query data, run checks and use the signed-in app. It stayed a prototype.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="lessons" title="What I learned">
+    <div class="story-prose">
+      <p>Search quality crosses team boundaries. A confusing result might need a query change, clearer help, or a fix to the source record, and working through that with the people who own the data is part of building the search.</p>
+      <p>And words that change often belong with the people who write them. My job was the components and the pipeline, so nobody had to wait on a developer to fix a sentence.</p>
+    </div>
+  </StoryChapter>
+</StoryLayout>

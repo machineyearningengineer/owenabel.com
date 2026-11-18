@@ -39,7 +39,7 @@ try {
     assert.equal(response.status, 404, path);
     assert.equal(await response.text(), await readFile(new URL("404.html", assets), "utf8"));
   }
-  // Merged case studies: each old URL lands on the chapter that replaced it.
+  // Merged and split case studies: each old URL lands on the page or chapter that replaced it.
   for (const [from, to] of Object.entries(legacyCaseStudies)) {
     const [path, anchor] = to.split("#");
     for (const variant of [from, from + "/", from + ".html"]) {
@@ -48,7 +48,9 @@ try {
       const location = new URL(redirect.headers.get("location"), origin);
       assert.equal(location.pathname + location.hash, to, variant);
     }
-    assert.ok((await (await fetch(origin + path)).text()).includes(`id="${anchor}"`), to);
+    const target = await fetch(origin + path);
+    assert.equal(target.status, 200, to);
+    if (anchor) assert.ok((await target.text()).includes(`id="${anchor}"`), to);
   }
   for (const file of ["og.png", "owen-abel-amenze-cv.pdf", "sitemap-index.xml", "robots.txt"]) {
     const response = await fetch(origin + "/" + file);

@@ -1,0 +1,128 @@
+---
+import StoryLayout from "../../layouts/StoryLayout.astro";
+import StoryChapter from "../../components/StoryChapter.astro";
+import CaseJourney from "../../components/CaseJourney.astro";
+import ArchitectureDiagram from "../../components/ArchitectureDiagram.astro";
+
+const steps = [
+  {
+    key: "site",
+    label: "Moving to Fargate",
+    text: [
+      "The site moved from EC2-hosted containers to AWS ECS Fargate and RDS. From the migration until I left in February 2026, it had no further downtime.",
+    ],
+    caption: "jisc.ac.uk today: the Solutions menu, then the latest news. The hosting is invisible from here, which is the point.",
+  },
+  {
+    key: "carousel",
+    label: "The carousel",
+    text: [
+      "I built the site's carousel, end to end: the one on the home page that pages through the latest news, blogs and projects.",
+    ],
+    caption: "The “Latest from Jisc” carousel on the home page, stepped through with its Next control.",
+  },
+  {
+    key: "publishing",
+    label: "Publishing",
+    text: [
+      "Editors work in Wagtail and Next.js presents the site. I built Wagtail components and kept both sides working through the move, so an editorial change still appeared the way it should.",
+    ],
+    caption: "From the content hub into a news article.",
+  },
+];
+
+const chapters = [
+  { id: "problem", label: "The problem" },
+  { id: "how-it-works", label: "How it works" },
+  { id: "what-happened", label: "What happened" },
+  {
+    id: "under-the-hood",
+    label: "Under the hood",
+    children: [
+      { id: "fargate", label: "Fargate and previews" },
+      { id: "components", label: "Components that never broke a page" },
+    ],
+  },
+  { id: "lessons", label: "What I learned" },
+];
+---
+
+<StoryLayout
+  title="The Jisc website"
+  description="Moving jisc.ac.uk from failing EC2 containers to AWS ECS Fargate, and retiring Wagtail components without breaking a page, in time for Digifest."
+  chapters={chapters}
+  groups={[{ id: "website", threads: steps }]}
+>
+  <StoryChapter id="problem" title="The problem">
+    <div class="story-prose">
+      <p>Researchers check publishing policies on <a href="/work/open-policy-finder">Open Policy Finder</a>. Everyone else meets Jisc through <a href="https://www.jisc.ac.uk">jisc.ac.uk</a>, which content teams keep up to date.</p>
+      <p>The daily outages came from EC2-hosted containers that ran out of memory, on top of a DDoS and a misconfigured network.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="how-it-works" title="How it works" group="website">
+    <div class="story-prose">
+      <p>I stepped into the Digital Experience Team's infrastructure work under a tight deadline, while still maintaining the publishing system. Three parts, recorded on the live site.</p>
+    </div>
+    <CaseJourney project="jisc-website" steps={steps} />
+  </StoryChapter>
+
+  <StoryChapter id="what-happened" title="What happened">
+    <div class="story-prose">
+      <p>The main website had no more downtime from the migration until I left in February 2026.</p>
+      <p>Old components were retired and pages moved onto new ones without a page breaking, in time for company deadlines like Digifest, Jisc's festival.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="under-the-hood" title="Under the hood" part>
+    <div class="story-prose">
+      <p>For engineers: the hosting, and how the components changed under live pages.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="fargate" title="Fargate and previews" level={3}>
+    <div class="story-prose">
+      <p>The move put both halves of the site, Wagtail for content and Next.js for the public pages, on ECS Fargate, with the database on RDS.</p>
+      <p>Changes could be reviewed in Terraform-managed preview environments, which replaced a staging site few people used. Playwright tests checked user-facing behaviour as part of release.</p>
+      <p>One smaller thing I'm fond of: when Jisc's shared Font Awesome licence limit started blocking deployments, I set up a cache and a local npm registry that several teams used.</p>
+    </div>
+    <ArchitectureDiagram
+      id="arch-jisc"
+      title="The Jisc website after the move"
+      summary="Wagtail manages content and Next.js presents it, both on AWS ECS Fargate, with the database on RDS. Changes are reviewed in Terraform-managed preview environments and checked by Playwright before release to jisc.ac.uk."
+      width={720}
+      height={290}
+      groups={[{ id: "fargate", label: "AWS ECS Fargate", x: 20, y: 20, w: 440, h: 120 }]}
+      boxes={[
+        { id: "wagtail", label: "Wagtail", note: "editors manage content", x: 40, y: 60, w: 190 },
+        { id: "next", label: "Next.js", note: "public pages", x: 260, y: 60, w: 180 },
+        { id: "site", label: "jisc.ac.uk", x: 530, y: 60, w: 170 },
+        { id: "rds", label: "RDS", note: "database", x: 40, y: 210, w: 190 },
+        { id: "terraform", label: "Preview env", note: "Terraform-managed", x: 290, y: 210, w: 170 },
+        { id: "playwright", label: "Playwright", note: "release checks", x: 530, y: 210, w: 170 },
+      ]}
+      edges={[
+        { from: "wagtail", to: "next" },
+        { from: "next", to: "site" },
+        { from: "rds", to: "fargate", plain: true },
+        { from: "terraform", to: "playwright" },
+        { from: "playwright", to: "site", label: "release" },
+      ]}
+    />
+  </StoryChapter>
+
+  <StoryChapter id="components" title="Components that never broke a page" level={3}>
+    <div class="story-prose">
+      <p>Pages on jisc.ac.uk are built from Wagtail components, and building them was part of my job. Some of the old ones had to go. Delete a component that live pages still use, though, and those pages break.</p>
+      <p>So I worked with the content team using expand and contract. The new component shipped alongside the old one first. Pages moved across, with the content team doing the editorial side and me running the migrations. Only when nothing used the old component did it go.</p>
+      <p>No page broke along the way, and each change landed in time for the company's deadlines, Digifest, Jisc's festival, among them.</p>
+    </div>
+  </StoryChapter>
+
+  <StoryChapter id="lessons" title="What I learned">
+    <div class="story-prose">
+      <p>A public website's reliability, its editorial workflow and its release path have to work together. Fixing the hosting meant understanding how people changed and checked the site.</p>
+      <p>And on a site people publish to every day, a breaking change is a schedule, not a moment: add the new thing, move everything across, then remove the old one.</p>
+    </div>
+  </StoryChapter>
+</StoryLayout>
