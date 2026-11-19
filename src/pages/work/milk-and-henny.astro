@@ -45,6 +45,20 @@ const steps = [
     ],
   },
   {
+    key: "hot-and-cold",
+    label: "Hot & Cold",
+    text: [
+      "Hot & Cold is my favourite of the games. There's a hidden word, and every guess gets a number: how many words in the dictionary sit closer to it in meaning. Zero finds it.",
+      "The number does the teaching. Nobody needs the rules twice when “castle” comes back #410 and “sea” comes back #4. The screen warms as you close in.",
+      "There's a new word every day at midnight, London time, with unlimited guesses and three hints. A room can also play it on their phones, taking turns. Whoever finds the word, or gets closest, wins the round.",
+    ],
+    clips: [
+      { beat: "hot-and-cold", caption: "Five guesses at the daily word, from “tree” at #11,742 to “mermaid” at #0.", local: true },
+      { beat: "hot-and-cold-standing", caption: "The result page, then how the solve compares with everyone else who played that word.", local: true },
+      { beat: "hot-and-cold-room", caption: "Two phones in a room take turns: house, song, piano, then Kofi finds “guitar”.", local: true },
+    ],
+  },
+  {
     key: "pitch-night",
     label: "Pitch Night",
     text: [
@@ -69,9 +83,14 @@ const steps = [
     key: "photos",
     label: "The photos",
     text: [
-      "Afterwards the photos go up as albums. Browsing uses smaller images prepared in advance. Downloading an original checks that the album is published, then hands out a signed link. Private batches go through transfers that expire.",
+      "Afterwards the photos go up as albums. Browsing uses smaller images prepared in advance. Downloading an original checks that the album is published, then hands out a signed link.",
+      "Not everything belongs in a public album. For the rest I built my own file transfer: pick the files, choose how long the link lives, from 30 minutes to 30 days, and send it. The page counts down, and when it ends the files go. After a night, guests can add theirs from a QR on the wall.",
     ],
-    caption: "Opening an album, then one of its photos.",
+    clips: [
+      { beat: "photos", caption: "Opening an album, then one of its photos." },
+      { beat: "transfer-create", caption: "Creating a transfer: a title, a 14-day expiry and six files, then a share link and a private owner link.", local: true },
+      { beat: "transfer-share", caption: "The shared page as the previews finish, then the photos taken around 21:15.", local: true },
+    ],
   },
 ];
 
@@ -85,7 +104,9 @@ const chapters = [
     children: [
       { id: "payments", label: "Payment that's safe to retry" },
       { id: "the-door", label: "A door with no signal" },
+      { id: "transfers", label: "Uploads that survive hotel wifi" },
       { id: "live-rooms", label: "Live rooms" },
+      { id: "scoring", label: "Scoring a guess" },
       { id: "writing-it-down", label: "Writing it down" },
     ],
   },
@@ -118,6 +139,7 @@ const chapters = [
     <div class="story-prose">
       <p>It's real, and it's small. A read-only production query in September 2026 counted 119 tickets across three events, and 908 emails sent through the outbox. That's enough to find the real failure modes. It isn't scale, and I won't pretend it is.</p>
       <p>The games are built and tested in software, but playtests with real groups are still to come. The playtest log is blunt about it: empty observations are pending, not passes.</p>
+      <p>The exception is Hot & Cold's daily word, which people did play. A backup from 26 September 2026 holds 122 finished games of 30 daily words, played between 29 August and 25 September. 88 found the word, with a median of 26.5 guesses. These are games, one per browser per word, not people, and some are mine.</p>
     </div>
   </StoryChapter>
 
@@ -144,6 +166,14 @@ const chapters = [
     </div>
   </StoryChapter>
 
+  <StoryChapter id="transfers" title="Uploads that survive hotel wifi" level={3}>
+    <div class="story-prose">
+      <p>The code's own example: someone empties a phone after a wedding, gigabytes over hotel wifi. So the browser uploads straight to storage on signed links that last six hours, and the server reserves the transfer's space before the first byte moves. After a refresh, the page resends only the files that hadn't finished.</p>
+      <p>Adding files to a live transfer reserves their count and bytes under a lock on the transfer, so two batches at once can't overbook it or reuse a filename. The owner link carries a delete token. The database keeps only its hash, plus an encrypted copy so an interrupted upload can still hand it back.</p>
+      <p>Originals are kept exactly as sent. Previews come from a separate media worker. Each attempt writes to its own key, and only the attempt that still holds the job publishes, so a slow worker can't overwrite a newer result. Before a release, an audit checks every live file is in storage at the right size.</p>
+    </div>
+  </StoryChapter>
+
   <StoryChapter id="live-rooms" title="Live rooms" level={3}>
     <div class="story-prose">
       <p>Phones drop out of games all the time: a lock screen, a tunnel, a flat battery. Each room changes state through a pure reducer, every action carries an ID, and the engine remembers which IDs it has already applied. A phone that resends after reconnecting gets the earlier result replayed, not applied twice.</p>
@@ -151,6 +181,14 @@ const chapters = [
       <p>The Postgres version locks the room row, stores a receipt for each action with the room's revision number, and writes the game result to an outbox in the same transaction.</p>
     </div>
     <Clip project="milk-and-henny" beat="rejoin" caption="Rejoining a room by its code in Imposter. The code is typed, never sent." />
+  </StoryChapter>
+
+  <StoryChapter id="scoring" title="Scoring a guess" level={3}>
+    <div class="story-prose">
+      <p>Hot & Cold runs no model when you guess. For each target, a build step ranks all 32,508 words in its dictionary by meaning, using a small open embedding model and Open English WordNet. The ranks ship as packed tables of 16-bit numbers, so a guess is a lookup. It's instant, and every phone gets the same answer.</p>
+      <p>Every result records the judging version that scored it. Four days after launch I changed the judging, the old scores stopped being comparable, and I wiped the board rather than rank games scored by different rules. Results are now keyed by game and version, and the community numbers only count games judged the same way.</p>
+      <p>The browser counts a daily game, so the server bounds it. The word and version come from the server, heat counts can't exceed guesses, each game counts once, and one address can post 30 an hour. In a room the server scores every guess, checks whose turn it is, and keeps the word hidden until the round ends.</p>
+    </div>
   </StoryChapter>
 
   <StoryChapter id="writing-it-down" title="Writing it down" level={3}>
