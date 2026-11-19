@@ -8,12 +8,15 @@ interface Props {
   title?: string;
   description?: string;
   noindex?: boolean;
+  /** Pages that open on Owen's head fetch its sprite before the CSS asks for it. */
+  headSprite?: boolean;
 }
 
 const {
   title = "Owen Abel Amenze - Engineer, London",
   description = "Owen Abel Amenze is a senior software engineer in London. Explore work in event platforms, search, publishing, and reliable software.",
   noindex = false,
+  headSprite = false,
 } = Astro.props;
 
 const nav = [
@@ -219,6 +222,7 @@ const structuredData = {
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <title>{title}</title>
+    {headSprite && <link rel="preload" as="image" href="/owen-head-sprite.webp" type="image/webp" fetchpriority="high" />}
     <ClientRouter />
   </head>
   <body>
