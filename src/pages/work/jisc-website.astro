@@ -103,7 +103,7 @@ const chapters = [
       after={{
         title: "The Jisc website after the move",
         summary:
-          "After: Wagtail manages content and Next.js presents it, both on AWS ECS Fargate, with the database on RDS. Each pull request gets its own Terraform-managed preview in place of the staging site, and Playwright checks run as part of release. A status page polls health checks. jisc.ac.uk had no downtime after the move.",
+          "After: Wagtail manages content and Next.js presents it, both on AWS ECS Fargate, with the database on RDS. Each pull request gets its own Terraform-managed preview in place of the staging site, and Playwright checks run as part of release. Failure alerts page whoever is on call. jisc.ac.uk had no downtime after the move.",
       }}
       width={720}
       height={396}
@@ -118,7 +118,7 @@ const chapters = [
         { id: "staging", label: "Staging site", weak: "few people used it", in: "before", x: 40, y: 180, w: 250 },
         { id: "leftover", label: "Leftover environments", weak: "not torn down: state drifted", in: "before", x: 40, y: 244, w: 250 },
         { id: "rds", label: "RDS", note: "database", in: "after", x: 40, y: 164, w: 200 },
-        { id: "status", label: "Status page", note: "polls health checks", in: "after", x: 500, y: 164, w: 200 },
+        { id: "status", label: "Alerts", note: "page whoever is on call", tag: "improved", in: "after", x: 500, y: 164, w: 200 },
         { id: "preview", label: "Preview per PR", note: "Terraform-managed", fix: "replaced staging", in: "after", x: 40, y: 272, w: 200, h: 70 },
         { id: "playwright", label: "Playwright", note: "release checks", in: "after", x: 280, y: 272, w: 190, h: 70 },
       ]}
@@ -131,7 +131,7 @@ const chapters = [
         { from: "wagtail", to: "next" },
         { from: "next", to: "site" },
         { from: "rds", to: "fargate", plain: true },
-        { from: "status", to: "site", label: "health checks" },
+        { from: "status", to: "site", label: "watches" },
         { from: "preview", to: "playwright" },
         { from: "playwright", to: "fargate", label: "release" },
       ]}

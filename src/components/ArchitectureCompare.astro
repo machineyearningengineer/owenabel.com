@@ -17,6 +17,8 @@ type Box = {
   weak?: string;
   fix?: string;
   in?: State;
+  /** Replaces the automatic "removed"/"new" tag, e.g. "improved". */
+  tag?: string;
   from?: Point;
   x: number;
   y: number;
@@ -166,7 +168,7 @@ const svgId = `${id}-svg`;
           boxes.map((box) => {
             const item = items.get(box.id)!;
             const { h, label, note, flag } = layout(box);
-            const only = box.in && tag(box.in);
+            const only = box.in && (box.tag ? { text: box.tag, tone: tag(box.in).tone } : tag(box.in));
             const dx = item.from ? item.from.x - box.x : 0;
             const dy = item.from ? item.from.y - box.y : 0;
             return (
