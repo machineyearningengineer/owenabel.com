@@ -256,11 +256,17 @@
       const activeLink = treeLinks.find((link) => link.dataset.treeLink === chapter?.id);
       const openId = activeLink?.dataset.treeParent ?? chapter?.id;
       subTrees.forEach((sub) => sub.toggleAttribute("data-open", sub.dataset.treeSub === openId));
-      const label = [...(activeLink?.childNodes ?? [])]
-        .filter((node) => !(node instanceof Element && node.classList.contains("story-tree-more")))
+      // A step reads "3 · Games on the TV"; the [+N] count is left out.
+      const nodes = [...(activeLink?.childNodes ?? [])].filter(
+        (node) => !(node instanceof Element && node.classList.contains("story-tree-more")),
+      );
+      const step = nodes.find((node) => node instanceof Element && node.classList.contains("story-tree-n"));
+      const text = nodes
+        .filter((node) => node !== step)
         .map((node) => node.textContent)
         .join("")
         .trim();
+      const label = step ? `${step.textContent} · ${text}` : text;
       if (currentChapter && label) currentChapter.textContent = label;
 
       const group = groupSections.filter((node) => top(node) <= y).pop()?.dataset.threadGroup ?? buttonSets[0]?.dataset.threadButtons;

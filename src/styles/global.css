@@ -2399,7 +2399,23 @@ html[data-intro="play"] body {
   margin-left: 6px;
   color: var(--muted);
   font-size: 10px;
+  font-variant-numeric: tabular-nums;
   transition: opacity 200ms ease;
+}
+
+/* A numbered step: the title wraps under itself, not under its number. */
+.story-tree a:has(.story-tree-n),
+.story-mobile-tree a:has(.story-tree-n) {
+  display: flex;
+}
+
+.story-tree-n {
+  display: inline-block;
+  flex: none;
+  min-width: 2ch;
+  margin-right: 6px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .story-tree:not([data-collapsible]) .story-tree-more,
@@ -2588,12 +2604,17 @@ html[data-intro="play"] body {
 }
 
 .story-keys[data-docked] .story-keys-chips > div {
+  /* One row however many steps: the chips share the rail width. */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 28px);
   gap: 4px;
 }
 
 .story-keys[data-docked] .story-chip {
   justify-content: center;
-  width: 24px;
+  width: 100%;
+  min-width: 0;
   height: 24px;
   padding: 0;
   font-size: 11px;

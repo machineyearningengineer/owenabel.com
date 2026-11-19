@@ -12,7 +12,7 @@ import ShareLinks from "../components/ShareLinks.astro";
 import { exhibitMark, getCaseStudy } from "../data/work";
 import { storyMarkdown } from "../lib/story-markdown";
 
-type Chapter = { id: string; label: string; children?: { id: string; label: string }[] };
+type Chapter = { id: string; label: string; children?: { id: string; label: string; n?: number }[] };
 type Group = { id: string; threads: { key: string; label: string }[] };
 
 interface Props {
@@ -41,6 +41,13 @@ const words = `${caseStudy.summary} ${body.replace(/<(script|style)[\s\S]*?<\/\1
   .split(/\s+/)
   .filter(Boolean).length;
 const minutes = Math.max(1, Math.round(words / 220));
+// The journey chapter lists its numbered steps as sub-chapters, so the
+// contents and the 1–N step keys agree.
+const tree: Chapter[] = chapters.map((chapter) =>
+  chapter.id === "how-it-works" && !chapter.children && groups[0]?.threads.length
+    ? { ...chapter, children: groups[0].threads.map((thread, index) => ({ id: thread.key, label: thread.label, n: index + 1 })) }
+    : chapter,
+);
 const firstThread = groups[0]?.threads[0]?.key ?? "";
 const hasSteps = groups.some((group) => group.threads.length > 0);
 
@@ -118,13 +125,13 @@ const markdownJson = JSON.stringify(markdown).replace(/</g, "\\u003c");
         <p class="story-rail-label">Contents</p>
         <ol class="story-tree" data-story-tree>
           {
-            chapters.map((chapter) => (
+            tree.map((chapter) => (
               <li>
                 <a href={`#${chapter.id}`} data-tree-link={chapter.id}>
                   {chapter.label}
                   {chapter.children && (
                     <span class="story-tree-more" aria-hidden="true">
-                      +{chapter.children.length}
+                      [+{chapter.children.length}]
                     </span>
                   )}
                 </a>
@@ -135,6 +142,7 @@ const markdownJson = JSON.stringify(markdown).replace(/</g, "\\u003c");
                         <li>
                           <span class="story-branch" aria-hidden="true" />
                           <a href={`#${child.id}`} data-tree-link={child.id} data-tree-parent={chapter.id}>
+                            {child.n && <span class="story-tree-n">{child.n}</span>}
                             {child.label}
                           </a>
                         </li>
@@ -166,7 +174,7 @@ const markdownJson = JSON.stringify(markdown).replace(/</g, "\\u003c");
             </summary>
             <ol>
               {
-                chapters.flatMap((chapter) => [
+                tree.flatMap((chapter) => [
                   <li>
                     <a href={`#${chapter.id}`} data-tree-link={chapter.id}>
                       {chapter.label}
@@ -175,6 +183,7 @@ const markdownJson = JSON.stringify(markdown).replace(/</g, "\\u003c");
                   ...(chapter.children ?? []).map((child) => (
                     <li class="story-mobile-child">
                       <a href={`#${child.id}`} data-tree-link={child.id} data-tree-parent={chapter.id}>
+                        {child.n && <span class="story-tree-n">{child.n}</span>}
                         {child.label}
                       </a>
                     </li>
