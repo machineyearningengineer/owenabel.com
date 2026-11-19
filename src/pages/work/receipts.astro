@@ -3,7 +3,7 @@ import StoryLayout from "../../layouts/StoryLayout.astro";
 import StoryChapter from "../../components/StoryChapter.astro";
 import CaseJourney from "../../components/CaseJourney.astro";
 import ThreadLedger from "../../components/ThreadLedger.astro";
-import ArchitectureDiagram from "../../components/ArchitectureDiagram.astro";
+import ArchitectureCompare from "../../components/ArchitectureCompare.astro";
 import Clip from "../../components/Clip.astro";
 
 const steps = [
@@ -60,6 +60,7 @@ const chapters = [
       { id: "evidence-first", label: "Evidence first" },
       { id: "ranking", label: "Likeness against evidence" },
       { id: "evals", label: "The eval harness" },
+      { id: "go-decides", label: "One backend decides" },
       { id: "jobs", label: "Jobs that can't finish twice" },
       { id: "decisions", label: "Decision records" },
       { id: "architecture", label: "Architecture" },
@@ -157,6 +158,15 @@ const chapters = [
     </div>
   </StoryChapter>
 
+  <StoryChapter id="go-decides" title="One backend decides" level={3}>
+    <div class="story-prose">
+      <p>Receipts began in March 2026 as one full-stack TypeScript app: Next.js, then TanStack Start, with Effect for the server code and the workers. The rules lived in the web server's functions, next to the screens that used them.</p>
+      <p>That works until there's a second screen. With a mobile app planned, every rule in those functions would have to be written again, and kept the same, in another codebase.</p>
+      <p>So in May I split it. A Go backend now owns the truth: every rule, every decision, and what each person is allowed to do. The web app and the mobile app talk to it through clients generated from the same Protobuf contracts, and only present what it decides.</p>
+      <p>The decision record has a one-line test for any frontend code: would a second frontend have to write it again to behave the same? If so, it belongs in Go.</p>
+    </div>
+  </StoryChapter>
+
   <StoryChapter id="jobs" title="Jobs that can't finish twice" level={3}>
     <div class="story-prose">
       <p>Postgres is the only job dispatcher. Temporal, Inngest and River were weighed and turned down in the decision record.</p>
@@ -164,24 +174,39 @@ const chapters = [
       <p>On 11 November that design met a bad day. Production commits started taking up to 19 seconds on a stalled disk, and every commit that sent a Postgres <code>NOTIFY</code> held the database's single notification lock until its write finished. Enqueues queued up behind each other and about 250 scheduled ticks an hour failed with lock timeouts.</p>
       <p>The fix replaced <code>NOTIFY</code> with a 250 ms polling check. A regression test now reproduces the convoy, and code generation refuses any query that sends a <code>NOTIFY</code>.</p>
     </div>
-    <ArchitectureDiagram
+    <ArchitectureCompare
       id="arch-receipts"
-      title="How Receipts fits together"
-      summary="The web app talks to a Go API through generated ConnectRPC clients. Postgres is the source of truth and the only job queue, with pgvector indexes for photo embeddings. Workers claim jobs by lease and publish in one fenced commit; they call a vision model to read each photo and Voyage to embed it."
+      before={{
+        title: "Receipts as one full-stack TypeScript app",
+        summary:
+          "Before: Receipts began in March 2026 as one full-stack TypeScript app, Next.js and then TanStack Start, with Effect for the server code and the workers. The web server's functions held the rules and read Postgres directly, so a mobile app would have had to repeat every rule to behave the same.",
+      }}
+      after={{
+        title: "Receipts with a Go backend that owns the truth",
+        summary:
+          "After: from May 2026 a Go API owns the truth: every rule, decision and what each viewer may do. The web app and the mobile app talk to it through clients generated from the same Protobuf contracts over ConnectRPC, and only present what Go decides. Postgres is the source of truth and the only job queue, with pgvector for photo embeddings. Workers claim jobs by lease and publish in one fenced commit, calling a vision model to read each photo and Voyage to embed it.",
+      }}
       width={760}
-      height={290}
+      height={330}
       boxes={[
-        { id: "web", label: "Web app", note: "generated TS client", x: 20, y: 40, w: 160 },
-        { id: "api", label: "Go API", note: "ConnectRPC · Protobuf", x: 260, y: 40, w: 200 },
-        { id: "pg", label: "Postgres", note: "truth · job queue · pgvector", x: 260, y: 220, w: 200 },
-        { id: "workers", label: "Workers", note: "claim by lease · fenced commit", x: 520, y: 220, w: 220 },
-        { id: "vision", label: "Vision model", note: "reads each photo", x: 480, y: 110, w: 130 },
-        { id: "voyage", label: "Voyage", note: "embeddings", x: 630, y: 110, w: 110 },
+        { id: "web", label: "Web app", note: "TanStack Start", fix: "presents only", x: 20, y: 40, w: 180, h: 70, from: { x: 20, y: 40 } },
+        { id: "mobile", label: "Mobile app", note: "same generated client", in: "after", x: 20, y: 140, w: 180 },
+        { id: "server", label: "Server functions", note: "Effect", weak: "the rules lived here", in: "before", x: 260, y: 40, w: 220, h: 70 },
+        { id: "mobile-gap", label: "A mobile app", weak: "would repeat every rule", tag: "planned", in: "before", x: 20, y: 160, w: 180 },
+        { id: "api", label: "Go API", note: "ConnectRPC · Protobuf", fix: "owns every rule", in: "after", x: 260, y: 40, w: 220, h: 70 },
+        { id: "pg", label: "Postgres", note: "truth · job queue · pgvector", x: 260, y: 250, w: 220 },
+        { id: "workers", label: "Workers", note: "claim by lease · fenced commit", x: 520, y: 250, w: 220 },
+        { id: "vision", label: "Vision model", note: "reads each photo", x: 500, y: 140, w: 120 },
+        { id: "voyage", label: "Voyage", note: "embeddings", x: 640, y: 140, w: 100 },
       ]}
       edges={[
-        { from: "web", to: "api", both: true },
-        { from: "api", to: "pg", both: true },
-        { from: "workers", to: "pg", both: true },
+        { from: "web", to: "server", in: "before" },
+        { from: "server", to: "pg", in: "before" },
+        { from: "mobile-gap", to: "server", in: "before", weak: true },
+        { from: "web", to: "api", in: "after" },
+        { from: "mobile", to: "api", in: "after" },
+        { from: "api", to: "pg", in: "after" },
+        { from: "workers", to: "pg" },
         { from: "workers", to: "vision" },
         { from: "workers", to: "voyage" },
       ]}
