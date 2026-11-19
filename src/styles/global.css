@@ -120,11 +120,17 @@ html[data-theme="dark"] {
   navigation: auto;
 }
 
+/* The page keeps the platform's own bounce at its top and bottom; what shows
+   there is the paper (html background and theme-color agree in both themes).
+   Inner scrollers (the contents rail, diagrams, the phone contents list)
+   don't hand their scroll on to the page when they reach an end. */
 html {
   background: var(--paper);
   color: var(--ink);
   min-width: 320px;
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 @supports (interpolate-size: allow-keywords) {
@@ -137,6 +143,7 @@ body {
   position: relative;
   margin: 0;
   min-height: 100vh;
+  min-height: 100svh;
   background:
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 42px 42px,
     radial-gradient(circle at 50% 0%, var(--paper-glow), transparent 36rem),
@@ -793,6 +800,7 @@ html[data-theme="dark"] .booking-embed iframe {
   border-bottom: 1px solid var(--rule);
   padding: 8px 0;
   background: var(--sticky-surface);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -2359,6 +2367,7 @@ html[data-intro="play"] body {
   min-height: calc(100dvh - 48px);
   max-height: calc(100dvh - 48px);
   overflow: auto;
+  overscroll-behavior: contain;
   font-size: 12px;
   line-height: 1.4;
 }
@@ -2856,6 +2865,27 @@ input {
   font-variant-numeric: tabular-nums;
 }
 
+/* Someone else's words: a ruled block, the quote in Georgia, the source in mono. */
+.pull-quote {
+  max-width: var(--measure);
+  margin: 4px 0;
+  border-left: 2px solid var(--accent);
+  padding: 4px 0 4px 18px;
+}
+
+.pull-quote p {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.pull-quote footer {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .story-figures caption {
   caption-side: top;
   padding-bottom: 8px;
@@ -3157,6 +3187,7 @@ input {
 
 .case-architecture-scroll {
   overflow-x: auto;
+  overscroll-behavior: contain;
 }
 
 .case-architecture svg {
@@ -3367,6 +3398,11 @@ input {
      its contents keep the page's 14px gutter. */
   .story-control {
     top: 0;
+    /* Solid paper: a see-through bar shows the text scrolling under it
+       wherever a browser skips the blur. */
+    background: var(--paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     grid-template-columns: minmax(0, 1fr);
     gap: 8px;
     margin-inline: -14px;
@@ -3410,6 +3446,7 @@ input {
   .story-mobile-tree ol {
     max-height: 55vh;
     overflow: auto;
+    overscroll-behavior: contain;
     margin-top: 8px;
     border-top: 1px solid var(--rule);
     padding-top: 6px;
