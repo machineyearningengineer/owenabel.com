@@ -3463,6 +3463,10 @@ input {
     gap: 4px;
   }
 
+  .story-control .story-threads > [hidden] {
+    display: none;
+  }
+
   .story-control .story-threads .story-chip {
     flex: 1 1 0;
     justify-content: center;

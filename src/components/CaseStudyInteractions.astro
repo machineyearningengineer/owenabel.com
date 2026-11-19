@@ -46,6 +46,17 @@
       return set ? [...set.querySelectorAll<HTMLButtonElement>("[data-thread-control]")] : controls;
     };
 
+    const chipSets = [...caseNote.querySelectorAll<HTMLElement>("[data-chip-group]")];
+    const chips = [...caseNote.querySelectorAll<HTMLButtonElement>("[data-chip-target]")];
+    let lastChip: string | undefined;
+    chips.forEach((chip) =>
+      chip.addEventListener(
+        "click",
+        () => document.getElementById(chip.dataset.chipTarget ?? "")?.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" }),
+        { signal },
+      ),
+    );
+
     // Phone bar: a newly reached step's chip opens to show its title for a
     // moment, then shrinks back to its number.
     let announceTimer = 0;
@@ -54,14 +65,13 @@
       window.clearTimeout(announceTimer);
       caseNote.querySelectorAll(".story-control [data-announce]").forEach((node) => node.removeAttribute("data-announce"));
       if (!key || !announcing) return;
-      const chip = caseNote.querySelector<HTMLElement>(`.story-control [data-thread-control="${key}"]`);
+      const chip = caseNote.querySelector<HTMLElement>(`.story-control [data-chip-target="${key}"]`);
       if (!chip) return;
       chip.setAttribute("data-announce", "");
       announceTimer = window.setTimeout(() => chip.removeAttribute("data-announce"), 1800);
     };
 
     const applyThread = (key?: string) => {
-      if (key !== caseNote.dataset.activeThread) announce(key);
       caseNote.dataset.activeThread = key ?? "";
       related.forEach((node) => node.toggleAttribute("data-active", Boolean(key) && node.dataset.thread === key));
       controls.forEach((control) => {
@@ -284,15 +294,21 @@
       const label = step ? `${step.textContent} · ${text}` : text;
       if (currentChapter && label) currentChapter.textContent = label;
 
-      // Phones fold the step chips away outside the journey chapter.
-      const fold = window.innerHeight * 0.3;
-      caseNote.toggleAttribute(
-        "data-in-steps",
-        groupSections.some((node) => {
-          const box = node.getBoundingClientRect();
-          return box.top <= fold && box.bottom > fold;
-        }),
-      );
+      // Phone bar chips: the folding section you're in, its current child lit.
+      const groupId = activeLink?.dataset.treeParent ?? (chipSets.some((set) => set.dataset.chipGroup === activeLink?.dataset.treeLink) ? activeLink?.dataset.treeLink : undefined);
+      chipSets.forEach((set) => (set.hidden = set.dataset.chipGroup !== groupId));
+      caseNote.toggleAttribute("data-in-steps", Boolean(groupId));
+      const childId = activeLink?.dataset.treeParent ? activeLink.dataset.treeLink : undefined;
+      chips.forEach((chip) => {
+        const on = chip.dataset.chipTarget === childId;
+        chip.toggleAttribute("data-active", on);
+        if (on) chip.setAttribute("aria-current", "location");
+        else chip.removeAttribute("aria-current");
+      });
+      if (childId !== lastChip) {
+        lastChip = childId;
+        announce(childId);
+      }
 
       const group = groupSections.filter((node) => top(node) <= y).pop()?.dataset.threadGroup ?? buttonSets[0]?.dataset.threadButtons;
       if (group && group !== caseNote.dataset.activeGroup) {

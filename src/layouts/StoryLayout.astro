@@ -43,11 +43,16 @@ const words = `${caseStudy.summary} ${body.replace(/<(script|style)[\s\S]*?<\/\1
 const minutes = Math.max(1, Math.round(words / 220));
 // The journey chapter lists its numbered steps as sub-chapters, so the
 // contents and the 1–N step keys agree.
-const tree: Chapter[] = chapters.map((chapter) =>
-  chapter.id === "how-it-works" && !chapter.children && groups[0]?.threads.length
-    ? { ...chapter, children: groups[0].threads.map((thread, index) => ({ id: thread.key, label: thread.label, n: index + 1 })) }
-    : chapter,
-);
+const tree: Chapter[] = chapters
+  .map((chapter) =>
+    chapter.id === "how-it-works" && !chapter.children && groups[0]?.threads.length
+      ? { ...chapter, children: groups[0].threads.map((thread) => ({ id: thread.key, label: thread.label })) }
+      : chapter,
+  )
+  .map((chapter) => (chapter.children ? { ...chapter, children: chapter.children.map((child, index) => ({ ...child, n: index + 1 })) } : chapter));
+// Phones: each folding section's children become number chips in the sticky
+// bar, shown while you read that section.
+const chipGroups = tree.filter((chapter) => chapter.children?.length);
 const firstThread = groups[0]?.threads[0]?.key ?? "";
 const hasSteps = groups.some((group) => group.threads.length > 0);
 
@@ -193,21 +198,14 @@ const markdownJson = JSON.stringify(markdown).replace(/</g, "\\u003c");
             </ol>
           </details>
           {
-            hasSteps && (
+            chipGroups.length > 0 && (
               <div class="story-threads">
-                {groups.map((group, groupIndex) => (
-                  <div data-thread-buttons={group.id} hidden={groupIndex > 0}>
-                    {group.threads.map((thread, index) => (
-                      <button
-                        type="button"
-                        class="story-chip"
-                        data-thread-control={thread.key}
-                        data-active={thread.key === firstThread ? true : undefined}
-                        aria-pressed={thread.key === firstThread ? "true" : "false"}
-                        aria-label={`${index + 1} ${thread.label}`}
-                      >
-                        <span class="story-chip-n">{index + 1}</span>
-                        <span class="story-chip-title">{thread.label}</span>
+                {chipGroups.map((group) => (
+                  <div data-chip-group={group.id} hidden>
+                    {group.children!.map((child) => (
+                      <button type="button" class="story-chip" data-chip-target={child.id} aria-label={`${child.n} ${child.label}`}>
+                        <span class="story-chip-n">{child.n}</span>
+                        <span class="story-chip-title">{child.label}</span>
                       </button>
                     ))}
                   </div>
