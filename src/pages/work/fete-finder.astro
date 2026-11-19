@@ -4,7 +4,7 @@ import StoryChapter from "../../components/StoryChapter.astro";
 import CaseJourney from "../../components/CaseJourney.astro";
 import Clip from "../../components/Clip.astro";
 import ClipSet from "../../components/ClipSet.astro";
-import ArchitectureDiagram from "../../components/ArchitectureDiagram.astro";
+import ArchitectureCompare from "../../components/ArchitectureCompare.astro";
 
 const steps = [
   {
@@ -42,6 +42,7 @@ const chapters = [
     id: "under-the-hood",
     label: "Under the hood",
     children: [
+      { id: "sheet-to-postgres", label: "From a Sheet to a database" },
       { id: "agents", label: "Agents that find the events" },
       { id: "flyers", label: "Flyers into listings" },
       { id: "stable-links", label: "Links that survive edits" },
@@ -102,6 +103,14 @@ const chapters = [
     </div>
   </StoryChapter>
 
+  <StoryChapter id="sheet-to-postgres" title="From a Sheet to a database" level={3}>
+    <div class="story-prose">
+      <p>In 2025 the programme lived in a Google Sheet. The team typed listings into it by hand, and the site read it live through a service account, with caches and a CSV copy in front so a slow or failed read couldn't take the site down. Keeping those caches in step with the Sheet took several fixes that June, and the Sheet kept no record of who changed what.</p>
+      <p>For 2026 I moved the programme into Postgres, edited through an event sheet inside the admin. It looks like the spreadsheet the team already knew, but every save is a revision: between May and the festival it recorded 134 of them, 95 autosaves and 39 publishes, so any change can be traced, and the store keeps backups to restore from.</p>
+      <p>That gave the agents and the flyer tool somewhere safe to put their work: draft rows that nothing public reads until a person accepts them.</p>
+    </div>
+  </StoryChapter>
+
   <StoryChapter id="agents" title="Agents that find the events" level={3}>
     <div class="story-prose">
       <p>Before this, Mel on the team collected screenshots all day and bulk-uploaded them each evening, about 30 to 40 hours of work a season.</p>
@@ -157,40 +166,52 @@ const chapters = [
       <p>The WhatsApp bot is a separate small service. It asks the site for new listings using a shared secret, posts each one to the community chat with a link back, then confirms the post so nothing goes out twice.</p>
       <p>It moderates the chat too, with link and spam rules and strikes that expire after seven days. It starts in dry-run mode by default, which is the right default for a bot that can remove people.</p>
     </div>
-    <ArchitectureDiagram
+    <ArchitectureCompare
       id="arch-fete"
-      title="How Fête Finder fits together"
-      summary="Agents on a VPS watch ticketing sites and organisers' pages, read each possible event with OCR and Gemini, and place venues through Google's location API with a cache. Flyers sent to the team join at the Gemini step. Every draft goes to human review before it reaches Postgres and the public site. Partner payments arrive by Stripe webhook and are stored once per event. Phones keep an offline copy of the programme. The WhatsApp bot takes new ticket-exchange listings to the community chat."
+      before={{
+        title: "How Fête Finder's listings worked in 2025",
+        summary:
+          "2025: Mel on the team screenshotted organisers' posts and flyers all day and typed them into a Google Sheet by hand, about 30 to 40 hours of work a season. The site read the Sheet live through a service account, with caches and a CSV fallback in front of it that kept falling out of sync. The Sheet had no history of who changed what.",
+      }}
+      after={{
+        title: "How Fête Finder's listings worked in 2026",
+        summary:
+          "2026: agents on a VPS watch ticketing sites and organisers' pages, read each possible event with OCR and Gemini, and place venues through Google's location API with a cache. Flyers sent to the team join at the Gemini step. Every draft goes to human review before it reaches Postgres, which replaced the Google Sheet and keeps a revision for every change, and then the public site. New ticket-exchange listings go to the community chat through the WhatsApp bot.",
+      }}
       width={800}
-      height={440}
+      height={336}
       boxes={[
-        { id: "sources", label: "Ticketing sites", note: "RA · Fatsoma · organiser pages", x: 20, y: 30, w: 215 },
-        { id: "agents", label: "Agents on a VPS", note: "browser · OCR", x: 265, y: 30, w: 150 },
-        { id: "places", label: "Google location", note: "venue cache", x: 445, y: 30, w: 150 },
-        { id: "flyers", label: "Flyer images", note: "up to six", x: 20, y: 130, w: 120 },
-        { id: "gemini", label: "Gemini draft", note: "value · evidence · confidence", x: 170, y: 130, w: 215 },
-        { id: "review", label: "Human review", x: 415, y: 130, w: 110 },
-        { id: "postgres", label: "Postgres", note: "events · keys", x: 555, y: 130, w: 115 },
-        { id: "site", label: "Site", note: "public", x: 700, y: 130, w: 92 },
-        { id: "stripe", label: "Stripe webhook", note: "stored once per event", x: 520, y: 240, w: 160 },
-        { id: "phone", label: "Phone", note: "offline copy", x: 700, y: 240, w: 92 },
-        { id: "exchange", label: "Ticket exchange", note: "new listings", x: 20, y: 350, w: 200 },
-        { id: "bot", label: "WhatsApp bot", note: "posts once, links back", x: 290, y: 350, w: 200 },
-        { id: "chat", label: "Community chat", note: "about 2,000 people", x: 560, y: 350, w: 220 },
+        { id: "posts", label: "Organisers' posts", note: "flyers · screenshots", x: 20, y: 30, w: 200 },
+        { id: "manual", label: "Mel, by hand", weak: "screenshots all day", in: "before", x: 250, y: 30, w: 200 },
+        { id: "sheet", label: "Google Sheet", weak: "hand edits, no history", in: "before", x: 480, y: 30, w: 200 },
+        { id: "cache", label: "Caches + CSV", weak: "fell out of sync", in: "before", x: 480, y: 140, w: 200 },
+        { id: "agents", label: "Agents on a VPS", note: "RA · Fatsoma · organiser pages", fix: "87 of 159 listings", in: "after", x: 250, y: 30, w: 210, h: 70 },
+        { id: "places", label: "Google location", note: "venue cache", in: "after", x: 480, y: 30, w: 200 },
+        { id: "flyers", label: "Flyer images", note: "up to six", in: "after", x: 20, y: 140, w: 150 },
+        { id: "gemini", label: "Gemini draft", note: "evidence · confidence", in: "after", x: 190, y: 140, w: 170 },
+        { id: "review", label: "Human review", in: "after", x: 380, y: 140, w: 130 },
+        { id: "postgres", label: "Postgres", note: "events · revisions", fix: "replaced the Sheet", in: "after", x: 530, y: 140, w: 180, h: 70 },
+        { id: "site", label: "Site", note: "public", x: 724, y: 140, w: 60 },
+        { id: "exchange", label: "Ticket exchange", note: "new listings", in: "after", x: 20, y: 256, w: 200 },
+        { id: "bot", label: "WhatsApp bot", note: "posts once, links back", in: "after", x: 260, y: 256, w: 220 },
+        { id: "chat", label: "Community chat", note: "about 2,000 people", in: "after", x: 520, y: 256, w: 260 },
       ]}
+      notes={[{ text: "about 30–40 hours a season", tone: "weak", x: 250, y: 112 }]}
       edges={[
-        { from: "sources", to: "agents" },
-        { from: "agents", to: "gemini" },
-        { from: "agents", to: "places" },
-        { from: "places", to: "review" },
-        { from: "flyers", to: "gemini" },
-        { from: "gemini", to: "review" },
-        { from: "review", to: "postgres" },
-        { from: "postgres", to: "site" },
-        { from: "stripe", to: "postgres" },
-        { from: "site", to: "phone" },
-        { from: "exchange", to: "bot" },
-        { from: "bot", to: "chat" },
+        { from: "posts", to: "manual", in: "before" },
+        { from: "manual", to: "sheet", in: "before" },
+        { from: "sheet", to: "cache", in: "before" },
+        { from: "cache", to: "site", in: "before" },
+        { from: "posts", to: "agents", in: "after" },
+        { from: "agents", to: "gemini", in: "after" },
+        { from: "agents", to: "places", in: "after" },
+        { from: "places", to: "review", in: "after" },
+        { from: "flyers", to: "gemini", in: "after" },
+        { from: "gemini", to: "review", in: "after" },
+        { from: "review", to: "postgres", in: "after" },
+        { from: "postgres", to: "site", in: "after" },
+        { from: "exchange", to: "bot", in: "after" },
+        { from: "bot", to: "chat", in: "after" },
       ]}
     />
   </StoryChapter>
