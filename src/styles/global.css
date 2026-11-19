@@ -2866,6 +2866,7 @@ html[data-intro="play"] body {
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 10;
+  cursor: pointer;
 }
 
 .journey-toggle {

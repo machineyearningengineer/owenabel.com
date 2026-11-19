@@ -184,15 +184,15 @@ const live = local ? undefined : (Astro.props.live ?? liveSources[project]);
       const toggle = toggleFor(video);
       video.addEventListener("play", () => label(video), { signal });
       video.addEventListener("pause", () => label(video), { signal });
-      toggle?.addEventListener(
-        "click",
-        () => {
-          video.dataset.choice = video.paused ? "play" : "pause";
-          if (video.paused) video.play().catch(() => {});
-          else video.pause();
-        },
-        { signal },
-      );
+      // Tapping the clip itself pauses and plays it, like any video; the
+      // button does the same for keyboard and screen-reader users.
+      const flip = () => {
+        video.dataset.choice = video.paused ? "play" : "pause";
+        if (video.paused) video.play().catch(() => {});
+        else video.pause();
+      };
+      toggle?.addEventListener("click", flip, { signal });
+      video.addEventListener("click", flip, { signal });
       if (toggle) toggle.hidden = false;
       label(video);
       observer.observe(video);
