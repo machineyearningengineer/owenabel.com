@@ -1,7 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .paper { fill: #efefec; }
+    .ink { stroke: #11110f; }
+    @media (prefers-color-scheme: dark) {
+      .paper { fill: #111213; }
+      .ink { stroke: #f3efe6; }
+    }
+  </style>
   <defs><clipPath id="between-rules"><rect y="9" width="64" height="46" /></clipPath></defs>
-  <rect width="64" height="64" fill="#efefec" />
-  <g stroke="#11110f" fill="none">
+  <rect class="paper" width="64" height="64" />
+  <g class="ink" fill="none">
     <path d="M12.2 56 32 8l19.8 48" stroke-width="4.5" clip-path="url(#between-rules)" />
     <path d="M19 40h26" stroke-width="4" />
     <path d="M8 10h48M8 54h48" stroke-width="2" />
