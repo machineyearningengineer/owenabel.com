@@ -3481,6 +3481,7 @@ html[data-intro="play"] body {
 .lab-plate > figcaption {
   align-items: baseline;
   flex-wrap: wrap;
+  gap: 8px 10px;
 }
 
 .lab-plate > figcaption .lab-provenance {
