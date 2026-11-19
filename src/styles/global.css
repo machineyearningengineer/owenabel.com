@@ -3539,7 +3539,7 @@ html[data-intro="play"] body {
   line-height: 1.55;
 }
 
-.lab-films ol {
+.lab-films > ol {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
   gap: 28px 24px;
@@ -3555,6 +3555,115 @@ html[data-intro="play"] body {
   aspect-ratio: 16 / 9;
   border: 1px solid var(--rule);
   background: var(--warm);
+}
+
+/* A film's chapter scrubber: square ticks at chapter starts, the title on hover or focus. */
+.film-scrub {
+  --thumb: 10px;
+  position: relative;
+  margin-top: 6px;
+}
+
+.film-scrub[hidden] {
+  display: none;
+}
+
+.film-scrub:hover .journey-scrub::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.film-scrub:hover .journey-scrub::-moz-range-thumb {
+  opacity: 1;
+}
+
+.film-ticks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.film-ticks i {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--at));
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  background: var(--muted);
+}
+
+.film-tip {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  z-index: 1;
+  padding: 2px 6px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.film-tip[hidden] {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .film-scrub {
+    --thumb: 16px;
+  }
+}
+
+.film-chapters {
+  margin: 8px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--faint);
+  list-style: none;
+  font-size: 12px;
+}
+
+.film-chapters li {
+  border-bottom: 1px solid var(--faint);
+}
+
+.film-chapters button {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 4px 0 4px 10px;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.film-chapters button span {
+  min-width: 4ch;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (hover: hover) {
+  .film-chapters button:hover {
+    text-decoration: underline;
+  }
+}
+
+.film-chapters button[aria-current="true"] {
+  border-left-color: var(--accent);
+  font-weight: 500;
+}
+
+.film-chapters button:focus-visible {
+  outline: 1px solid var(--accent-outline);
+  outline-offset: -1px;
 }
 
 .lab-film-text h3 {

@@ -16,6 +16,11 @@ export type LabFilm = {
   length: string;
   line: string;
   related?: LabLink;
+  /**
+   * [start in seconds, title], taken from the film's timeline section starts.
+   * scripts/film-chapters.mjs turns them into films/<file>.chapters.vtt on R2.
+   */
+  chapters?: [number, string][];
 };
 
 export type LabEntry = {

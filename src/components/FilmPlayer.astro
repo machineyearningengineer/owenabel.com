@@ -1,0 +1,178 @@
+---
+// One Lab film: the video with its native controls, then (when the film lists
+// chapters) a ledger scrubber with a square tick at each chapter start and the
+// chapter's title on hover or focus, and a chapter list that seeks. Chapters
+// come from the film's data; the same starts are on R2 as a WebVTT chapters track.
+// Keyboard: the scrubber takes arrows (1 s), Home/End, and Page Up/Down to step
+// a chapter; every chapter is a button. Nothing moves on its own.
+import { MEDIA, type LabFilm } from "../data/lab";
+
+interface Props {
+  film: LabFilm;
+}
+const { film } = Astro.props;
+const [minutes, seconds] = film.length.split(":").map(Number);
+const total = minutes * 60 + seconds;
+const clock = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+const chapters = film.chapters ?? [];
+---
+
+<div class="film" data-film>
+  <video
+    controls
+    playsinline
+    preload="none"
+    crossorigin="anonymous"
+    width="1280"
+    height="720"
+    poster={`${MEDIA}/${film.file}.jpg`}
+    data-film-video
+  >
+    <source src={`${MEDIA}/${film.file}.mp4`} type="video/mp4" />
+    <track kind="captions" srclang="en" label="English" src={`${MEDIA}/${film.file}.vtt`} default />
+    {chapters.length > 0 && <track kind="chapters" srclang="en" label="Chapters" src={`${MEDIA}/${film.file}.chapters.vtt`} />}
+  </video>
+  {
+    chapters.length > 0 && (
+      <div class="film-scrub" data-film-scrub hidden>
+        <input
+          type="range"
+          class="journey-scrub"
+          min="0"
+          max={total}
+          step="1"
+          value="0"
+          aria-label={`Scrub through ${film.title}`}
+          data-film-range
+        />
+        <span class="film-ticks" aria-hidden="true">
+          {chapters.slice(1).map(([at]) => (
+            <i style={`--at: ${at / total}`} />
+          ))}
+        </span>
+        <span class="film-tip" aria-hidden="true" data-film-tip hidden />
+      </div>
+    )
+  }
+  <div class="lab-film-text">
+    <h3>
+      {film.title} <span>{film.length}</span>
+    </h3>
+    <p>{film.line}</p>
+    {
+      film.related && (
+        <a href={film.related.href}>
+          {film.related.label} <span aria-hidden="true">→</span>
+        </a>
+      )
+    }
+  </div>
+  {
+    chapters.length > 0 && (
+      <ol class="film-chapters" aria-label={`Chapters of ${film.title}`}>
+        {chapters.map(([at, title]) => (
+          <li>
+            <button type="button" data-film-chapter={at} data-title={title}>
+              <span>{clock(at)}</span> {title}
+            </button>
+          </li>
+        ))}
+      </ol>
+    )
+  }
+</div>
+
+<script>
+  import { onPage } from "../scripts/page";
+
+  const clock = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+
+  onPage((signal) => {
+    for (const root of document.querySelectorAll<HTMLElement>("[data-film]")) {
+      const video = root.querySelector<HTMLVideoElement>("[data-film-video]");
+      const scrub = root.querySelector<HTMLElement>("[data-film-scrub]");
+      const range = root.querySelector<HTMLInputElement>("[data-film-range]");
+      const tip = root.querySelector<HTMLElement>("[data-film-tip]");
+      const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-film-chapter]")];
+      if (!video || !scrub || !range || !tip || !buttons.length) continue;
+      const starts = buttons.map((button) => Number(button.dataset.filmChapter));
+      const titles = buttons.map((button) => button.dataset.title ?? "");
+      const length = () => (Number.isFinite(video.duration) && video.duration > 0 ? video.duration : Number(range.max));
+      const chapterAt = (t: number) => starts.findLastIndex((start) => start <= t + 0.05);
+      let current = -1;
+
+      const paint = () => {
+        const t = video.currentTime;
+        range.max = String(Math.round(length()));
+        range.value = String(Math.round(t));
+        range.style.setProperty("--played", `${(t / length()) * 100}%`);
+        const index = chapterAt(t);
+        range.setAttribute("aria-valuetext", `${clock(t)} of ${clock(length())}, ${titles[index] ?? ""}`);
+        if (index === current) return;
+        current = index;
+        buttons.forEach((button, i) => {
+          if (i === index) button.setAttribute("aria-current", "true");
+          else button.removeAttribute("aria-current");
+        });
+      };
+
+      // The film may not have loaded yet (preload="none"): load it, then seek.
+      const seek = (t: number, play = false) => {
+        const go = () => {
+          video.currentTime = Math.min(t, length() - 0.1);
+          paint();
+          if (play) video.play().catch(() => {});
+        };
+        if (video.readyState >= 1) return go();
+        video.preload = "auto";
+        video.addEventListener("loadedmetadata", go, { once: true, signal });
+        video.load();
+      };
+
+      // The title under the pointer, or at the scrubber's value while it has focus.
+      const show = (t: number) => {
+        const index = chapterAt(t);
+        tip.textContent = `${clock(t)} ${titles[index] ?? ""}`;
+        const width = scrub.clientWidth;
+        const x = 5 + (t / length()) * (width - 10);
+        const half = tip.offsetWidth / 2;
+        tip.style.left = `${Math.max(half, Math.min(width - half, x))}px`;
+        tip.hidden = false;
+      };
+      const pointerTime = (event: PointerEvent) => {
+        const box = range.getBoundingClientRect();
+        return Math.max(0, Math.min(1, (event.clientX - box.left - 5) / (box.width - 10))) * length();
+      };
+
+      range.addEventListener("input", () => {
+        seek(Number(range.value));
+        if (document.activeElement === range) show(Number(range.value));
+      }, { signal });
+      range.addEventListener(
+        "keydown",
+        (event) => {
+          if (event.key !== "PageDown" && event.key !== "PageUp") return;
+          event.preventDefault();
+          const index = chapterAt(video.currentTime);
+          const next = event.key === "PageDown" ? Math.min(index + 1, starts.length - 1) : Math.max(index - (video.currentTime - starts[index] > 2 ? 0 : 1), 0);
+          seek(starts[next]);
+          show(starts[next]);
+        },
+        { signal },
+      );
+      range.addEventListener("focus", () => range.matches(":focus-visible") && show(video.currentTime), { signal });
+      range.addEventListener("blur", () => (tip.hidden = true), { signal });
+      scrub.addEventListener("pointermove", (event) => show(pointerTime(event)), { signal });
+      scrub.addEventListener("pointerleave", () => {
+        if (range.matches(":focus-visible")) show(video.currentTime);
+        else tip.hidden = true;
+      }, { signal });
+      for (const [i, button] of buttons.entries()) {
+        button.addEventListener("click", () => seek(starts[i], true), { signal });
+      }
+      for (const type of ["timeupdate", "seeked", "loadedmetadata"]) video.addEventListener(type, paint, { signal });
+      scrub.hidden = false;
+      paint();
+    }
+  });
+</script>

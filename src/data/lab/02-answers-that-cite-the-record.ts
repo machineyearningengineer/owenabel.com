@@ -27,6 +27,17 @@ export default {
       title: "One question, end to end",
       length: "10:58",
       line: "How one question becomes a checked answer, the limits that keep it safe, what is checked and what is fragile, and what breaks first. Narrated by an AI voice.",
+      chapters: [
+        [0, "A plain question"],
+        [33.3, "One question, end to end"],
+        [194.8, "Limits that fail loudly"],
+        [334.9, "What is checked and what is fragile"],
+        [377, "What breaks first: recall"],
+        [440.5, "A growing database"],
+        [504.6, "Many people at once"],
+        [595.5, "Long conversations and sign-in"],
+        [640.9, "In one breath"],
+      ],
     },
   ],
   testing: [

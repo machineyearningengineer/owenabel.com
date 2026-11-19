@@ -114,7 +114,7 @@ on the personal Cloudflare account, and HTTP-to-HTTPS covers every subdomain.
 Current showcases: `nairaandchill.owenabel.com` (NAIRAA & Chill client preview, noindex),
 `care-agent.owenabel.com` and `fieldnotes.owenabel.com` (static replay demos, Workers
 `care-agent-replay` and `fieldnotes-replay`, built from the local `~/dev/personal/lab-demos`
-repository), and `media.owenabel.com` (R2 bucket `owenabel-media`, the Lab's films).
+repository), and `media.owenabel.com` (R2 bucket `owenabel-media`: clips, posters and the Lab's films).
 
 ## CV and work content
 
@@ -136,8 +136,7 @@ build time from the rendered chapters (`src/lib/story-markdown.ts`). Old
 case-study URLs, including `/work/jisc` from before the Jisc story split, are
 listed in `legacyCaseStudies` in `src/data/work.ts`, which drives their 301s and
 lets `<Cite>` keep accepting them. Journey clips are recorded from the live
-products into `public/journeys/<project>/<beat>.{webm,mp4,jpg}` (960px wide,
-silent, under about 600 KB each). Share images are generated from
+products (960px wide, silent, under about 600 KB each). Share images are generated from
 `scripts/generate-og.mjs` during the build. Keep claims aligned with the
 attributed records in the resume repository before publishing updates.
 
@@ -146,8 +145,25 @@ attributed records in the resume repository before publishing updates.
 `/lab` lists experiments, demos and films; each has a one-screen note at `/lab/<slug>`.
 Every entry is one file in `src/data/lab/`, ordered by file name, typed by `src/data/lab.ts`.
 Leave `source` out to show "On request"; give text for no link, or links for public code.
-Short clips and thumbnails are `public/lab/<slug>.{mp4,webm,jpg}` (960 × 600, recorded from the
-live demos). Films stream from `https://media.owenabel.com/films/<file>.{mp4,jpg,vtt}`, never from
+Short clips and thumbnails are recorded from the live demos. Films stream from `https://media.owenabel.com/films/<file>.{mp4,jpg,vtt}`, never from
 Workers assets; the bucket's CORS rules allow owenabel.com, the preview Worker and local ports
 4321 and 8788, so captions load across origins. Demo code stays in its own repository; the
-encoder and caption builder are in `lab-demos/films`.
+encoder and caption builder are in `lab-demos/films`. A film's `chapters` (start in seconds and
+title, taken from its timeline in `~/dev/personal/explainer-films`) drive the chapter ticks and
+list under it; `pnpm run films:chapters -- --profile personal-deploy` uploads the matching
+`films/<file>.chapters.vtt` tracks.
+
+## Clips
+
+Clips and their posters stream from R2, not Workers assets: Workers Static Assets ignores
+Range requests, which iOS Safari needs to play video, and revalidates every view. Sources
+stay out of git in `~/dev/personal/owenabel-media-staging/site/`, as
+`journeys/<project>/<beat>.{mp4,webm,jpg}` and `lab/<slug>.{mp4,webm,jpg}` (a slug with only
+a `.jpg` is a poster on its own). `pnpm run media:sync -- --profile personal-deploy`, with
+`CLOUDFLARE_ACCOUNT_ID` set to the personal account, hashes each file, uploads new ones to
+`media.owenabel.com/clips/<project>/<beat>.<hash8>.<ext>` with
+`Cache-Control: public, max-age=31536000, immutable`, and rewrites `src/data/media.json`
+(URLs, sizes, dimensions). `--dry-run` lists what would upload. A changed clip gets a new
+URL, so nothing needs purging. `Clip.astro` and the Lab pages read only the manifest, and the
+build fails on a clip it doesn't list. Motion clips are recorded frame by frame at 60 fps on a
+virtual clock (`owenabel-media-staging/recorder`), so every frame is a real render.

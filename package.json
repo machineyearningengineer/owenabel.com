@@ -26,7 +26,8 @@
     "check:redirects": "node scripts/check-redirects.mjs",
     "head:build": "node scripts/build-head-sprite.mjs",
     "check:prose": "node scripts/check-prose.mjs",
-    "media:sync": "node scripts/media-sync.mjs"
+    "media:sync": "node scripts/media-sync.mjs",
+    "films:chapters": "node scripts/film-chapters.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
