@@ -119,6 +119,7 @@ const chapters = film.chapters ?? [];
 
 <script>
   import { onPage } from "../scripts/page";
+  import { touchScrub } from "../scripts/touch-scrub";
 
   const clock = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
 
@@ -247,6 +248,7 @@ const chapters = film.chapters ?? [];
         },
         { signal },
       );
+      touchScrub(range, signal);
       range.addEventListener(
         "keydown",
         (event) => {
@@ -266,14 +268,13 @@ const chapters = film.chapters ?? [];
       range.addEventListener("focus", () => range.matches(":focus-visible") && show(video.currentTime), { signal });
       range.addEventListener("blur", () => (tip.hidden = true), { signal });
       scrub.addEventListener("pointermove", (event) => show(pointerTime(event)), { signal });
-      scrub.addEventListener(
-        "pointerleave",
-        () => {
-          if (range.matches(":focus-visible")) show(video.currentTime);
-          else tip.hidden = true;
-        },
-        { signal },
-      );
+      // A finger that starts a scroll on the scrubber is cancelled, with no leave in Safari.
+      const leave = () => {
+        if (range.matches(":focus-visible")) show(video.currentTime);
+        else tip.hidden = true;
+      };
+      scrub.addEventListener("pointerleave", leave, { signal });
+      scrub.addEventListener("pointercancel", leave, { signal });
 
       mute.addEventListener(
         "click",

@@ -78,6 +78,7 @@ const live = local ? undefined : (Astro.props.live ?? liveSources[project]);
 
 <script>
   import { onPage } from "../scripts/page";
+  import { touchScrub } from "../scripts/touch-scrub";
 
   onPage((signal) => {
     const videos = [...document.querySelectorAll<HTMLVideoElement>("[data-journey-video]")];
@@ -152,6 +153,7 @@ const live = local ? undefined : (Astro.props.live ?? liveSources[project]);
         if (video.readyState === 0) video.load();
       };
       scrub.addEventListener("pointerdown", warm, { signal });
+      touchScrub(scrub, signal);
       scrub.addEventListener("focus", warm, { signal });
       scrub.addEventListener(
         "input",
