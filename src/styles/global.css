@@ -2914,6 +2914,10 @@ input {
   font-size: 12px;
 }
 
+.pull-quote footer a {
+  color: inherit;
+}
+
 .story-figures caption {
   caption-side: top;
   padding-bottom: 8px;
