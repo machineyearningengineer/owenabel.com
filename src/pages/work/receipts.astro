@@ -4,6 +4,7 @@ import StoryChapter from "../../components/StoryChapter.astro";
 import CaseJourney from "../../components/CaseJourney.astro";
 import ThreadLedger from "../../components/ThreadLedger.astro";
 import ArchitectureDiagram from "../../components/ArchitectureDiagram.astro";
+import Clip from "../../components/Clip.astro";
 
 const steps = [
   {
@@ -12,7 +13,11 @@ const steps = [
     text: [
       "Start with a picture of the look you want. Receipts reads it and comes back with work by real stylists that matches, each card showing whose work it is and where they are.",
     ],
-    caption: "Picking a look on the home page, then the matches.",
+    clips: [
+      { beat: "photo", caption: "Picking a look on the home page, then the matches." },
+      { beat: "upload", caption: "Choosing a photo from your files: the composer reads it, then the matches. Waits shortened." },
+      { beat: "drag", caption: "Dragging a photo onto the page: the drop target, the composer, then the matches. Waits shortened." },
+    ],
   },
   {
     key: "details",
@@ -21,7 +26,10 @@ const steps = [
       "The details it read from the photo come back as suggestions, not decisions. You keep the ones that matter, like the cornrows or the colour, and set the rest aside.",
       "Only kept details count as search criteria. A detail you set aside is parked, never deleted, so you can change your mind.",
     ],
-    caption: "Opening the photo's details and setting one aside. The matches update.",
+    clips: [
+      { beat: "details", caption: "Opening the photo's details and setting one aside. The matches update." },
+      { beat: "composer", caption: "The composer offering what it read from a look: keeping Fulani Braids, Beads and Cuffs, then setting Cuffs aside." },
+    ],
   },
   {
     key: "why",
@@ -99,7 +107,19 @@ const chapters = [
     <div class="story-prose">
       <p>The related-looks feed is the clearest result: the full ranking scores more than double plain nearest-neighbour search. Safety got 10 cases wrong by letting something through and 6 by blocking something fine, and both counts are on the record.</p>
       <p>Not every label is human. Some were drafted by Claude and then reviewed by me; on the related feed I changed 14 of 950 grades.</p>
+      <p>Speed matters too, because a search you wait for is a search you abandon. Over 17 searches with photos it had never seen, choosing a photo to seeing the first match took 4.7 seconds at the median, and never more than 6. Reading the photo into suggestions took 2.9 of those; from tapping "Find matches" to the first result took 1.6.</p>
     </div>
+    <table class="story-figures">
+      <caption>Photo search on receipts.beauty, 17 first-time photos, 18 November 2026. Times include the network from a London laptop.</caption>
+      <tbody>
+        <tr><th scope="row">Photo chosen to first match, median</th><td>4.7 s (4.3–6.0 s)</td></tr>
+        <tr><th scope="row">Photo chosen to suggestions</th><td>2.9 s</td></tr>
+        <tr><th scope="row">Of which: reading the photo</th><td>1.8 s</td></tr>
+        <tr><th scope="row">"Find matches" to first result</th><td>1.6 s</td></tr>
+        <tr><th scope="row">Of which: ranking on the server</th><td>0.8 s</td></tr>
+      </tbody>
+    </table>
+    <Clip project="receipts" beat="speed" caption="One first-time photo search, unedited and in real time: suggestions at 2.9 seconds, the first matches 2.0 seconds after the tap." />
   </StoryChapter>
 
   <StoryChapter id="under-the-hood" title="Under the hood" part>
