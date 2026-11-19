@@ -7,7 +7,7 @@ export default {
   kind: "Replay demo",
   line: "An experiment: can a research tool tie each claim to the passage it came from, and say so when the evidence doesn't answer the question?",
   stack: ["Next.js", "TypeScript", "Firestore", "Cloud Run", "Gemini"],
-  built: "Nov 2026",
+  built: "Nov 2026; ran live on Cloud Run with Gemini and a search API until 4 Nov",
   runs: "Two saved reports, served as static files",
   source: [
     {

@@ -7,7 +7,7 @@ export default {
   kind: "Replay demo",
   line: "An experiment: can an AI agent answer questions about care records without making anything up? Every claim links to the visit note behind it, and it says what the records can't show.",
   stack: ["Python", "FastAPI", "SQLite", "OpenAI"],
-  built: "Nov 2026",
+  built: "Nov 2026; ran live on OpenAI's API",
   runs: "Recorded answers, replayed in your browser",
   source: [
     {

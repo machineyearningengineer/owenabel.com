@@ -2689,6 +2689,15 @@ html[data-intro="play"] body {
   box-shadow: inset 2px 0 var(--accent);
 }
 
+/* No grey flash on tap (iOS and Android); focus rings still show. */
+video,
+a,
+button,
+summary,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .story-threads,
 .story-threads > div {
   min-width: 0;
@@ -3355,16 +3364,35 @@ html[data-intro="play"] body {
     margin: 0 0 -9px;
   }
 
-  /* Phone bar chips: numbers, with the title only on the step being read. */
-  .story-control .story-chip:not([data-active]) .story-chip-title {
+  /* Phone bar chips: numbers only; the line above already names the step. */
+  .story-control .story-chip-title {
     display: none;
   }
 
-  .story-control .story-chip-title {
-    min-width: 0;
+  /* The chips show while you read the steps and fold away for the rest of
+     the story, so the bar is one line outside "How it works". */
+  .story-control .story-threads {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition:
+      grid-template-rows 240ms ease,
+      opacity 200ms ease,
+      visibility 0s linear 0s;
+  }
+
+  .story-control .story-threads > div {
+    min-height: 0;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  }
+
+  [data-case-note]:not([data-in-steps]) .story-control .story-threads {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      grid-template-rows 240ms ease,
+      opacity 160ms ease,
+      visibility 0s linear 240ms;
   }
 }
 
@@ -3408,24 +3436,19 @@ html[data-intro="play"] body {
     scroll-margin-top: 96px;
   }
 
-  /* One row of steps, so the sticky bar stays short. */
-  .story-threads > div {
-    flex-wrap: nowrap;
+  /* One row of equal number chips, however many steps. */
+  .story-control .story-threads > div {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
     gap: 4px;
   }
 
   .story-control .story-threads .story-chip {
-    flex: none;
     justify-content: center;
-    min-width: 32px;
-    padding: 5px 6px;
-    font-size: 11px;
-  }
-
-  .story-control .story-threads .story-chip[data-active] {
-    flex: 1 1 auto;
-    justify-content: flex-start;
     min-width: 0;
+    padding: 5px 0;
+    font-size: 11px;
   }
 }
 
@@ -3437,6 +3460,7 @@ html[data-intro="play"] body {
   .story-tree-more,
   .share-links a,
   .share-links button,
+  .story-control .story-threads,
   .plate {
     transition: none !important;
   }
@@ -3583,6 +3607,170 @@ html[data-intro="play"] body {
   aspect-ratio: 16 / 9;
   border: 1px solid var(--rule);
   background: var(--warm);
+}
+
+/* A film's own control bar, in the ledger style of the clips. */
+.film-frame video {
+  cursor: pointer;
+}
+
+.film-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.film-bar[hidden] {
+  display: none;
+}
+
+.film-btn {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--rule);
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.film-btn:hover,
+.film-btn:focus-visible {
+  outline: 1px solid var(--accent-outline);
+  outline-offset: -1px;
+}
+
+.film-btn-text {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.film-btn[aria-pressed="false"] {
+  border-color: var(--faint);
+  color: var(--muted);
+}
+
+.film-time {
+  flex: none;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.film-bar .film-scrub {
+  flex: 1 1 auto;
+  min-width: 60px;
+  margin-top: 0;
+}
+
+.film-sound {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Volume opens beside the speaker on hover or focus; phones keep mute only,
+   since iOS ignores page volume. */
+.film-sound .film-volume {
+  width: 0;
+  opacity: 0;
+  transition:
+    width 180ms ease,
+    opacity 180ms ease;
+}
+
+.film-sound:hover .film-volume,
+.film-sound:focus-within .film-volume {
+  width: 64px;
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  .film-sound .film-volume {
+    display: none;
+  }
+
+  .film-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-sound .film-volume {
+    transition: none;
+  }
+}
+
+/* Phones: the scrubber gets its own full-width row above the buttons. */
+@media (max-width: 600px) {
+  .film-bar {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .film-bar .film-scrub {
+    flex-basis: 100%;
+    order: -1;
+  }
+
+  .film-time {
+    margin-right: auto;
+  }
+}
+
+/* Chapters fold into one line naming the current chapter. */
+.film-chapters-wrap {
+  margin-top: 10px;
+  border-top: 1px solid var(--faint);
+  font-size: 12px;
+}
+
+.film-chapters-wrap summary {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 6px 0;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.film-chapters-wrap summary::-webkit-details-marker {
+  display: none;
+}
+
+.film-chapters-wrap summary::before {
+  content: "▸";
+}
+
+.film-chapters-wrap[open] summary::before {
+  content: "▾";
+}
+
+.film-chapters-count {
+  flex: none;
+  text-transform: uppercase;
+}
+
+.film-chapters-now {
+  overflow: hidden;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.film-chapters-wrap .film-chapters {
+  margin-top: 0;
 }
 
 /* A film's chapter scrubber: square ticks at chapter starts, the title on hover or focus. */

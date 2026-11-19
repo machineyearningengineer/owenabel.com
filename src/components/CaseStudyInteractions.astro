@@ -269,6 +269,16 @@
       const label = step ? `${step.textContent} · ${text}` : text;
       if (currentChapter && label) currentChapter.textContent = label;
 
+      // Phones fold the step chips away outside the journey chapter.
+      const fold = window.innerHeight * 0.3;
+      caseNote.toggleAttribute(
+        "data-in-steps",
+        groupSections.some((node) => {
+          const box = node.getBoundingClientRect();
+          return box.top <= fold && box.bottom > fold;
+        }),
+      );
+
       const group = groupSections.filter((node) => top(node) <= y).pop()?.dataset.threadGroup ?? buttonSets[0]?.dataset.threadButtons;
       if (group && group !== caseNote.dataset.activeGroup) {
         caseNote.dataset.activeGroup = group;
