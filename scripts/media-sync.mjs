@@ -13,36 +13,26 @@
 //   pnpm run media:sync -- --dry-run                    # hash and plan, no writes
 //   pnpm run media:sync -- --profile personal-deploy    # upload what's new, write the manifest
 //
-// Writes need an explicit cf profile other than "default" and
-// CLOUDFLARE_ACCOUNT_ID. The token is read in-process from cf's own store
-// after `cf auth whoami` refreshes it; it is never printed or passed as an argument.
+// Writes need an explicit cf profile other than "default" (see r2.mjs).
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { BASE, bucket, served, writeOptions } from "./r2.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE =
   process.env.MEDIA_SOURCE ?? join(homedir(), "dev/personal/owenabel-media-staging/site");
 const MANIFEST = join(ROOT, "src/data/media.json");
-const BASE = "https://media.owenabel.com";
-const BUCKET = "owenabel-media";
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
 const TYPES = { mp4: "video/mp4", webm: "video/webm", jpg: "image/jpeg" };
 
-const args = process.argv.slice(2);
-const dryRun = args.includes("--dry-run");
-const profile = args.includes("--profile") ? args[args.indexOf("--profile") + 1] : undefined;
-const account = process.env.CLOUDFLARE_ACCOUNT_ID;
-
+const options = writeOptions();
+const { dryRun } = options;
+const r2 = dryRun ? undefined : bucket(options);
 if (!existsSync(SOURCE)) throw new Error(`No media sources at ${SOURCE}`);
-if (!dryRun) {
-  if (!profile || profile === "default")
-    throw new Error("Uploads need --profile <operational profile>, not default.");
-  if (!account) throw new Error("Set CLOUDFLARE_ACCOUNT_ID to the personal account.");
-}
 
 // Every clip id (journeys/<project>/<beat> or lab/<slug>) with its files.
 const walk = (dir) =>
@@ -87,44 +77,6 @@ const probe = (path) => {
   };
 };
 
-let token;
-const getToken = () => {
-  if (token) return token;
-  // whoami refreshes an expired OAuth token in the profile file.
-  execFileSync("pnpm", ["exec", "cf", "auth", "whoami", "--profile", profile], {
-    cwd: ROOT,
-    stdio: "ignore",
-    env: { ...process.env, CLOUDFLARE_API_TOKEN: "" },
-  });
-  const file = join(homedir(), "Library/Preferences/cloudflare/config", `${profile}.json`);
-  token = JSON.parse(readFileSync(file, "utf8")).oauth_token;
-  if (!token) throw new Error(`No OAuth token in profile ${profile}`);
-  return token;
-};
-
-const exists = async (url, bytes) => {
-  const res = await fetch(url, { method: "HEAD" });
-  return res.ok && Number(res.headers.get("content-length")) === bytes;
-};
-
-const upload = async (key, path, type) => {
-  const body = readFileSync(path);
-  const res = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${account}/r2/buckets/${BUCKET}/objects/${key}`,
-    {
-      method: "PUT",
-      headers: {
-        authorization: `Bearer ${getToken()}`,
-        "content-type": type,
-        "cache-control": CACHE_CONTROL,
-      },
-      body,
-    },
-  );
-  if (!res.ok)
-    throw new Error(`Upload of ${key} failed: ${res.status} ${(await res.text()).slice(0, 300)}`);
-};
-
 const manifest = {};
 let uploaded = 0;
 let skipped = 0;
@@ -144,12 +96,12 @@ for (const id of [...clips.keys()].sort((a, b) => a.localeCompare(b))) {
     const hash = createHash("sha256").update(readFileSync(path)).digest("hex").slice(0, 8);
     const key = `${stem}.${hash}.${ext}`;
     const url = `${BASE}/${key}`;
-    if (await exists(url, bytes)) skipped++;
+    if (await served(url, bytes)) skipped++;
     else {
       console.log(`${dryRun ? "would upload" : "upload"} ${key} (${(bytes / 1024).toFixed(0)} KB)`);
       if (!dryRun) {
-        await upload(key, path, TYPES[ext]);
-        if (!(await exists(url, bytes))) throw new Error(`${url} is not readable after upload`);
+        await r2.put(key, readFileSync(path), { type: TYPES[ext], cacheControl: CACHE_CONTROL });
+        if (!(await served(url, bytes))) throw new Error(`${url} is not readable after upload`);
       }
       uploaded++;
     }

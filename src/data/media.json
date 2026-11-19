@@ -612,20 +612,20 @@
     }
   },
   "lab/nairaa-and-chill": {
-    "width": 960,
-    "height": 600,
-    "duration": 17.9,
+    "width": 1280,
+    "height": 800,
+    "duration": 14.5,
     "poster": {
-      "url": "https://media.owenabel.com/clips/lab/nairaa-and-chill.28232d43.jpg",
-      "bytes": 114955
+      "url": "https://media.owenabel.com/clips/lab/nairaa-and-chill.474ef765.jpg",
+      "bytes": 110123
     },
     "mp4": {
-      "url": "https://media.owenabel.com/clips/lab/nairaa-and-chill.53a09d63.mp4",
-      "bytes": 1411949
+      "url": "https://media.owenabel.com/clips/lab/nairaa-and-chill.0785e6a6.mp4",
+      "bytes": 2203628
     },
     "webm": {
-      "url": "https://media.owenabel.com/clips/lab/nairaa-and-chill.b0592296.webm",
-      "bytes": 1518186
+      "url": "https://media.owenabel.com/clips/lab/nairaa-and-chill.15a1e3ca.webm",
+      "bytes": 2219615
     }
   },
   "lab/primary-paste": {
@@ -654,37 +654,37 @@
     }
   },
   "lab/the-head": {
-    "width": 960,
-    "height": 600,
-    "duration": 11.8,
+    "width": 1280,
+    "height": 800,
+    "duration": 12,
     "poster": {
-      "url": "https://media.owenabel.com/clips/lab/the-head.6b2e2662.jpg",
-      "bytes": 77213
+      "url": "https://media.owenabel.com/clips/lab/the-head.cdc2c0ef.jpg",
+      "bytes": 114742
     },
     "mp4": {
-      "url": "https://media.owenabel.com/clips/lab/the-head.4100b4fe.mp4",
-      "bytes": 378982
+      "url": "https://media.owenabel.com/clips/lab/the-head.480f72fa.mp4",
+      "bytes": 693957
     },
     "webm": {
-      "url": "https://media.owenabel.com/clips/lab/the-head.a0bf2881.webm",
-      "bytes": 309453
+      "url": "https://media.owenabel.com/clips/lab/the-head.0fa08cb1.webm",
+      "bytes": 790854
     }
   },
   "lab/the-koi": {
-    "width": 960,
-    "height": 600,
-    "duration": 9.4,
+    "width": 1280,
+    "height": 800,
+    "duration": 9.1,
     "poster": {
-      "url": "https://media.owenabel.com/clips/lab/the-koi.7537426e.jpg",
-      "bytes": 95186
+      "url": "https://media.owenabel.com/clips/lab/the-koi.546399e9.jpg",
+      "bytes": 135044
     },
     "mp4": {
-      "url": "https://media.owenabel.com/clips/lab/the-koi.f9b129e3.mp4",
-      "bytes": 459392
+      "url": "https://media.owenabel.com/clips/lab/the-koi.f81dd6c5.mp4",
+      "bytes": 867181
     },
     "webm": {
-      "url": "https://media.owenabel.com/clips/lab/the-koi.4ac7681c.webm",
-      "bytes": 458412
+      "url": "https://media.owenabel.com/clips/lab/the-koi.510b0ab3.webm",
+      "bytes": 900578
     }
   }
 }
