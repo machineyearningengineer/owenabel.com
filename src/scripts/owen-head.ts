@@ -3,7 +3,8 @@
  * (assets/owen-head):
  *   0 looking at you, 1–8 directions clockwise from straight up,
  *   9 wince, 10 teary, 11 annoyed, 12 sigh, 13 shocked.
- * With no cursor (or a still one) it glances around on its own.
+ * With no cursor (or a still one) it glances around on its own. On touch
+ * screens it looks toward where you touch and glances the way you scroll.
  * Clicks escalate within a few seconds: wince, then teary, then annoyed with
  * a cartoon vein, then a sigh, and back to normal. Playing the voice line
  * (any [data-play]) gets a shocked double-take.
@@ -105,6 +106,40 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
     },
     { passive: true, signal },
   );
+  // Phones have no cursor: the head looks toward where you touch the page,
+  // and glances the way you scroll, then settles back to face you.
+  let settleTimer = 0;
+  const glance = (next: () => void, ms: number) => {
+    if (busy || reducedMotion.matches) return;
+    lastMove = performance.now();
+    next();
+    window.clearTimeout(settleTimer);
+    settleTimer = window.setTimeout(() => !busy && show(0), ms);
+  };
+  document.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType === "mouse" || head.contains(event.target as Node)) return;
+      glance(() => lookAt(event.clientX, event.clientY), 1400);
+    },
+    { passive: true, signal },
+  );
+  let lastY = window.scrollY;
+  let onScreen = false;
+  const seen = new IntersectionObserver(([entry]) => (onScreen = Boolean(entry?.isIntersecting)));
+  seen.observe(head);
+  window.addEventListener(
+    "scroll",
+    () => {
+      const y = window.scrollY;
+      const delta = y - lastY;
+      lastY = y;
+      if (!onScreen || Math.abs(delta) < 4 || matchMedia("(hover: hover)").matches) return;
+      // Frame 5 looks down, frame 1 looks up.
+      glance(() => show(delta > 0 ? 5 : 1), 500);
+    },
+    { passive: true, signal },
+  );
   head.addEventListener("click", poke, { signal });
   document.addEventListener(
     "click",
@@ -119,6 +154,8 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
   signal.addEventListener("abort", () => {
     window.clearTimeout(idleTimer);
     window.clearTimeout(moodTimer);
+    window.clearTimeout(settleTimer);
+    seen.disconnect();
   });
 
   // Show the head once the sheet has decoded, so it never appears half-loaded.

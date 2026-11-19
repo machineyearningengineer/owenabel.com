@@ -46,7 +46,22 @@
       return set ? [...set.querySelectorAll<HTMLButtonElement>("[data-thread-control]")] : controls;
     };
 
+    // Phone bar: a newly reached step's chip opens to show its title for a
+    // moment, then shrinks back to its number.
+    let announceTimer = 0;
+    let announcing = false;
+    const announce = (key?: string) => {
+      window.clearTimeout(announceTimer);
+      caseNote.querySelectorAll(".story-control [data-announce]").forEach((node) => node.removeAttribute("data-announce"));
+      if (!key || !announcing) return;
+      const chip = caseNote.querySelector<HTMLElement>(`.story-control [data-thread-control="${key}"]`);
+      if (!chip) return;
+      chip.setAttribute("data-announce", "");
+      announceTimer = window.setTimeout(() => chip.removeAttribute("data-announce"), 1800);
+    };
+
     const applyThread = (key?: string) => {
+      if (key !== caseNote.dataset.activeThread) announce(key);
       caseNote.dataset.activeThread = key ?? "";
       related.forEach((node) => node.toggleAttribute("data-active", Boolean(key) && node.dataset.thread === key));
       controls.forEach((control) => {
@@ -315,10 +330,14 @@
     tree?.setAttribute("data-settling", "");
     update();
     ready = true;
+    announcing = true;
     requestAnimationFrame(() => requestAnimationFrame(() => tree?.removeAttribute("data-settling")));
 
     desktop.addEventListener("change", () => place(desktop.matches && Boolean(slot && slot.getBoundingClientRect().bottom < 0), false), { signal });
-    signal.addEventListener("abort", () => ghost?.remove());
+    signal.addEventListener("abort", () => {
+      ghost?.remove();
+      window.clearTimeout(announceTimer);
+    });
 
     // ---- Share ----
     const status = caseNote.querySelector<HTMLElement>("[data-copy-status]");
