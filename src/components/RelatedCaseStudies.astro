@@ -1,29 +1,47 @@
 ---
-import { getRelatedCaseStudies } from "../data/work";
+// "Keep reading" at the end of a story: up to two stories as small exhibit
+// cards. A sibling from the same project comes first ("Also at Jisc"), then
+// the next stories in Work order, so every page has two places to go.
+// (No reading time here: computing it renders every story page, including this one.)
+import { exhibitMark, getRelatedCaseStudies, work } from "../data/work";
 
 type Props = {
   currentHref: string;
 };
 
 const { currentHref } = Astro.props;
-const relatedCaseStudies = getRelatedCaseStudies(currentHref);
+const all = work.flatMap((item) => item.caseNotes.map((note) => ({ note, project: item })));
+const siblings = getRelatedCaseStudies(currentHref);
+const index = all.findIndex(({ note }) => note.href === currentHref);
+const upcoming = [...all.slice(index + 1), ...all.slice(0, index)].filter(
+  ({ note }) => note.href !== currentHref && !siblings.some((sibling) => sibling.href === note.href),
+);
+const parent = all[index]?.project;
+const cards = [
+  ...siblings.map((note) => ({ note, kicker: `Also at ${parent?.name ?? "this project"}` })),
+  ...upcoming.map(({ note }, i) => ({ note, kicker: i === 0 ? "Next story" : "After that" })),
+].slice(0, 2);
 ---
 
 {
-  relatedCaseStudies.length > 0 && (
-    <section class="case-section related-case" aria-labelledby="related-case">
-      <div class="case-section-label">
-        <h2 id="related-case">Related</h2>
-        <p>
-          {relatedCaseStudies.length > 1
-            ? "More case studies from this project."
-            : "Another case study from this project."}
-        </p>
-      </div>
-      <ol class="related-case-list">
-        {relatedCaseStudies.map((caseStudy) => (
+  cards.length > 0 && (
+    <section class="keep-reading" aria-labelledby="keep-reading-title">
+      <h2 id="keep-reading-title">Keep reading</h2>
+      <ol>
+        {cards.map(({ note, kicker }) => (
           <li>
-            <a href={caseStudy.href}>{caseStudy.label}</a>
+            <a href={note.href}>
+              <span class="exhibit keep-reading-exhibit" aria-hidden="true">
+                <img src={note.exhibit.src} alt="" width="960" height="600" loading="lazy" decoding="async" />
+                <span>Exh. {exhibitMark(note.href)}</span>
+              </span>
+              <span class="keep-reading-kicker">{kicker}</span>
+              <span class="keep-reading-title">{note.label}</span>
+              <span class="keep-reading-line">{note.summary.split(/(?<=[.!?])\s+(?=[A-Z])/)[0]}</span>
+              <span class="keep-reading-fact">
+                <span aria-hidden="true">→</span> {note.fact}
+              </span>
+            </a>
           </li>
         ))}
       </ol>

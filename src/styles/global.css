@@ -872,22 +872,80 @@ html[data-theme="dark"] .booking-embed iframe {
   line-height: 1.35;
 }
 
-.related-case {
-  margin-top: clamp(12px, 3vw, 28px);
-  border-top-style: double;
+/* Keep reading: two stories as small exhibit cards at the end of a story. */
+.keep-reading {
+  margin-top: clamp(28px, 5vw, 56px);
+  border-top: 3px double var(--rule);
+  padding-top: 14px;
+}
+
+.keep-reading h2 {
+  margin: 0 0 18px;
   color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
 }
 
-.related-case a {
-  color: var(--ink);
-}
-
-.related-case-list {
+.keep-reading ol {
   display: grid;
-  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 28px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.keep-reading a {
+  display: grid;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.keep-reading-exhibit {
+  margin-bottom: 10px;
+}
+
+.keep-reading li:nth-child(even) .keep-reading-exhibit {
+  transform: rotate(1.2deg);
+}
+
+.keep-reading a:hover .keep-reading-exhibit,
+.keep-reading a:focus-visible .keep-reading-exhibit {
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.keep-reading-kicker {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.keep-reading-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.keep-reading a:hover .keep-reading-title,
+.keep-reading a:focus-visible .keep-reading-title {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.keep-reading-line {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.keep-reading-fact {
+  font-size: 13px;
+}
+
+.keep-reading-fact span {
+  color: var(--accent);
 }
 
 @media (min-width: 761px) {
@@ -2242,16 +2300,31 @@ html[data-intro="play"] body {
 .story-rail {
   position: sticky;
   top: 24px;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 18px;
+  min-height: calc(100dvh - 48px);
   max-height: calc(100dvh - 48px);
   overflow: auto;
   font-size: 12px;
   line-height: 1.4;
 }
 
+.story-rail > * {
+  flex-shrink: 0;
+}
+
+/* Share sits at the foot of the rail, like an end note. */
 .story-rail-share {
+  margin-top: auto;
   padding-top: 22px;
+}
+
+/* The rail carries Share on desktop; the end-of-story block is for phones. */
+@media (min-width: 1000px) {
+  .story-share {
+    display: none;
+  }
 }
 
 .story-rail-label {
