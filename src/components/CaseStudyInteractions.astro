@@ -49,6 +49,9 @@
     const chipSets = [...caseNote.querySelectorAll<HTMLElement>("[data-chip-group]")];
     const chips = [...caseNote.querySelectorAll<HTMLButtonElement>("[data-chip-target]")];
     let lastChip: string | undefined;
+    let headingText = "";
+    let headingUntil = 0;
+    let headingTimer = 0;
     chips.forEach((chip) =>
       chip.addEventListener(
         "click",
@@ -292,7 +295,7 @@
         .join("")
         .trim();
       const label = step ? `${step.textContent} · ${text}` : text;
-      if (currentChapter && label) currentChapter.textContent = label;
+      if (currentChapter && label) currentChapter.textContent = performance.now() < headingUntil ? headingText : label;
 
       // Phone bar chips: the folding section you're in, its current child lit.
       const groupId = activeLink?.dataset.treeParent ?? (chipSets.some((set) => set.dataset.chipGroup === activeLink?.dataset.treeLink) ? activeLink?.dataset.treeLink : undefined);
@@ -308,6 +311,23 @@
       if (childId !== lastChip) {
         lastChip = childId;
         announce(childId);
+        // While the chip shows the step's title, the line above names the
+        // section instead, so the title isn't said twice; then they swap back.
+        const parent = treeLinks.find((link) => link.dataset.treeLink === groupId && !link.dataset.treeParent);
+        if (childId && parent && currentChapter) {
+          headingText = [...parent.childNodes]
+            .filter((node) => !(node instanceof Element && node.classList.contains("story-tree-more")))
+            .map((node) => node.textContent)
+            .join("")
+            .trim();
+          headingUntil = performance.now() + 1800;
+          currentChapter.textContent = headingText;
+          window.clearTimeout(headingTimer);
+          headingTimer = window.setTimeout(() => {
+            headingUntil = 0;
+            schedule();
+          }, 1820);
+        }
       }
 
       const group = groupSections.filter((node) => top(node) <= y).pop()?.dataset.threadGroup ?? buttonSets[0]?.dataset.threadButtons;
@@ -353,6 +373,7 @@
     signal.addEventListener("abort", () => {
       ghost?.remove();
       window.clearTimeout(announceTimer);
+      window.clearTimeout(headingTimer);
     });
 
     // ---- Share ----

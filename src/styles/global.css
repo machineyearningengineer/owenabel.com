@@ -1753,11 +1753,30 @@ html[data-theme="dark"] .booking-embed iframe {
 }
 
 @media (max-width: 760px) {
-  /* On phones the card (head, status, contact) comes first, then the table. */
+  /* On phones the card (head, status, contact) comes first, then the table.
+     The card rises into the header's spare room and the head sits up beside
+     the nav, top right, so the card is above the fold with the opener. */
+  .home .site-header,
+  body:has(.index-card) .site-header {
+    margin-bottom: 20px;
+  }
+
   .index-card {
     order: -1;
     max-width: 360px;
-    margin-top: 0;
+    margin-top: -72px;
+  }
+
+  .owen-head {
+    right: 0;
+  }
+}
+
+/* Very narrow phones: the nav reaches the right edge, so the head waits
+   below it on the card instead of beside it. */
+@media (max-width: 349px) {
+  .index-card {
+    margin-top: -16px;
   }
 }
 
