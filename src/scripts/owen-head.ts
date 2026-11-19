@@ -26,9 +26,15 @@ const ANNOYED_MS = 1800;
 const SIGH_MS = 1000;
 const SHOCKED_MS = 1100;
 
-export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
+// Options: `rest` is the face it returns to (the 404 rests shocked) and
+// `still` turns off looking around, so only clicks change the face.
+export function mountOwenHead(
+  head: HTMLElement,
+  signal: AbortSignal,
+  { rest = 0, still = false } = {},
+) {
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
-  let frame = 0;
+  let frame = rest;
   let lastMove = 0;
   let idleTimer = 0;
   let moodTimer = 0;
@@ -53,7 +59,7 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
   // Glance in a random direction now and then, coming back to face the reader.
   const idle = () => {
     window.clearTimeout(idleTimer);
-    if (reducedMotion.matches) return;
+    if (reducedMotion.matches || still) return;
     idleTimer = window.setTimeout(
       () => {
         if (!busy && performance.now() - lastMove > IDLE_AFTER) {
@@ -68,7 +74,7 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
   const settle = () => {
     busy = false;
     delete head.dataset.mood;
-    show(0);
+    show(rest);
   };
 
   const feel = (mood: string, next: number, ms: number, then: () => void) => {
@@ -100,7 +106,7 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
   document.addEventListener(
     "pointermove",
     (event) => {
-      if (event.pointerType !== "mouse" || busy || reducedMotion.matches) return;
+      if (still || event.pointerType !== "mouse" || busy || reducedMotion.matches) return;
       lastMove = performance.now();
       lookAt(event.clientX, event.clientY);
     },
@@ -110,7 +116,7 @@ export function mountOwenHead(head: HTMLElement, signal: AbortSignal) {
   // and glances the way you scroll, then settles back to face you.
   let settleTimer = 0;
   const glance = (next: () => void, ms: number) => {
-    if (busy || reducedMotion.matches) return;
+    if (still || busy || reducedMotion.matches) return;
     lastMove = performance.now();
     next();
     window.clearTimeout(settleTimer);

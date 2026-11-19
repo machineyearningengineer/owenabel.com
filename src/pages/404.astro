@@ -8,7 +8,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   noindex
 >
   <section class="not-found" aria-labelledby="not-found-title">
-    <div class="not-found-head" role="img" aria-label="Owen, looking shocked"></div>
+    <button type="button" class="not-found-head owen-head" aria-label="Owen, looking shocked. Tap him." data-not-found-head></button>
     <p class="eyebrow">Missing entry</p>
     <h1 id="not-found-title">This page is not in the ledger.</h1>
     <p>
@@ -16,10 +16,19 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </p>
 
     <div class="not-found-actions" aria-label="Recovery links">
-      <a class="button-link" href="/">Index</a>
-      <a class="button-link" href="/work">Work</a>
-      <a class="button-link" href="/contact#book">Book a chat</a>
-      <a class="button-link" href="/contact">Contact</a>
+      <a class="button-link" href="/">Back to the index</a>
+      <a class="button-link" href="/work">See the work</a>
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  import { onPage } from "../scripts/page";
+  import { mountOwenHead } from "../scripts/owen-head";
+
+  // Same reactions as the homepage head, resting on the shocked face.
+  onPage((signal) => {
+    const head = document.querySelector<HTMLElement>("[data-not-found-head]");
+    if (head) mountOwenHead(head, signal, { rest: 13, still: true });
+  });
+</script>

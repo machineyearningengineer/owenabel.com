@@ -2100,12 +2100,18 @@ html[data-intro="play"] body {
 }
 
 /* 404: Owen, shocked (frame 13 of the head sprite). */
-.not-found-head {
+/* The 404's head: the homepage head, larger, resting shocked; clicks get the
+   same wince, tears, vein and sigh. */
+.owen-head.not-found-head {
+  --frame: 13;
+  position: relative;
+  top: auto;
+  right: auto;
+  display: block;
   width: 144px;
   height: 156px;
   margin-bottom: 12px;
-  background: url("/owen-head-sprite.webp") no-repeat;
-  background-position: calc(13 * -144px) 0;
+  background-position: calc(var(--frame) * -144px) 0;
   background-size: calc(14 * 144px) 156px;
   filter: drop-shadow(0 10px 14px var(--shadow));
 }
