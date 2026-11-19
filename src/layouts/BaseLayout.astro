@@ -312,5 +312,13 @@ const structuredData = {
       }
       });
     </script>
+    <!-- Cloudflare Web Analytics: page views and Core Web Vitals, no cookies, no
+         personal data. spa:true counts client-side navigations. -->
+    <script
+      is:inline
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={JSON.stringify({ token: "494c1cb79c5b4086b2e0802035bfbd5e", spa: true })}
+    ></script>
   </body>
 </html>
