@@ -3994,6 +3994,15 @@ input {
   display: none;
 }
 
+/* A phone held upright: the film takes the full width, so the bar's two rows
+   stay on screen under it. */
+@media (orientation: portrait) {
+  .film:fullscreen .film-frame video {
+    width: 100%;
+    height: auto;
+  }
+}
+
 /* Chapters fold into one line naming the current chapter. */
 .film-chapters-wrap {
   margin-top: 10px;
