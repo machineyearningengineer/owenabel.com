@@ -9,6 +9,12 @@ export default {
   stack: ["Next.js", "TypeScript", "Firestore", "Cloud Run", "Gemini"],
   built: "Nov 2026",
   runs: "Two saved reports, served as static files",
+  source: [
+    {
+      label: "machineyearningengineer/fieldnotes",
+      href: "https://github.com/machineyearningengineer/fieldnotes",
+    },
+  ],
   open: { label: "fieldnotes.owenabel.com", href: "https://fieldnotes.owenabel.com" },
   clip: {
     caption:

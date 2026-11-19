@@ -2734,11 +2734,21 @@ html[data-intro="play"] body {
   max-width: 66ch;
 }
 
+/* Long reading is set in Georgia, like the titles: proportional type reads
+   faster than mono over a whole story. Labels, captions, tables and the
+   ledger stay mono. The column (66ch of mono) keeps lines at about 65–70
+   characters. */
 .story-prose p,
 .journey-text p {
-  max-width: 66ch;
   margin: 0;
-  line-height: 1.72;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.story-prose p code,
+.journey-text p code {
+  font-size: 15px;
 }
 
 .story-prose code,
