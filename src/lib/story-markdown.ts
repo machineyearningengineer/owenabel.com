@@ -128,7 +128,14 @@ const blocks = (node: Node, origin: string): string[] => {
     return blocks({ ...node, name: "div" }, origin).map((block) => block.replace(/^/gm, "> "));
   if (name === "figure" && classes(node).includes("journey-clip")) {
     const caption = elements(node, "figcaption")[0];
-    return caption ? [`*Clip: ${text(caption, origin)}*`] : [];
+    if (!caption) return [];
+    // The caption, then where it was recorded, as two sentences.
+    const source = elements(caption, "span").find((span) => classes(span).includes("clip-source"));
+    const said = text(
+      { ...caption, children: kids(caption).filter((child) => child !== source) },
+      origin,
+    ).trim();
+    return [`*Clip: ${said}${source ? ` ${text(source, origin)}` : ""}*`];
   }
   if (name === "details" && classes(node).includes("case-architecture")) {
     const caption = elements(node, "figcaption")[0];
