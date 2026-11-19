@@ -219,12 +219,19 @@ const chapters = film.chapters ?? [];
         if (track) track.mode = on ? "showing" : "hidden";
         cc.setAttribute("aria-pressed", String(on));
       };
+      // Full screen keeps our controls: the whole player goes full screen.
+      // iPhone Safari only lets the video itself go full screen, with Apple's controls.
       const fullscreen = () => {
         const frame = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
         if (document.fullscreenElement) return void document.exitFullscreen();
-        if (video.requestFullscreen) video.requestFullscreen().catch(() => {});
+        if (root.requestFullscreen) root.requestFullscreen().catch(() => {});
         else frame.webkitEnterFullscreen?.();
       };
+      document.addEventListener(
+        "fullscreenchange",
+        () => full.setAttribute("aria-label", document.fullscreenElement === root ? "Exit full screen" : "Full screen"),
+        { signal },
+      );
 
       play.addEventListener("click", toggle, { signal });
       video.addEventListener("click", toggle, { signal });

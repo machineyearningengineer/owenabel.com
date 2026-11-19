@@ -3728,6 +3728,33 @@ input {
   }
 }
 
+/* Full screen: the film fills the screen above our bar, on the paper. */
+.film:fullscreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px;
+  background: var(--paper);
+}
+
+.film:fullscreen .film-frame video {
+  width: auto;
+  max-width: 100%;
+  height: calc(100dvh - 80px);
+  margin: 0 auto;
+  border: 0;
+}
+
+.film:fullscreen .film-bar {
+  width: min(100%, 1200px);
+  margin: 10px auto 0;
+}
+
+.film:fullscreen .lab-film-text,
+.film:fullscreen .film-chapters-wrap {
+  display: none;
+}
+
 /* Chapters fold into one line naming the current chapter. */
 .film-chapters-wrap {
   margin-top: 10px;

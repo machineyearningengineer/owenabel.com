@@ -8,6 +8,7 @@ import { BOX_HEIGHT, route, type Rect, type Route } from "./architecture";
 // what was removed; sage marks what replaced it. Colour always has words beside
 // it: a `weak` or `fix` line, a free note, or the automatic "removed"/"new" tag.
 // Each state's summary is the SVG's <title>/<desc>; nothing is printed under it.
+// It opens on After; the toggle animates between the two states.
 type State = "before" | "after";
 type Point = { x: number; y: number };
 type Box = {
@@ -250,9 +251,6 @@ const svgId = `${id}-svg`;
   import { onPage } from "../scripts/page";
 
   type State = "before" | "after";
-  // How long Before stays up when the reader first opens the disclosure.
-  const HOLD_MS = 1600;
-
   onPage((signal) => {
     const still = matchMedia("(prefers-reduced-motion: reduce)");
     for (const figure of document.querySelectorAll<HTMLElement>("[data-arch-compare]")) {
@@ -262,8 +260,6 @@ const svgId = `${id}-svg`;
       const toggle = figure.querySelector<HTMLElement>("[data-arch-toggle]");
       const buttons = [...figure.querySelectorAll<HTMLButtonElement>("[data-arch-state]")];
       if (!details || !title || !desc || !toggle) continue;
-      let timer = 0;
-      let played = false;
 
       const show = (state: State, animate: boolean) => {
         figure.classList.toggle("is-instant", !animate);
@@ -281,27 +277,12 @@ const svgId = `${id}-svg`;
       for (const button of buttons) {
         button.addEventListener(
           "click",
-          () => {
-            window.clearTimeout(timer);
-            show(button.dataset.archState as State, !still.matches);
-          },
+          () => show(button.dataset.archState as State, !still.matches),
           { signal },
         );
       }
 
-      // First open: Before for a moment, then the move to After.
-      details.addEventListener(
-        "toggle",
-        () => {
-          window.clearTimeout(timer);
-          if (!details.open || played || still.matches) return;
-          played = true;
-          show("before", false);
-          timer = window.setTimeout(() => show("after", true), HOLD_MS);
-        },
-        { signal },
-      );
-      signal.addEventListener("abort", () => window.clearTimeout(timer));
+      // It opens on After, the system as it is; Before is one click away.
       toggle.hidden = false;
     }
   });
