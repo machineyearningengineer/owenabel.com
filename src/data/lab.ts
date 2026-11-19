@@ -40,6 +40,8 @@ export type LabEntry = {
   films?: LabFilm[];
   /** A line under the films heading, e.g. how they were made. */
   filmsNote?: string;
+  /** A second action beside the main one, e.g. the book the films follow. */
+  also?: LabLink;
   testing: string[];
   stops: string[];
   how: string[];

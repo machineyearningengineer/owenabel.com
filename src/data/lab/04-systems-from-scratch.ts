@@ -11,6 +11,7 @@ export default {
   runs: "Streamed from Cloudflare R2, with captions",
   source: "Private",
   open: { label: "Watch", href: "#films" },
+  also: { label: "Read the book", href: "https://systems.owenabel.com/" },
   films: [
     {
       file: "sfs-e00-the-whole-map",
@@ -45,6 +46,7 @@ export default {
     "Every frame is drawn in code and rendered in headless Chrome. The voice is AI, not a person, and its word timings drive the animation, so things move on the word.",
   testing: [
     "Whether one small app can carry a whole course: the same receipts app in every film, one idea at a time.",
+    "The films follow the receipts service in my book, Systems from Scratch.",
     "Here are three episodes from the series and one longer film on messages and events.",
   ],
   stops: [

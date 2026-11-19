@@ -102,6 +102,13 @@ const columns = [
               </a>
             )
           }
+          {
+            entry.also && (
+              <a class="lab-open" href={entry.also.href}>
+                {entry.also.label} {external(entry.also.href) ? "↗" : "→"}
+              </a>
+            )
+          }
           {!entry.clip && <span class="lab-provenance">{entry.films?.length} films, streamed with captions</span>}
         </figcaption>
       </figure>
