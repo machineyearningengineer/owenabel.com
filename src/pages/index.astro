@@ -122,9 +122,12 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
           <dt>Local time:</dt>
           <dd><span data-london-clock>{londonTime}</span> · London, <span data-london-zone>{londonZone}</span></dd>
           <dt>Status:</dt>
-          <dd class="status-open">Open to work</dd>
-          <dt>Looking for:</dt>
-          <dd>Senior, hands-on, small team · London, remote or hybrid</dd>
+          <dd>
+            <button type="button" class="status-open" popovertarget="looking-for" data-looking-for>Open to work</button>
+            <div id="looking-for" class="looking-for" popover>
+              A senior, hands-on role in a small team. London, remote or hybrid.
+            </div>
+          </dd>
           <dt>Intro:</dt>
           <dd><a href="/contact#book">Book 20 minutes →</a></dd>
           <dt>Email:</dt>
@@ -187,6 +190,36 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 <script>
   import { mountOwenHead } from "../scripts/owen-head";
   import { onPage } from "../scripts/page";
+
+  // "Open to work": what kind, on hover (a pointer that can hover), focus or tap.
+  onPage((signal) => {
+    const trigger = document.querySelector<HTMLButtonElement>("[data-looking-for]");
+    const card = document.getElementById("looking-for");
+    if (!trigger || !card || !("showPopover" in card)) return;
+    const place = () => {
+      const box = trigger.getBoundingClientRect();
+      const width = card.offsetWidth;
+      card.style.left = `${Math.max(12, Math.min(innerWidth - width - 12, box.right - width))}px`;
+      card.style.top = `${box.bottom + 6}px`;
+    };
+    card.addEventListener("toggle", place, { signal });
+    let timer = 0;
+    const hover = matchMedia("(hover: hover)");
+    const open = () => {
+      window.clearTimeout(timer);
+      if (!card.matches(":popover-open")) card.showPopover();
+      place();
+    };
+    const close = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => card.matches(":popover-open") && card.hidePopover(), 200);
+    };
+    trigger.addEventListener("pointerenter", () => hover.matches && (timer = window.setTimeout(open, 150)), { signal });
+    trigger.addEventListener("pointerleave", () => hover.matches && close(), { signal });
+    trigger.addEventListener("focus", () => trigger.matches(":focus-visible") && open(), { signal });
+    trigger.addEventListener("blur", close, { signal });
+    window.addEventListener("scroll", () => card.matches(":popover-open") && card.hidePopover(), { passive: true, signal });
+  });
 
   onPage((signal) => {
 

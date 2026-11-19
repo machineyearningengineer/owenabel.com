@@ -1315,6 +1315,34 @@ html[data-theme="dark"] .booking-embed iframe {
   text-decoration: none;
 }
 
+.invoice-box .status-open {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline dotted var(--muted);
+  text-underline-offset: 4px;
+}
+
+/* The popover under "Open to work": one line, in the cite card's style. */
+.looking-for {
+  position: fixed;
+  inset: auto;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 24px));
+  margin: 0;
+  border: 1px solid var(--rule);
+  padding: 8px 10px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 16px 34px -22px var(--shadow);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+}
+
 .invoice-box .status-open::before {
   display: inline-block;
   width: 7px;
