@@ -2689,6 +2689,10 @@ html[data-intro="play"] body {
   scroll-margin-top: 84px;
 }
 
+.case-architecture {
+  scroll-margin-top: 84px;
+}
+
 .story-chapter > h2,
 .story-chapter > h3 {
   margin: 0;
@@ -3361,7 +3365,8 @@ html[data-intro="play"] body {
   }
 
   .story-chapter,
-  .journey-step {
+  .journey-step,
+  .case-architecture {
     scroll-margin-top: 96px;
   }
 

@@ -7,7 +7,8 @@
   // - Journey steps follow the scroll: the step on screen becomes the thread.
   // - ↑/↓ move between chapters ([data-case-section]); Escape clears.
   // - The chapter tree marks where you are and opens only that chapter's
-  //   sub-chapters; the progress bar fills.
+  //   sub-chapters; the progress bar fills. A contents entry can point at a
+  //   <details> (the architecture diagram): following it opens the disclosure.
   // - Desktop: the keys strip docks under the tree once its place under the
   //   hero scrolls away, and travels back when you return (FLIP, transform
   //   and opacity only; a crossfade with reduced motion).
@@ -127,6 +128,26 @@
       sections[next].scrollIntoView({ behavior: "auto", block: "start" });
     };
 
+    // A link or #hash to a closed <details> opens it, so it lands on the content.
+    const openTarget = (hash: string) => {
+      const id = decodeURIComponent(hash.slice(1));
+      const target = id ? document.getElementById(id) : null;
+      if (!(target instanceof HTMLDetailsElement) || !caseNote.contains(target)) return undefined;
+      target.open = true;
+      return target;
+    };
+    caseNote.addEventListener(
+      "click",
+      (event) => {
+        const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="#"]') : null;
+        if (link) openTarget(link.hash);
+      },
+      { signal },
+    );
+    window.addEventListener("hashchange", () => openTarget(location.hash), { signal });
+    const landed = openTarget(location.hash);
+    if (landed) requestAnimationFrame(() => landed.scrollIntoView({ block: "start" }));
+
     mobileTree?.querySelectorAll("a").forEach((link) =>
       link.addEventListener("click", () => {
         mobileTree.open = false;
@@ -217,7 +238,12 @@
       // every frame, so a jump past it, like a contents link, docks it too).
       if (slot) place(desktop.matches && slot.getBoundingClientRect().bottom < 0, ready);
 
-      const chapter = chapters.filter((node) => top(node) <= y).pop() ?? chapters[0];
+      // By position on the page, since a contents entry (Architecture) can sit out of page order.
+      const chapter =
+        chapters
+          .filter((node) => top(node) <= y)
+          .sort((a, b) => top(a) - top(b))
+          .pop() ?? chapters[0];
       treeLinks.forEach((link) => {
         const here = link.dataset.treeLink === chapter?.id;
         if (here) link.setAttribute("aria-current", "location");

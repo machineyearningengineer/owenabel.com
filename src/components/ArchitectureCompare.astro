@@ -38,8 +38,10 @@ interface Props {
   edges: Edge[];
   groups?: Group[];
   notes?: Note[];
+  /** Contents-tree target; a link to it opens the disclosure. */
+  anchor?: string;
 }
-const { id, before, after, width, height, boxes, edges, groups = [], notes = [] } = Astro.props;
+const { id, before, after, width, height, boxes, edges, groups = [], notes = [], anchor = "architecture" } = Astro.props;
 const BOTH: State[] = ["before", "after"];
 const LINE = 17;
 // Berkeley Mono and its fallbacks are 0.6em wide, so a 10.5px note is ~6.3 units a character.
@@ -83,7 +85,7 @@ const toneState = (tone: "weak" | "fix"): State => (tone === "weak" ? "before" :
 const svgId = `${id}-svg`;
 ---
 
-<details class="case-architecture">
+<details class="case-architecture" id={anchor}>
   <summary>View architecture</summary>
   <figure
     class="arch-compare"

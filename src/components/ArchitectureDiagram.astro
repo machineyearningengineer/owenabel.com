@@ -18,8 +18,10 @@ interface Props {
   boxes: Box[];
   edges: Edge[];
   groups?: Group[];
+  /** Contents-tree target; a link to it opens the disclosure. */
+  anchor?: string;
 }
-const { id, title, summary, width, height, boxes, edges, groups = [] } = Astro.props;
+const { id, title, summary, width, height, boxes, edges, groups = [], anchor = "architecture" } = Astro.props;
 const H = BOX_HEIGHT;
 const all = new Map<string, Rect>();
 for (const box of boxes) all.set(box.id, { ...box, h: box.h ?? H });
@@ -34,7 +36,7 @@ const routeEdge = (edge: Edge) => {
 const lines = edges.map((edge) => ({ edge, ...routeEdge(edge) }));
 ---
 
-<details class="case-architecture">
+<details class="case-architecture" id={anchor}>
   <summary>View architecture</summary>
   <figure>
     <div class="case-architecture-scroll">
