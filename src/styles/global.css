@@ -4197,3 +4197,60 @@ input {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Phones: the small controls keep their look, but each gets a finger-sized
+   hit area from an invisible box around it, about 44px where there is room.
+   In the INDEX-ABEL card the boxes only grow to their row, so neighbouring
+   rows never steal each other's taps. */
+@media (pointer: coarse) {
+  .nav a,
+  .theme-toggle,
+  .sound-cue,
+  .footer-links a,
+  .film-btn,
+  .invoice-box .status-open,
+  .copy-email {
+    position: relative;
+  }
+
+  .nav a::after,
+  .theme-toggle::after,
+  .sound-cue::after,
+  .footer-links a::after,
+  .film-btn::after,
+  .journey-toggle::after,
+  .invoice-box .status-open::after,
+  .copy-email::after {
+    position: absolute;
+    inset: -12px;
+    content: "";
+  }
+
+  .nav a::after {
+    inset: -12px -7px;
+  }
+
+  .theme-toggle::after {
+    inset: -13px -13px -13px -7px;
+  }
+
+  .footer-links a::after {
+    inset: -10px -6px;
+  }
+
+  .film-btn::after {
+    inset: -4px;
+  }
+
+  .journey-toggle::after {
+    inset: -12px -4px -8px;
+  }
+
+  .invoice-box .status-open::after {
+    inset: -3px 0;
+  }
+
+  .copy-email::after {
+    inset: -4px;
+  }
+}
