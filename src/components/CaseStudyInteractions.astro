@@ -49,6 +49,49 @@
     const chipSets = [...caseNote.querySelectorAll<HTMLElement>("[data-chip-group]")];
     const chips = [...caseNote.querySelectorAll<HTMLButtonElement>("[data-chip-target]")];
     let lastChip: string | undefined;
+    let announced: string | undefined;
+    let settleTimer = 0;
+    // The line names the chapter; a numbered step leads with its number in a
+    // small square, like the step's own heading.
+    let lineKey = "";
+    const setLine = (text: string, n?: string) => {
+      const key = `${n ?? ""}|${text}`;
+      if (!currentChapter || key === lineKey) return;
+      lineKey = key;
+      currentChapter.replaceChildren();
+      if (n) {
+        const mark = document.createElement("span");
+        mark.className = "story-now-n";
+        mark.textContent = n;
+        currentChapter.append(mark);
+      }
+      currentChapter.append(text);
+      if (!reduceMotion.matches) currentChapter.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
+    };
+    const endAnnounce = () => {
+      window.clearTimeout(headingTimer);
+      headingUntil = 0;
+      announce();
+      schedule();
+    };
+    // While the chip shows the step's title, the line above names the section,
+    // so the title isn't said twice; after 1.8 s both return together.
+    const startAnnounce = (childId: string, groupId?: string) => {
+      announced = childId;
+      announce(childId);
+      const parent = treeLinks.find((link) => link.dataset.treeLink === groupId && !link.dataset.treeParent);
+      if (parent) {
+        headingText = [...parent.childNodes]
+          .filter((node) => !(node instanceof Element && node.classList.contains("story-tree-more")))
+          .map((node) => node.textContent)
+          .join("")
+          .trim();
+        headingUntil = performance.now() + 1800;
+        setLine(headingText);
+      }
+      window.clearTimeout(headingTimer);
+      headingTimer = window.setTimeout(endAnnounce, 1800);
+    };
     let headingText = "";
     let headingUntil = 0;
     let headingTimer = 0;
@@ -71,7 +114,6 @@
       const chip = caseNote.querySelector<HTMLElement>(`.story-control [data-chip-target="${key}"]`);
       if (!chip) return;
       chip.setAttribute("data-announce", "");
-      announceTimer = window.setTimeout(() => chip.removeAttribute("data-announce"), 1800);
     };
 
     const applyThread = (key?: string) => {
@@ -294,8 +336,10 @@
         .map((node) => node.textContent)
         .join("")
         .trim();
-      const label = step ? `${step.textContent} · ${text}` : text;
-      if (currentChapter && label) currentChapter.textContent = performance.now() < headingUntil ? headingText : label;
+      if (text) {
+        if (performance.now() < headingUntil) setLine(headingText);
+        else setLine(text, step?.textContent ?? undefined);
+      }
 
       // Phone bar chips: the folding section you're in, its current child lit.
       const groupId = activeLink?.dataset.treeParent ?? (chipSets.some((set) => set.dataset.chipGroup === activeLink?.dataset.treeLink) ? activeLink?.dataset.treeLink : undefined);
@@ -308,26 +352,16 @@
         if (on) chip.setAttribute("aria-current", "location");
         else chip.removeAttribute("aria-current");
       });
+      // Announce a step only once scrolling has rested on it, so scrolling
+      // straight through never flickers; the number lights up meanwhile.
       if (childId !== lastChip) {
         lastChip = childId;
-        announce(childId);
-        // While the chip shows the step's title, the line above names the
-        // section instead, so the title isn't said twice; then they swap back.
-        const parent = treeLinks.find((link) => link.dataset.treeLink === groupId && !link.dataset.treeParent);
-        if (childId && parent && currentChapter) {
-          headingText = [...parent.childNodes]
-            .filter((node) => !(node instanceof Element && node.classList.contains("story-tree-more")))
-            .map((node) => node.textContent)
-            .join("")
-            .trim();
-          headingUntil = performance.now() + 1800;
-          currentChapter.textContent = headingText;
-          window.clearTimeout(headingTimer);
-          headingTimer = window.setTimeout(() => {
-            headingUntil = 0;
-            schedule();
-          }, 1820);
-        }
+        window.clearTimeout(settleTimer);
+        if (!childId) endAnnounce();
+      }
+      if (childId && childId !== announced) {
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(() => startAnnounce(childId, groupId), 450);
       }
 
       const group = groupSections.filter((node) => top(node) <= y).pop()?.dataset.threadGroup ?? buttonSets[0]?.dataset.threadButtons;
@@ -374,6 +408,7 @@
       ghost?.remove();
       window.clearTimeout(announceTimer);
       window.clearTimeout(headingTimer);
+      window.clearTimeout(settleTimer);
     });
 
     // ---- Share ----
