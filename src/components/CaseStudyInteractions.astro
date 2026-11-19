@@ -51,21 +51,13 @@
     let lastChip: string | undefined;
     let announced: string | undefined;
     let settleTimer = 0;
-    // The line names the chapter; a numbered step leads with its number in a
-    // small square, like the step's own heading.
+    // The line names the chapter or step being read.
     let lineKey = "";
-    const setLine = (text: string, n?: string) => {
-      const key = `${n ?? ""}|${text}`;
+    const setLine = (text: string) => {
+      const key = text;
       if (!currentChapter || key === lineKey) return;
       lineKey = key;
-      currentChapter.replaceChildren();
-      if (n) {
-        const mark = document.createElement("span");
-        mark.className = "story-now-n";
-        mark.textContent = n;
-        currentChapter.append(mark);
-      }
-      currentChapter.append(text);
+      currentChapter.textContent = text;
       if (!reduceMotion.matches) currentChapter.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
     };
     const endAnnounce = () => {
@@ -338,7 +330,9 @@
         .trim();
       if (text) {
         if (performance.now() < headingUntil) setLine(headingText);
-        else setLine(text, step?.textContent ?? undefined);
+        // The lit chip right below already shows the number, so the line
+        // carries only the name.
+        else setLine(text);
       }
 
       // Phone bar chips: the folding section you're in, its current child lit.
