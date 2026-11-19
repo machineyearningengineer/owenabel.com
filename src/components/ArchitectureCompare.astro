@@ -26,7 +26,7 @@ type Box = {
   w: number;
   h?: number;
 };
-type Group = { id: string; label: string; in?: State; x: number; y: number; w: number; h: number };
+type Group = { id: string; label: string; in?: State; tag?: string; x: number; y: number; w: number; h: number };
 type Edge = { from: string; to: string; label?: string; in?: State; plain?: boolean; weak?: boolean };
 type Note = { text: string; x: number; y: number; tone: "weak" | "fix" };
 type Side = { title: string; summary: string };
@@ -136,7 +136,7 @@ const svgId = `${id}-svg`;
         </defs>
         {
           groups.map((group) => {
-            const only = group.in && tag(group.in);
+            const only = group.in && (group.tag ? { text: group.tag, tone: tag(group.in).tone } : tag(group.in));
             return (
               <g class:list={["arch-group", only && `is-${only.tone}`]} data-in={group.in}>
                 <rect x={group.x} y={group.y} width={group.w} height={group.h} />

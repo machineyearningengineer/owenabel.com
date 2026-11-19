@@ -161,8 +161,9 @@ const chapters = [
   <StoryChapter id="go-decides" title="One backend decides" level={3}>
     <div class="story-prose">
       <p>Receipts began in March 2026 as one full-stack TypeScript app: Next.js, then TanStack Start, with Effect for the server code and the workers. The rules lived in the web server's functions, next to the screens that used them.</p>
-      <p>That works until there's a second screen. With a mobile app planned, every rule in those functions would have to be written again, and kept the same, in another codebase.</p>
-      <p>So in May I split it. A Go backend now owns the truth: every rule, every decision, and what each person is allowed to do. The web app and the mobile app talk to it through clients generated from the same Protobuf contracts, and only present what it decides.</p>
+      <p>That works while there's one screen. The mobile app had started as a Swift experiment, a separate codebase, and every rule in those server functions would have had to be written again there and kept the same.</p>
+      <p>So in May I split it. A Go backend now owns the truth: every rule, every decision, and what each person is allowed to do. The web app talks to it through a client generated from the Protobuf contracts, and only presents what it decides.</p>
+      <p>The payoff is that a rule is written once. The mobile app is being rebuilt in Expo on packages shared with the web app, so it can reach every device quickly, and the CLI and agents get the same answers as the screens.</p>
       <p>The decision record has a one-line test for any frontend code: would a second frontend have to write it again to behave the same? If so, it belongs in Go.</p>
     </div>
   </StoryChapter>
@@ -179,30 +180,34 @@ const chapters = [
       before={{
         title: "Receipts as one full-stack TypeScript app",
         summary:
-          "Before: Receipts began in March 2026 as one full-stack TypeScript app, Next.js and then TanStack Start, with Effect for the server code and the workers. The web server's functions held the rules and read Postgres directly, so a mobile app would have had to repeat every rule to behave the same.",
+          "Before: Receipts began in March 2026 as one full-stack TypeScript app, Next.js and then TanStack Start, with Effect for the server code and the workers. The screens and the server functions were one app, and the rules lived in those functions, beside the screens that used them. The mobile app was a separate Swift experiment with its own codebase.",
       }}
       after={{
         title: "Receipts with a Go backend that owns the truth",
         summary:
-          "After: from May 2026 a Go API owns the truth: every rule, decision and what each viewer may do. The web app and the mobile app talk to it through clients generated from the same Protobuf contracts over ConnectRPC, and only present what Go decides. Postgres is the source of truth and the only job queue, with pgvector for photo embeddings. Workers claim jobs by lease and publish in one fenced commit, calling a vision model to read each photo and Voyage to embed it.",
+          "After: from May 2026 a Go API owns the truth: every rule, every decision and what each viewer may do. The web app only presents what Go decides, through a client generated from the Protobuf contracts over ConnectRPC. The mobile app is being rebuilt in Expo on packages shared with the web app, against the same contracts. Each rule is written once, so the web app, the mobile app, the CLI and agents all get the same answer. Postgres is the source of truth and the only job queue, with pgvector for photo embeddings. Workers claim jobs by lease and publish in one fenced commit, calling a vision model to read each photo and Voyage to embed it.",
       }}
       width={760}
-      height={330}
+      height={350}
+      groups={[{ id: "one-app", label: "One TypeScript app", in: "before", tag: "split", x: 20, y: 20, w: 500, h: 114 }]}
       boxes={[
-        { id: "web", label: "Web app", note: "TanStack Start", fix: "presents only", x: 20, y: 40, w: 180, h: 70, from: { x: 20, y: 40 } },
-        { id: "mobile", label: "Mobile app", note: "same generated client", in: "after", x: 20, y: 140, w: 180 },
-        { id: "server", label: "Server functions", note: "Effect", weak: "the rules lived here", in: "before", x: 260, y: 40, w: 220, h: 70 },
-        { id: "mobile-gap", label: "A mobile app", weak: "would repeat every rule", tag: "planned", in: "before", x: 20, y: 160, w: 180 },
-        { id: "api", label: "Go API", note: "ConnectRPC · Protobuf", fix: "owns every rule", in: "after", x: 260, y: 40, w: 220, h: 70 },
-        { id: "pg", label: "Postgres", note: "truth · job queue · pgvector", x: 260, y: 250, w: 220 },
-        { id: "workers", label: "Workers", note: "claim by lease · fenced commit", x: 520, y: 250, w: 220 },
-        { id: "vision", label: "Vision model", note: "reads each photo", x: 500, y: 140, w: 120 },
-        { id: "voyage", label: "Voyage", note: "embeddings", x: 640, y: 140, w: 100 },
+        { id: "web", label: "Web app", note: "TanStack Start", fix: "presents only", x: 20, y: 40, w: 230, h: 70, from: { x: 40, y: 52 } },
+        { id: "server", label: "Server functions", note: "Effect", weak: "rules beside the screens", tag: "now Go", in: "before", x: 290, y: 52, w: 210, h: 70 },
+        { id: "swift", label: "Mobile app", note: "Swift experiment", weak: "its own codebase", tag: "being rewritten", in: "before", x: 20, y: 160, w: 230, h: 70 },
+        { id: "mobile", label: "Mobile app", note: "Expo · shared packages", tag: "in progress", in: "after", x: 20, y: 150, w: 230 },
+        { id: "api", label: "Go API", note: "ConnectRPC · Protobuf", fix: "owns every rule", in: "after", x: 290, y: 40, w: 210, h: 70 },
+        { id: "pg", label: "Postgres", note: "truth · job queue · pgvector", x: 290, y: 276, w: 210 },
+        { id: "workers", label: "Workers", note: "claim by lease · fenced commit", x: 530, y: 276, w: 210 },
+        { id: "vision", label: "Vision model", note: "reads each photo", x: 505, y: 176, w: 130 },
+        { id: "voyage", label: "Voyage", note: "embeddings", x: 645, y: 176, w: 95 },
+      ]}
+      notes={[
+        { text: "each rule is written once", tone: "fix", x: 408, y: 132 },
+        { text: "web, mobile, CLI and agents get the same answer", tone: "fix", x: 408, y: 152 },
       ]}
       edges={[
         { from: "web", to: "server", in: "before" },
         { from: "server", to: "pg", in: "before" },
-        { from: "mobile-gap", to: "server", in: "before", weak: true },
         { from: "web", to: "api", in: "after" },
         { from: "mobile", to: "api", in: "after" },
         { from: "api", to: "pg", in: "after" },

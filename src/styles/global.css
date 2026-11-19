@@ -840,13 +840,28 @@ html[data-theme="dark"] .booking-embed iframe {
     transform 180ms ease;
 }
 
-.case-control button:hover,
-.case-control button:focus-visible,
+/* Only the current one is filled; hover and focus get an outline. On touch
+   screens a tapped button stays "hovered", so hover styles are for real
+   pointers only. */
 .case-control button[data-active] {
   background: var(--accent-wash);
   color: var(--ink);
   outline: 1px solid var(--accent-outline);
   outline-offset: -1px;
+}
+
+.case-control button:focus-visible {
+  color: var(--ink);
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (hover: hover) {
+  .case-control button:hover {
+    color: var(--ink);
+    outline: 1px solid var(--accent-outline);
+    outline-offset: -1px;
+  }
 }
 
 .case-section {
@@ -2595,13 +2610,27 @@ html[data-intro="play"] body {
   content: "]";
 }
 
-.story-chip:hover,
-.story-chip:focus-visible,
+/* Only the current step is filled. Hover (where there is a pointer that can
+   hover) and keyboard focus get an outline, so two chips never look selected. */
 .story-chip[data-active] {
   background: var(--accent-wash);
   color: var(--ink);
   outline: 1px solid var(--accent-outline);
   outline-offset: -1px;
+}
+
+.story-chip:focus-visible {
+  color: var(--ink);
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (hover: hover) {
+  .story-chip:hover {
+    color: var(--ink);
+    outline: 1px solid var(--accent-outline);
+    outline-offset: -1px;
+  }
 }
 
 .story-keys[data-docked] {
@@ -3328,9 +3357,15 @@ input {
     display: none;
   }
 
+  /* The bar runs edge to edge and sits flush with the top of the screen;
+     its contents keep the page's 14px gutter. */
   .story-control {
+    top: 0;
     grid-template-columns: minmax(0, 1fr);
     gap: 8px;
+    margin-inline: -14px;
+    border-top: 0;
+    padding-inline: 14px;
   }
 
   .story-mobile-tree {
@@ -3384,9 +3419,18 @@ input {
   }
 
   /* Phone bar chips: numbers only, since the line above names the step.
-     A newly reached step opens to show its title for a moment. */
+     A chip opens to show its title only under a finger (see the script). */
   .story-control .story-chip {
     gap: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .story-control .story-chip[data-pressed] {
+    color: var(--ink);
+    outline: 1px solid var(--accent);
+    outline-offset: -1px;
   }
 
   .story-control .story-chip-title {
@@ -3402,8 +3446,10 @@ input {
       opacity 200ms ease;
   }
 
-  .story-control .story-chip[data-announce] .story-chip-title {
-    max-width: 24ch;
+  /* The open chip's title takes what the row can spare once the other
+     chips are at their narrowest; anything longer ends in an ellipsis. */
+  .story-control .story-chip[data-peek] .story-chip-title {
+    max-width: min(40ch, calc(100vw - 28px - (var(--n, 7) - 1) * 26px - 32px));
     margin-left: 6px;
     opacity: 1;
   }
@@ -3475,11 +3521,23 @@ input {
     scroll-margin-top: 96px;
   }
 
-  /* One row of equal number chips, however many steps; an announced chip
-     grows to fit its title, then gives the room back. */
+  .story-control {
+    margin-inline: -11px;
+    padding-inline: 11px;
+  }
+
+  .story-control .story-chip[data-peek] .story-chip-title {
+    max-width: calc(100vw - 22px - (var(--n, 7) - 1) * 26px - 32px);
+  }
+
+  /* One row of equal number chips, however many steps. The open chip grows
+     to fit its title and the others give way, down to 22px. Sideways
+     movement on the row is ours (sliding between chips); vertical still
+     scrolls the page. */
   .story-control .story-threads > div {
     display: flex;
     gap: 4px;
+    touch-action: pan-y;
   }
 
   .story-control .story-threads > [hidden] {
@@ -3487,17 +3545,20 @@ input {
   }
 
   .story-control .story-threads .story-chip {
-    flex: 1 1 0;
+    flex: 1 1 auto;
     justify-content: center;
-    min-width: 0;
+    min-width: 22px;
     padding: 5px 0;
     font-size: 11px;
-    transition: flex-grow 320ms ease;
+    transition:
+      background 180ms ease,
+      color 180ms ease,
+      padding 320ms ease;
   }
 
-  .story-control .story-threads .story-chip[data-announce] {
-    flex-grow: 5;
-    padding: 5px 6px;
+  .story-control .story-threads .story-chip[data-peek] {
+    flex-shrink: 0;
+    padding: 5px 8px;
   }
 }
 

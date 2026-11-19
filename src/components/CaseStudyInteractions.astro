@@ -46,67 +46,177 @@
       return set ? [...set.querySelectorAll<HTMLButtonElement>("[data-thread-control]")] : controls;
     };
 
+    // ---- Phone bar ----
+    // One line and one row of number chips per folding section. What it shows
+    // is a pure function of this state, so it can never disagree with itself:
+    //   here    the step being read (from scroll)
+    //   going   a chip that was tapped, while the page travels to it
+    //   peek    the chip under a finger, or the one being travelled to
+    // Exactly one chip is lit (going, else here). At most one is open, showing
+    // its title (peek). The line names the section while a chip is open and
+    // the step otherwise, so a title never shows twice. Scrolling only moves
+    // the lit number; a chip opens only under a finger. Sliding along the row
+    // moves the open chip, and lifting goes there.
     const chipSets = [...caseNote.querySelectorAll<HTMLElement>("[data-chip-group]")];
     const chips = [...caseNote.querySelectorAll<HTMLButtonElement>("[data-chip-target]")];
-    let lastChip: string | undefined;
-    let announced: string | undefined;
-    let settleTimer = 0;
-    // The line names the chapter or step being read.
-    let lineKey = "";
-    const setLine = (text: string) => {
-      const key = text;
-      if (!currentChapter || key === lineKey) return;
-      lineKey = key;
+    const bar: { group?: string; here?: string; hereText: string; going?: string; peek?: string; pressed?: string } = { hereText: "" };
+    const PEEK_MIN_MS = 700;
+    let lineText = "";
+    let peekAt = 0;
+    let collapseTimer = 0;
+    let arriveTimer = 0;
+    let lastPointerGo = 0;
+    let finger: { id: number; row: HTMLElement } | undefined;
+
+    const paintBar = () => {
+      const lit = bar.going ?? bar.here;
+      chipSets.forEach((set) => (set.hidden = set.dataset.chipGroup !== bar.group));
+      caseNote.toggleAttribute("data-in-steps", Boolean(bar.group));
+      let open: HTMLElement | undefined;
+      let litChip: HTMLElement | undefined;
+      for (const chip of chips) {
+        const id = chip.dataset.chipTarget;
+        const on = id === lit;
+        chip.toggleAttribute("data-active", on);
+        if (on) chip.setAttribute("aria-current", "location");
+        else chip.removeAttribute("aria-current");
+        chip.toggleAttribute("data-peek", id === bar.peek);
+        chip.toggleAttribute("data-pressed", id === bar.pressed);
+        if (on) litChip = chip;
+        if (id === bar.peek) open = chip;
+      }
+      const text = open ? open.parentElement?.dataset.groupTitle : bar.going ? litChip?.dataset.title : bar.hereText;
+      if (!currentChapter || !text || text === lineText) return;
+      const first = lineText === "";
+      lineText = text;
       currentChapter.textContent = text;
-      if (!reduceMotion.matches) currentChapter.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
+      if (!first && !reduceMotion.matches) currentChapter.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
     };
-    const endAnnounce = () => {
-      window.clearTimeout(headingTimer);
-      headingUntil = 0;
-      announce();
+
+    // A finger is over chip `id` (or over none). The step being read doesn't
+    // open: the line already names it.
+    const point = (id?: string) => {
+      window.clearTimeout(collapseTimer);
+      const peek = id && id !== (bar.going ?? bar.here) ? id : undefined;
+      if (id === bar.pressed && peek === bar.peek) return;
+      bar.pressed = id;
+      if (peek !== bar.peek) {
+        bar.peek = peek;
+        if (peek) peekAt = performance.now();
+      }
+      paintBar();
+    };
+
+    // The page has stopped at the tapped step: light follows scroll again, and
+    // the open chip closes once it has been readable for a moment.
+    const arrive = () => {
+      window.clearTimeout(arriveTimer);
+      if (!bar.going) return;
+      bar.going = undefined;
+      window.clearTimeout(collapseTimer);
+      collapseTimer = window.setTimeout(
+        () => {
+          bar.peek = undefined;
+          paintBar();
+        },
+        Math.max(0, PEEK_MIN_MS - (performance.now() - peekAt)),
+      );
       schedule();
     };
-    // While the chip shows the step's title, the line above names the section,
-    // so the title isn't said twice; after 1.8 s both return together.
-    const startAnnounce = (childId: string, groupId?: string) => {
-      announced = childId;
-      announce(childId);
-      const parent = treeLinks.find((link) => link.dataset.treeLink === groupId && !link.dataset.treeParent);
-      if (parent) {
-        headingText = [...parent.childNodes]
-          .filter((node) => !(node instanceof Element && node.classList.contains("story-tree-more")))
-          .map((node) => node.textContent)
-          .join("")
-          .trim();
-        headingUntil = performance.now() + 1800;
-        setLine(headingText);
+
+    // Go to a step: the bar shows the destination at once and holds it while
+    // the page scrolls underneath, so the steps passed on the way never light.
+    const go = (id: string) => {
+      const target = document.getElementById(id);
+      if (!target) return;
+      window.clearTimeout(collapseTimer);
+      const elsewhere = id !== bar.here;
+      bar.pressed = undefined;
+      bar.going = id;
+      if (!elsewhere) bar.peek = undefined;
+      else if (bar.peek !== id) {
+        bar.peek = id;
+        peekAt = performance.now();
       }
-      window.clearTimeout(headingTimer);
-      headingTimer = window.setTimeout(endAnnounce, 1800);
+      paintBar();
+      target.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" });
+      window.clearTimeout(arriveTimer);
+      arriveTimer = window.setTimeout(arrive, 160);
     };
-    let headingText = "";
-    let headingUntil = 0;
-    let headingTimer = 0;
+
+    // Taking over the scroll mid-journey hands the bar back to the scroll.
+    const takeOver = () => {
+      if (!bar.going) return;
+      window.clearTimeout(arriveTimer);
+      window.clearTimeout(collapseTimer);
+      bar.going = undefined;
+      bar.peek = undefined;
+      schedule();
+    };
+
+    // Position along the row picks the chip, like a slider, so the open chip
+    // resizing its neighbours never moves the target under the finger.
+    const chipAt = (row: HTMLElement, x: number) => {
+      const kids = [...row.children] as HTMLElement[];
+      const box = row.getBoundingClientRect();
+      const index = Math.floor(((x - box.left) / box.width) * kids.length);
+      return kids[Math.max(0, Math.min(kids.length - 1, index))]?.dataset.chipTarget;
+    };
+    for (const row of chipSets) {
+      row.addEventListener(
+        "pointerdown",
+        (event) => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          finger = { id: event.pointerId, row };
+          point(chipAt(row, event.clientX));
+        },
+        { signal },
+      );
+    }
+    document.addEventListener(
+      "pointermove",
+      (event) => {
+        if (event.pointerId !== finger?.id) return;
+        const box = finger.row.getBoundingClientRect();
+        const near = event.clientY > box.top - 28 && event.clientY < box.bottom + 28;
+        point(near ? chipAt(finger.row, event.clientX) : undefined);
+      },
+      { passive: true, signal },
+    );
+    const lift = (event: PointerEvent, commit: boolean) => {
+      if (event.pointerId !== finger?.id) return;
+      finger = undefined;
+      const id = bar.pressed;
+      if (commit && id) {
+        lastPointerGo = performance.now();
+        go(id);
+        return;
+      }
+      bar.pressed = undefined;
+      bar.peek = bar.going && bar.going !== bar.here ? bar.going : undefined;
+      paintBar();
+    };
+    document.addEventListener("pointerup", (event) => lift(event, true), { signal });
+    document.addEventListener("pointercancel", (event) => lift(event, false), { signal });
+    document.addEventListener(
+      "pointerdown",
+      (event) => {
+        if (!(event.target instanceof Element && event.target.closest("[data-chip-group]"))) takeOver();
+      },
+      { passive: true, signal },
+    );
+    document.addEventListener("wheel", takeOver, { passive: true, signal });
+    // Keyboard and assistive activation arrive as a click with no pointer lift before it.
     chips.forEach((chip) =>
       chip.addEventListener(
         "click",
-        () => document.getElementById(chip.dataset.chipTarget ?? "")?.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" }),
+        () => {
+          if (performance.now() - lastPointerGo < 500) return;
+          if (chip.dataset.chipTarget) go(chip.dataset.chipTarget);
+        },
         { signal },
       ),
     );
-
-    // Phone bar: a newly reached step's chip opens to show its title for a
-    // moment, then shrinks back to its number.
-    let announceTimer = 0;
-    let announcing = false;
-    const announce = (key?: string) => {
-      window.clearTimeout(announceTimer);
-      caseNote.querySelectorAll(".story-control [data-announce]").forEach((node) => node.removeAttribute("data-announce"));
-      if (!key || !announcing) return;
-      const chip = caseNote.querySelector<HTMLElement>(`.story-control [data-chip-target="${key}"]`);
-      if (!chip) return;
-      chip.setAttribute("data-announce", "");
-    };
 
     const applyThread = (key?: string) => {
       caseNote.dataset.activeThread = key ?? "";
@@ -328,35 +438,13 @@
         .map((node) => node.textContent)
         .join("")
         .trim();
-      if (text) {
-        if (performance.now() < headingUntil) setLine(headingText);
-        // The lit chip right below already shows the number, so the line
-        // carries only the name.
-        else setLine(text);
-      }
-
-      // Phone bar chips: the folding section you're in, its current child lit.
-      const groupId = activeLink?.dataset.treeParent ?? (chipSets.some((set) => set.dataset.chipGroup === activeLink?.dataset.treeLink) ? activeLink?.dataset.treeLink : undefined);
-      chipSets.forEach((set) => (set.hidden = set.dataset.chipGroup !== groupId));
-      caseNote.toggleAttribute("data-in-steps", Boolean(groupId));
-      const childId = activeLink?.dataset.treeParent ? activeLink.dataset.treeLink : undefined;
-      chips.forEach((chip) => {
-        const on = chip.dataset.chipTarget === childId;
-        chip.toggleAttribute("data-active", on);
-        if (on) chip.setAttribute("aria-current", "location");
-        else chip.removeAttribute("aria-current");
-      });
-      // Announce a step only once scrolling has rested on it, so scrolling
-      // straight through never flickers; the number lights up meanwhile.
-      if (childId !== lastChip) {
-        lastChip = childId;
-        window.clearTimeout(settleTimer);
-        if (!childId) endAnnounce();
-      }
-      if (childId && childId !== announced) {
-        window.clearTimeout(settleTimer);
-        settleTimer = window.setTimeout(() => startAnnounce(childId, groupId), 450);
-      }
+      // Phone bar: report where the reader is; paintBar decides how it looks.
+      bar.group =
+        activeLink?.dataset.treeParent ??
+        (chipSets.some((set) => set.dataset.chipGroup === activeLink?.dataset.treeLink) ? activeLink?.dataset.treeLink : undefined);
+      bar.here = activeLink?.dataset.treeParent ? activeLink.dataset.treeLink : undefined;
+      if (text) bar.hereText = text;
+      paintBar();
 
       const group = groupSections.filter((node) => top(node) <= y).pop()?.dataset.threadGroup ?? buttonSets[0]?.dataset.threadButtons;
       if (group && group !== caseNote.dataset.activeGroup) {
@@ -385,7 +473,17 @@
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
-    window.addEventListener("scroll", schedule, { passive: true, signal });
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (bar.going) {
+          window.clearTimeout(arriveTimer);
+          arriveTimer = window.setTimeout(arrive, 160);
+        }
+        schedule();
+      },
+      { passive: true, signal },
+    );
     window.addEventListener("resize", schedule, { signal });
     signal.addEventListener("abort", () => cancelAnimationFrame(frame));
     applyThread(caseNote.dataset.activeThread || undefined);
@@ -394,15 +492,13 @@
     tree?.setAttribute("data-settling", "");
     update();
     ready = true;
-    announcing = true;
     requestAnimationFrame(() => requestAnimationFrame(() => tree?.removeAttribute("data-settling")));
 
     desktop.addEventListener("change", () => place(desktop.matches && Boolean(slot && slot.getBoundingClientRect().bottom < 0), false), { signal });
     signal.addEventListener("abort", () => {
       ghost?.remove();
-      window.clearTimeout(announceTimer);
-      window.clearTimeout(headingTimer);
-      window.clearTimeout(settleTimer);
+      window.clearTimeout(collapseTimer);
+      window.clearTimeout(arriveTimer);
     });
 
     // ---- Share ----

@@ -201,9 +201,9 @@ const markdownJson = JSON.stringify(markdown).replace(/</g, "\\u003c");
             chipGroups.length > 0 && (
               <div class="story-threads">
                 {chipGroups.map((group) => (
-                  <div data-chip-group={group.id} hidden>
+                  <div data-chip-group={group.id} data-group-title={group.label} style={`--n: ${group.children!.length}`} hidden>
                     {group.children!.map((child) => (
-                      <button type="button" class="story-chip" data-chip-target={child.id} aria-label={`${child.n} ${child.label}`}>
+                      <button type="button" class="story-chip" data-chip-target={child.id} data-title={child.label} aria-label={`${child.n} ${child.label}`}>
                         <span class="story-chip-n">{child.n}</span>
                         <span class="story-chip-title">{child.label}</span>
                       </button>
