@@ -1,8 +1,9 @@
 /**
  * The Lab: experiments, demos and films. One file per entry in src/data/lab/,
  * ordered by its file name. Each entry feeds a row on /lab and its note at
- * /lab/<slug>. Clips and thumbnails live in public/lab/<slug>.{mp4,webm,jpg};
- * films stream from R2 at media.owenabel.com/films/<film>.{mp4,jpg,vtt}.
+ * /lab/<slug>. Clips and thumbnails stream from R2 (media.owenabel.com/clips/lab/),
+ * listed in src/data/media.json as lab/<slug>; films stream from R2 at
+ * media.owenabel.com/films/<film>.{mp4,jpg,vtt}.
  */
 export type LabKind = "Live site" | "Replay demo" | "Films" | "Mac app" | "Note";
 export type LabLink = { label: string; href: string };
@@ -33,7 +34,7 @@ export type LabEntry = {
   /** The main action under the exhibit: the demo, the site or the repository. */
   open?: LabLink;
   /**
-   * A clip at public/lab/<slug>, or the films' poster when there is no clip.
+   * A clip at lab/<slug> in src/data/media.json, or the films' poster when there is no clip.
    * `live` is where it was recorded; `note` replaces that line for a clip from elsewhere.
    */
   clip?: { caption: string; live?: { host: string; href: string }; note?: string };

@@ -1,8 +1,9 @@
 ---
-// A short clip of the product: public/journeys/<project>/<beat>.{webm,mp4,jpg}.
+// A short clip of the product, streamed from R2: src/data/media.json maps
+// journeys/<project>/<beat> to its MP4, WebM and poster (pnpm run media:sync).
 // Under the caption it says where it was recorded: the live site, or (with
 // `local`) a local build with made-up data, for staff and signed-in screens.
-// The Lab passes `base` (public/lab/<slug>) with `live` for where it was
+// The Lab passes `media` (lab/<slug>) with `live` for where it was
 // recorded, or `note` for a clip that came from elsewhere.
 // MP4 comes first: for these screen recordings H.264 was usually the smaller file.
 // Muted and looped, it plays only while on screen. With reduced motion it
@@ -11,18 +12,21 @@
 // keys to scrub. Scrubbing pauses the clip and resumes it if it was playing.
 // Seeking costs 10–60 ms on these files, so they need no extra keyframes.
 import { liveSources, RECORDED_ON } from "../data/clip-sources";
+import { clipMedia } from "../data/media";
 
 interface Props {
   project?: string;
   beat?: string;
-  base?: string;
+  media?: string;
   caption: string;
   local?: boolean;
   live?: { host: string; href: string };
   note?: string;
 }
 const { project = "", beat, caption, local = false, note } = Astro.props;
-const base = Astro.props.base ?? `/journeys/${project}/${beat}`;
+const id = Astro.props.media ?? `journeys/${project}/${beat}`;
+const { width, height, poster, mp4, webm } = clipMedia(id);
+if (!mp4 || !webm) throw new Error(`${id} has a poster but no clip`);
 const live = local ? undefined : (Astro.props.live ?? liveSources[project]);
 ---
 
@@ -34,14 +38,14 @@ const live = local ? undefined : (Astro.props.live ?? liveSources[project]);
       playsinline
       disablepictureinpicture
       preload="none"
-      width="960"
-      height="600"
-      poster={`${base}.jpg`}
+      width={width}
+      height={height}
+      poster={poster.url}
       aria-label={caption}
       data-journey-video
     >
-      <source src={`${base}.mp4`} type="video/mp4" />
-      <source src={`${base}.webm`} type="video/webm" />
+      <source src={mp4.url} type="video/mp4" />
+      <source src={webm.url} type="video/webm" />
     </video>
     <button type="button" class="journey-toggle" data-journey-toggle hidden>Play</button>
   </div>

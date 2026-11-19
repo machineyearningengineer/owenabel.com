@@ -1,0 +1,690 @@
+{
+  "journeys/fete-finder/exchange": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.1,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/fete-finder/exchange.b25f490a.jpg",
+      "bytes": 56597
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/fete-finder/exchange.31c34f98.mp4",
+      "bytes": 381710
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/fete-finder/exchange.8da25acf.webm",
+      "bytes": 335675
+    }
+  },
+  "journeys/fete-finder/find": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.7,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/fete-finder/find.f738f1d8.jpg",
+      "bytes": 54778
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/fete-finder/find.60440c70.mp4",
+      "bytes": 313052
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/fete-finder/find.f05fbc7d.webm",
+      "bytes": 411774
+    }
+  },
+  "journeys/fete-finder/flyer-draft": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.8,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/fete-finder/flyer-draft.f63b2bf1.jpg",
+      "bytes": 47688
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/fete-finder/flyer-draft.2b0bf746.mp4",
+      "bytes": 170322
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/fete-finder/flyer-draft.b783b389.webm",
+      "bytes": 143455
+    }
+  },
+  "journeys/fete-finder/flyer-review": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.8,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/fete-finder/flyer-review.90a1493e.jpg",
+      "bytes": 50653
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/fete-finder/flyer-review.a456b0b8.mp4",
+      "bytes": 167111
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/fete-finder/flyer-review.99b46c12.webm",
+      "bytes": 132619
+    }
+  },
+  "journeys/fete-finder/flyer-sheet": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.9,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/fete-finder/flyer-sheet.c1dfb649.jpg",
+      "bytes": 51747
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/fete-finder/flyer-sheet.1af42f85.mp4",
+      "bytes": 121260
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/fete-finder/flyer-sheet.82c51555.webm",
+      "bytes": 101967
+    }
+  },
+  "journeys/fete-finder/offline": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.7,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/fete-finder/offline.cf0eeaa2.jpg",
+      "bytes": 56329
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/fete-finder/offline.519ad7e5.mp4",
+      "bytes": 209165
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/fete-finder/offline.0bac5fab.webm",
+      "bytes": 290877
+    }
+  },
+  "journeys/fete-finder/plan": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.7,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/fete-finder/plan.de0bed1d.jpg",
+      "bytes": 52356
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/fete-finder/plan.1f2880bb.mp4",
+      "bytes": 171402
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/fete-finder/plan.339fd7d5.webm",
+      "bytes": 224288
+    }
+  },
+  "journeys/jisc-website/carousel": {
+    "width": 960,
+    "height": 600,
+    "duration": 6.7,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/jisc-website/carousel.867fac9b.jpg",
+      "bytes": 67886
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/jisc-website/carousel.08731ce4.mp4",
+      "bytes": 297001
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/jisc-website/carousel.1d5d2250.webm",
+      "bytes": 491752
+    }
+  },
+  "journeys/jisc-website/publishing": {
+    "width": 960,
+    "height": 600,
+    "duration": 5.8,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/jisc-website/publishing.020cd99c.jpg",
+      "bytes": 51560
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/jisc-website/publishing.3a22a0f4.mp4",
+      "bytes": 407387
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/jisc-website/publishing.5343bbc5.webm",
+      "bytes": 516694
+    }
+  },
+  "journeys/jisc-website/site": {
+    "width": 960,
+    "height": 600,
+    "duration": 6.4,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/jisc-website/site.f57456d3.jpg",
+      "bytes": 85200
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/jisc-website/site.2c167858.mp4",
+      "bytes": 300378
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/jisc-website/site.e450188e.webm",
+      "bytes": 513214
+    }
+  },
+  "journeys/milk-and-henny/door-offline": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.8,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/door-offline.49dab579.jpg",
+      "bytes": 28905
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/door-offline.61889cca.mp4",
+      "bytes": 46613
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/door-offline.11fdce5f.webm",
+      "bytes": 46812
+    }
+  },
+  "journeys/milk-and-henny/door-scan": {
+    "width": 960,
+    "height": 600,
+    "duration": 6.3,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/door-scan.eed94404.jpg",
+      "bytes": 54072
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/door-scan.17e70a08.mp4",
+      "bytes": 193517
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/door-scan.19fbee71.webm",
+      "bytes": 88087
+    }
+  },
+  "journeys/milk-and-henny/door-sync": {
+    "width": 960,
+    "height": 600,
+    "duration": 6,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/door-sync.d415e954.jpg",
+      "bytes": 27900
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/door-sync.2ed24f5c.mp4",
+      "bytes": 41765
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/door-sync.c483cc25.webm",
+      "bytes": 42307
+    }
+  },
+  "journeys/milk-and-henny/games": {
+    "width": 960,
+    "height": 600,
+    "duration": 5.9,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/games.c072d824.jpg",
+      "bytes": 42615
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/games.67fd0b40.mp4",
+      "bytes": 217960
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/games.a01f43c9.webm",
+      "bytes": 280434
+    }
+  },
+  "journeys/milk-and-henny/games-controller": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.8,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/games-controller.a82aebe6.jpg",
+      "bytes": 42722
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/games-controller.7cd77e82.mp4",
+      "bytes": 85389
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/games-controller.c579b137.webm",
+      "bytes": 93944
+    }
+  },
+  "journeys/milk-and-henny/photos": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.3,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/photos.5a3a3101.jpg",
+      "bytes": 51352
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/photos.15de3085.mp4",
+      "bytes": 386487
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/photos.24ce5fcd.webm",
+      "bytes": 349543
+    }
+  },
+  "journeys/milk-and-henny/pitch-night": {
+    "width": 960,
+    "height": 600,
+    "duration": 7,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/pitch-night.5f120c28.jpg",
+      "bytes": 88115
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/pitch-night.79a91d85.mp4",
+      "bytes": 509864
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/pitch-night.466bffbd.webm",
+      "bytes": 567432
+    }
+  },
+  "journeys/milk-and-henny/purchase": {
+    "width": 960,
+    "height": 600,
+    "duration": 8,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/purchase.713996e6.jpg",
+      "bytes": 31932
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/purchase.f20a4ecd.mp4",
+      "bytes": 140304
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/purchase.ca38bdb4.webm",
+      "bytes": 93577
+    }
+  },
+  "journeys/milk-and-henny/rejoin": {
+    "width": 960,
+    "height": 600,
+    "duration": 5.4,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/rejoin.06b8a301.jpg",
+      "bytes": 32212
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/rejoin.5fd0e8b5.mp4",
+      "bytes": 67590
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/rejoin.e6bf0a88.webm",
+      "bytes": 128210
+    }
+  },
+  "journeys/milk-and-henny/studio": {
+    "width": 960,
+    "height": 600,
+    "duration": 5.9,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/studio.036f72fd.jpg",
+      "bytes": 26074
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/studio.8f304785.mp4",
+      "bytes": 146911
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/studio.bd852100.webm",
+      "bytes": 157584
+    }
+  },
+  "journeys/milk-and-henny/studio-edit": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.8,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/studio-edit.96c2a3eb.jpg",
+      "bytes": 31129
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/studio-edit.de9f0233.mp4",
+      "bytes": 46744
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/studio-edit.ec033004.webm",
+      "bytes": 48171
+    }
+  },
+  "journeys/milk-and-henny/team-email": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.4,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/team-email.0abb5e75.jpg",
+      "bytes": 47542
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/team-email.2c8d5b13.mp4",
+      "bytes": 167203
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/team-email.f62e325e.webm",
+      "bytes": 119164
+    }
+  },
+  "journeys/milk-and-henny/teams": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.6,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/teams.2e77357b.jpg",
+      "bytes": 83407
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/teams.685e9f9a.mp4",
+      "bytes": 142637
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/teams.026fc40e.webm",
+      "bytes": 110851
+    }
+  },
+  "journeys/milk-and-henny/tickets": {
+    "width": 960,
+    "height": 600,
+    "duration": 6.4,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/tickets.1b77f5e4.jpg",
+      "bytes": 14966
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/tickets.8ae23e67.mp4",
+      "bytes": 289983
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/milk-and-henny/tickets.887715a3.webm",
+      "bytes": 204402
+    }
+  },
+  "journeys/open-policy-finder/data": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.7,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/open-policy-finder/data.5f602353.jpg",
+      "bytes": 41002
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/open-policy-finder/data.4d2e9fdd.mp4",
+      "bytes": 59843
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/open-policy-finder/data.6533b1d8.webm",
+      "bytes": 92284
+    }
+  },
+  "journeys/open-policy-finder/help": {
+    "width": 960,
+    "height": 600,
+    "duration": 5.5,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/open-policy-finder/help.7850c69f.jpg",
+      "bytes": 46176
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/open-policy-finder/help.8aed92bd.mp4",
+      "bytes": 164812
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/open-policy-finder/help.6675415d.webm",
+      "bytes": 283639
+    }
+  },
+  "journeys/open-policy-finder/search": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.7,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/open-policy-finder/search.20ab5b67.jpg",
+      "bytes": 51438
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/open-policy-finder/search.8d3dd350.mp4",
+      "bytes": 127170
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/open-policy-finder/search.ca7cac01.webm",
+      "bytes": 241176
+    }
+  },
+  "journeys/receipts/composer": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.7,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/receipts/composer.106a17b1.jpg",
+      "bytes": 42047
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/receipts/composer.9e423c02.mp4",
+      "bytes": 339326
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/receipts/composer.4d8ba6e2.webm",
+      "bytes": 399102
+    }
+  },
+  "journeys/receipts/details": {
+    "width": 960,
+    "height": 600,
+    "duration": 6.9,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/receipts/details.37d98c17.jpg",
+      "bytes": 118513
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/receipts/details.a395a795.mp4",
+      "bytes": 326148
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/receipts/details.ecb32ba2.webm",
+      "bytes": 560271
+    }
+  },
+  "journeys/receipts/drag": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.8,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/receipts/drag.4f7d1ef3.jpg",
+      "bytes": 40295
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/receipts/drag.239a5c1d.mp4",
+      "bytes": 416783
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/receipts/drag.343adc88.webm",
+      "bytes": 416607
+    }
+  },
+  "journeys/receipts/photo": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.1,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/receipts/photo.7ca9c0a4.jpg",
+      "bytes": 87301
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/receipts/photo.ae419714.mp4",
+      "bytes": 398568
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/receipts/photo.d89c0329.webm",
+      "bytes": 524883
+    }
+  },
+  "journeys/receipts/speed": {
+    "width": 960,
+    "height": 600,
+    "duration": 6.9,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/receipts/speed.f7c375da.jpg",
+      "bytes": 71346
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/receipts/speed.3f1264bf.mp4",
+      "bytes": 307347
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/receipts/speed.a69f4c69.webm",
+      "bytes": 272515
+    }
+  },
+  "journeys/receipts/upload": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.4,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/receipts/upload.1d4fc5dd.jpg",
+      "bytes": 31606
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/receipts/upload.ce6a9306.mp4",
+      "bytes": 429005
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/receipts/upload.5a1f0680.webm",
+      "bytes": 395524
+    }
+  },
+  "journeys/receipts/why": {
+    "width": 960,
+    "height": 600,
+    "duration": 4.4,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/receipts/why.c8cd1a57.jpg",
+      "bytes": 118489
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/receipts/why.5160c8c1.mp4",
+      "bytes": 184415
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/receipts/why.b08ec679.webm",
+      "bytes": 354957
+    }
+  },
+  "lab/answers-that-cite-the-record": {
+    "width": 960,
+    "height": 600,
+    "duration": 14.5,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/lab/answers-that-cite-the-record.76112d9f.jpg",
+      "bytes": 51825
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/lab/answers-that-cite-the-record.5f8679e8.mp4",
+      "bytes": 739415
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/lab/answers-that-cite-the-record.615b44c5.webm",
+      "bytes": 665934
+    }
+  },
+  "lab/claims-tied-to-their-sources": {
+    "width": 960,
+    "height": 600,
+    "duration": 9.6,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/lab/claims-tied-to-their-sources.7815bf2d.jpg",
+      "bytes": 76476
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/lab/claims-tied-to-their-sources.b916c4e2.mp4",
+      "bytes": 310998
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/lab/claims-tied-to-their-sources.d30c8cce.webm",
+      "bytes": 386888
+    }
+  },
+  "lab/nairaa-and-chill": {
+    "width": 960,
+    "height": 600,
+    "duration": 17.9,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/lab/nairaa-and-chill.28232d43.jpg",
+      "bytes": 114955
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/lab/nairaa-and-chill.53a09d63.mp4",
+      "bytes": 1411949
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/lab/nairaa-and-chill.b0592296.webm",
+      "bytes": 1518186
+    }
+  },
+  "lab/primary-paste": {
+    "width": 960,
+    "height": 600,
+    "duration": 7.4,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/lab/primary-paste.29d170a8.jpg",
+      "bytes": 26492
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/lab/primary-paste.b7ec2468.mp4",
+      "bytes": 43986
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/lab/primary-paste.c34c97e2.webm",
+      "bytes": 51474
+    }
+  },
+  "lab/systems-from-scratch": {
+    "width": 960,
+    "height": 600,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/lab/systems-from-scratch.0453ce5b.jpg",
+      "bytes": 58669
+    }
+  },
+  "lab/the-head": {
+    "width": 960,
+    "height": 600,
+    "duration": 11.8,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/lab/the-head.6b2e2662.jpg",
+      "bytes": 77213
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/lab/the-head.4100b4fe.mp4",
+      "bytes": 378982
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/lab/the-head.a0bf2881.webm",
+      "bytes": 309453
+    }
+  },
+  "lab/the-koi": {
+    "width": 960,
+    "height": 600,
+    "duration": 9.4,
+    "poster": {
+      "url": "https://media.owenabel.com/clips/lab/the-koi.7537426e.jpg",
+      "bytes": 95186
+    },
+    "mp4": {
+      "url": "https://media.owenabel.com/clips/lab/the-koi.f9b129e3.mp4",
+      "bytes": 459392
+    },
+    "webm": {
+      "url": "https://media.owenabel.com/clips/lab/the-koi.4ac7681c.webm",
+      "bytes": 458412
+    }
+  }
+}

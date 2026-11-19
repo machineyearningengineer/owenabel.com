@@ -25,7 +25,8 @@
     "test:routing": "pnpm --dir workers exec node test-routing.mjs",
     "check:redirects": "node scripts/check-redirects.mjs",
     "head:build": "node scripts/build-head-sprite.mjs",
-    "check:prose": "node scripts/check-prose.mjs"
+    "check:prose": "node scripts/check-prose.mjs",
+    "media:sync": "node scripts/media-sync.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",

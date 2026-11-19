@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import KoiPond from "../components/KoiPond.astro";
 import { kindLabel, lab, labNumber } from "../data/lab";
+import { clipMedia } from "../data/media";
 ---
 
 <BaseLayout
@@ -39,7 +40,7 @@ import { kindLabel, lab, labNumber } from "../data/lab";
               </ul>
             </div>
             <span class="exhibit work-entry-exhibit" aria-hidden="true">
-              <img src={`/lab/${entry.slug}.jpg`} alt="" width="960" height="600" loading="lazy" decoding="async" />
+              <img src={clipMedia(`lab/${entry.slug}`).poster.url} alt="" width="960" height="600" loading="lazy" decoding="async" />
               <span>{labNumber(entry)}</span>
             </span>
           </a>

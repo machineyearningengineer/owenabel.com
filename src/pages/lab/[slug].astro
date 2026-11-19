@@ -4,6 +4,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Clip from "../../components/Clip.astro";
 import { filmLength, kindLabel, lab, labNumber, MEDIA, type LabEntry } from "../../data/lab";
+import { clipMedia } from "../../data/media";
 
 export function getStaticPaths() {
   return lab.map((entry) => ({ params: { slug: entry.slug }, props: { entry } }));
@@ -13,6 +14,7 @@ const { entry } = Astro.props as { entry: LabEntry };
 const number = labNumber(entry);
 const external = (href: string) => /^https?:/.test(href);
 const length = filmLength(entry);
+const poster = clipMedia(`lab/${entry.slug}`).poster;
 const details = [
   { label: "Built", value: entry.built },
   { label: "Stack", value: entry.stack.join(", ") },
@@ -87,9 +89,9 @@ const columns = [
           }
           {
             entry.clip ? (
-              <Clip base={`/lab/${entry.slug}`} caption={entry.clip.caption} live={entry.clip.live} note={entry.clip.note} />
+              <Clip media={`lab/${entry.slug}`} caption={entry.clip.caption} live={entry.clip.live} note={entry.clip.note} />
             ) : (
-              <img src={`/lab/${entry.slug}.jpg`} alt={`A frame from ${entry.films?.[0]?.title ?? entry.title}`} width="960" height="600" decoding="async" />
+              <img src={poster.url} alt={`A frame from ${entry.films?.[0]?.title ?? entry.title}`} width="960" height="600" decoding="async" />
             )
           }
         </div>
