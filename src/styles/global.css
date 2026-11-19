@@ -30,6 +30,12 @@
   --positive-ring: rgba(63, 143, 79, 0.18);
   --shadow: rgba(17, 17, 15, 0.34);
   --max: 1080px;
+  /* Reading widths, used everywhere text is read: 45–75 characters a line,
+     about 65 the ideal. Body text is Georgia, so its width is in em; mono
+     text (captions, notes, descriptions) uses ch. */
+  --measure: 34em; /* Georgia body, about 65–70 characters */
+  --measure-mono: 66ch; /* mono paragraphs and captions */
+  --measure-lead: 54ch; /* the larger hero hook */
   color-scheme: light dark;
   font-family: "Berkeley Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 }
@@ -864,7 +870,7 @@ html[data-theme="dark"] .booking-embed iframe {
 }
 
 .case-section p {
-  max-width: 72ch;
+  max-width: var(--measure-mono);
 }
 
 .case-section-label {
@@ -1471,7 +1477,7 @@ html[data-theme="dark"] .booking-embed iframe {
 }
 
 .work-entry-line {
-  max-width: 64ch;
+  max-width: var(--measure-mono);
   margin: 0;
   color: var(--muted);
   line-height: 1.5;
@@ -2101,7 +2107,7 @@ html[data-intro="play"] body {
 
 .story-hook {
   grid-area: hook;
-  max-width: 54ch;
+  max-width: var(--measure-lead);
   margin: 24px 0 0;
   color: var(--ink);
   font-size: clamp(17px, 1.9vw, 21px);
@@ -2731,7 +2737,6 @@ html[data-intro="play"] body {
 .story-prose {
   display: grid;
   gap: 1.05em;
-  max-width: 66ch;
 }
 
 /* Long reading is set in Georgia, like the titles: proportional type reads
@@ -2740,6 +2745,7 @@ html[data-intro="play"] body {
    characters. */
 .story-prose p,
 .journey-text p {
+  max-width: var(--measure);
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 18px;
@@ -2760,7 +2766,7 @@ html[data-intro="play"] body {
 
 .story-figures {
   width: 100%;
-  max-width: 66ch;
+  max-width: var(--measure-mono);
   border-collapse: collapse;
   border-top: 1px solid var(--rule);
   font-variant-numeric: tabular-nums;
@@ -2982,7 +2988,7 @@ html[data-intro="play"] body {
 }
 
 .journey-clip figcaption {
-  max-width: 66ch;
+  max-width: var(--measure-mono);
   margin-top: 8px;
   color: var(--muted);
   font-size: 12px;
@@ -3534,7 +3540,7 @@ html[data-intro="play"] body {
 }
 
 .lab-films-note {
-  max-width: 70ch;
+  max-width: var(--measure-mono);
   margin: 0;
   font-size: 14px;
   line-height: 1.55;
@@ -3681,7 +3687,7 @@ html[data-intro="play"] body {
 }
 
 .lab-film-text p {
-  max-width: 62ch;
+  max-width: var(--measure-mono);
   margin: 0 0 6px;
   color: var(--muted);
   font-size: 13px;

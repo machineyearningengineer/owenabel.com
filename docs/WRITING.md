@@ -78,6 +78,10 @@ Measured on 18 November 2026 at 1440px and 390px.
 - Story body copy is Georgia 18px on a 1.6 line height, about 65–70 characters a
   line on desktop. Titles are Georgia too. Labels, captions, tables, contents
   and the ledger pages are Berkeley Mono.
+- Line length is set once, in `:root` of src/styles/global.css: `--measure`
+  (Georgia body, about 65–70 characters), `--measure-mono` (66ch, mono
+  paragraphs and captions) and `--measure-lead` (the hero hook). Use these;
+  never hard-code a reading width.
 - **One idea per paragraph, about 60 words at most.** On a phone that is eight
   lines; anything longer reads as a wall. Split at the turn in the argument.
 - Sentences mostly under 25 words; one over 30 needs a reason.
